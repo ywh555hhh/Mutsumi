@@ -37,6 +37,10 @@ class TaskRow(Widget, can_focus=True):
         background: #2a2a2a;
     }
 
+    TaskRow:hover {
+        background: #1a1a1a;
+    }
+
     TaskRow.done {
         color: #666666;
     }
@@ -82,6 +86,10 @@ class TaskRow(Widget, can_focus=True):
         line.append(f" {stars}", style=star_style)
 
         return line
+
+    def on_click(self) -> None:
+        """Focus this row when clicked."""
+        self.focus()
 
     def toggle_done(self) -> None:
         """Toggle the done status visually (no write-back in Phase 1)."""

@@ -98,6 +98,11 @@ class MutsumiApp(App[None]):
         tasks = filter_tasks_by_scope(self.task_file.tasks, scope)
         await panel.update_tasks(tasks)
 
+        # Auto-focus the first task row
+        rows = panel.query(TaskRow)
+        if rows:
+            rows.first().focus()
+
         total = len(tasks)
         done = sum(1 for t in tasks if t.status == TaskStatus.DONE)
         footer.update_stats(total, done, total - done)

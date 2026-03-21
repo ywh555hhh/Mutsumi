@@ -36,7 +36,9 @@ class TaskListPanel(Widget):
         self._tasks: list[Task] = tasks or []
 
     def compose(self) -> ComposeResult:
-        with VerticalScroll():
+        scroll = VerticalScroll()
+        scroll.can_focus = False
+        with scroll:
             if not self._tasks:
                 yield EmptyState()
             else:
@@ -48,6 +50,7 @@ class TaskListPanel(Widget):
         """Replace the task list and re-render."""
         self._tasks = tasks
         scroll = self.query_one(VerticalScroll)
+        scroll.can_focus = False
         await scroll.remove_children()
         if not self._tasks:
             await scroll.mount(EmptyState())
