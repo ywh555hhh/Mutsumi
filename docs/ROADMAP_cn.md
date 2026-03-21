@@ -22,7 +22,7 @@ data model       task list        click → JSON     themes           Product Hu
 
 ---
 
-## Phase 0：基础设施（当前）
+## Phase 0：基础设施 ✅
 
 **目标**：完成所有设计文档，建立项目骨架，零代码阶段。
 
@@ -33,54 +33,54 @@ data model       task list        click → JSON     themes           Product Hu
 - [x] TUI 规范 (`TUI_SPEC.md`)
 - [x] 品牌标识 (`BRAND.md`)
 - [x] 路线图（本文档）
-- [ ] `uv init` 项目骨架
-- [ ] `pyproject.toml` 依赖声明
-- [ ] 示例 `tasks.json`（fixture）
-- [ ] `CLAUDE.md` 项目级开发规范
-- [ ] CI：GitHub Actions（lint + 类型检查）
+- [x] `uv init` 项目骨架
+- [x] `pyproject.toml` 依赖声明
+- [x] 示例 `tasks.json`（fixture）
+- [x] `CLAUDE.md` 项目级开发规范
+- [x] CI：GitHub Actions（lint + 类型检查）
 
 **退出标准**：`uv run mutsumi` 能启动一个空白 Textual 窗口并正常退出。
 
 ---
 
-## Phase 1：骨架
+## Phase 1：骨架 ✅
 
 **目标**：画出静态 TUI，能读取 `tasks.json` 并渲染，但不响应外部变化。
 
-- [ ] Textual App 基础框架 (`app.py`)
-- [ ] Header 组件：Tab 切换（Today / Week / Month / Inbox）
-- [ ] TaskList 组件：按优先级分组渲染
-- [ ] TaskRow 组件：checkbox + 标题 + 标签 + 优先级星标
-- [ ] Footer 组件：任务统计
-- [ ] 数据层：Task schema 的 pydantic 模型
-- [ ] 数据层：读取并解析 `tasks.json`
-- [ ] 基础键盘导航：`j/k` 上/下，`q` 退出
-- [ ] 子任务缩进展示（最多 3 层）
-- [ ] 空白提示页
+- [x] Textual App 基础框架 (`app.py`)
+- [x] Header 组件：Tab 切换（Today / Week / Month / Inbox）
+- [x] TaskList 组件：按优先级分组渲染
+- [x] TaskRow 组件：checkbox + 标题 + 标签 + 优先级星标
+- [x] Footer 组件：任务统计
+- [x] 数据层：Task schema 的 pydantic 模型
+- [x] 数据层：读取并解析 `tasks.json`
+- [x] 基础键盘导航：`j/k` 上/下，`q` 退出
+- [x] 子任务缩进展示（最多 3 层）
+- [x] 空白提示页
 
 **退出标准**：手动创建一个 `tasks.json`，`uv run mutsumi` 能正确渲染所有任务。
 
 ---
 
-## Phase 2：注入灵魂
+## Phase 2：注入灵魂 ✅
 
 **目标**：实现双向数据流 — 外部修改 JSON 自动重绘 + TUI 操作反写 JSON。
 
-- [ ] watchdog 集成：监听 `tasks.json` 文件变化
-- [ ] 防抖机制（100ms）
-- [ ] 热重载：JSON 变化 → 无闪烁 TUI 重绘
-- [ ] 鼠标点击 checkbox → 切换状态 → 反写 JSON
-- [ ] 原子写入（临时文件 + `os.rename`）
-- [ ] Schema 校验：非法 JSON → 错误提示横幅
-- [ ] 错误状态：文件缺失/格式错误时优雅降级
-- [ ] 详情面板：`Enter` 展开任务详情
-- [ ] 端到端场景：Agent 在另一个终端写 JSON → TUI 自动刷新
+- [x] watchdog 集成：监听 `tasks.json` 文件变化
+- [x] 防抖机制（100ms）
+- [x] 热重载：JSON 变化 → 无闪烁 TUI 重绘
+- [x] 鼠标点击 checkbox → 切换状态 → 反写 JSON
+- [x] 原子写入（临时文件 + `os.rename`）
+- [x] Schema 校验：非法 JSON → 错误提示横幅
+- [x] 错误状态：文件缺失/格式错误时优雅降级
+- [x] 详情面板：`Enter` 展开任务详情
+- [x] 端到端场景：Agent 在另一个终端写 JSON → TUI 自动刷新
 
 **退出标准**：录制一个 10 秒 GIF：左边 Mutsumi 运行，右边手动修改 JSON，左边瞬间刷新。
 
 ---
 
-## Phase 3：打磨
+## Phase 3：打磨（当前）
 
 **目标**：完善 CLI 子命令、CRUD 交互、配置系统。
 

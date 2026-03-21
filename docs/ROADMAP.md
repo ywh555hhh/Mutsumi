@@ -22,7 +22,7 @@ data model       task list        click → JSON     themes           Product Hu
 
 ---
 
-## Phase 0: Foundations (Current)
+## Phase 0: Foundations ✅
 
 **Goal**: Complete all design documents, set up project skeleton. Zero-code phase.
 
@@ -33,54 +33,54 @@ data model       task list        click → JSON     themes           Product Hu
 - [x] TUI Specification (`TUI_SPEC.md`)
 - [x] Brand Identity (`BRAND.md`)
 - [x] Roadmap (this document)
-- [ ] `uv init` project skeleton
-- [ ] `pyproject.toml` dependency declaration
-- [ ] Sample `tasks.json` (fixture)
-- [ ] `CLAUDE.md` project-level dev conventions
-- [ ] CI: GitHub Actions (lint + type check)
+- [x] `uv init` project skeleton
+- [x] `pyproject.toml` dependency declaration
+- [x] Sample `tasks.json` (fixture)
+- [x] `CLAUDE.md` project-level dev conventions
+- [x] CI: GitHub Actions (lint + type check)
 
 **Exit Criteria**: `uv run mutsumi` can launch a blank Textual window and exit cleanly.
 
 ---
 
-## Phase 1: Skeleton
+## Phase 1: Skeleton ✅
 
 **Goal**: Render a static TUI that reads `tasks.json` and displays tasks, without reacting to external changes.
 
-- [ ] Textual App base framework (`app.py`)
-- [ ] Header widget: Tab switching (Today / Week / Month / Inbox)
-- [ ] TaskList widget: Group by priority
-- [ ] TaskRow widget: checkbox + title + tags + priority stars
-- [ ] Footer widget: Task statistics
-- [ ] Data layer: pydantic model for Task schema
-- [ ] Data layer: Parse `tasks.json`
-- [ ] Basic keyboard navigation: `j/k` up/down, `q` quit
-- [ ] Sub-task rendering: indented children (max 3 levels)
-- [ ] Empty state placeholder page
+- [x] Textual App base framework (`app.py`)
+- [x] Header widget: Tab switching (Today / Week / Month / Inbox)
+- [x] TaskList widget: Group by priority
+- [x] TaskRow widget: checkbox + title + tags + priority stars
+- [x] Footer widget: Task statistics
+- [x] Data layer: pydantic model for Task schema
+- [x] Data layer: Parse `tasks.json`
+- [x] Basic keyboard navigation: `j/k` up/down, `q` quit
+- [x] Sub-task rendering: indented children (max 3 levels)
+- [x] Empty state placeholder page
 
 **Exit Criteria**: Manually create a `tasks.json`, `uv run mutsumi` correctly renders all tasks.
 
 ---
 
-## Phase 2: Reactivity
+## Phase 2: Reactivity ✅
 
 **Goal**: Implement bidirectional data flow — external JSON changes trigger TUI re-render, and TUI interactions write back to JSON.
 
-- [ ] watchdog integration: monitor `tasks.json` for changes
-- [ ] Debounce mechanism (100ms)
-- [ ] Hot-reload: JSON change → flicker-free TUI re-render
-- [ ] Mouse click checkbox → toggle status → write back JSON
-- [ ] Atomic write (temp file + `os.rename`)
-- [ ] Schema validation: invalid JSON → error banner
-- [ ] Error state: graceful degradation for missing/malformed files
-- [ ] Detail panel: `Enter` to expand task details
-- [ ] End-to-end scenario: Agent writes JSON in another terminal → TUI auto-refreshes
+- [x] watchdog integration: monitor `tasks.json` for changes
+- [x] Debounce mechanism (100ms)
+- [x] Hot-reload: JSON change → flicker-free TUI re-render
+- [x] Mouse click checkbox → toggle status → write back JSON
+- [x] Atomic write (temp file + `os.rename`)
+- [x] Schema validation: invalid JSON → error banner
+- [x] Error state: graceful degradation for missing/malformed files
+- [x] Detail panel: `Enter` to expand task details
+- [x] End-to-end scenario: Agent writes JSON in another terminal → TUI auto-refreshes
 
 **Exit Criteria**: Record a 10-second GIF: Mutsumi running on the left, JSON being edited on the right, left side refreshes instantly.
 
 ---
 
-## Phase 3: CLI & Polish
+## Phase 3: CLI & Polish (Current)
 
 **Goal**: Flesh out CLI sub-commands, CRUD interactions, and configuration system.
 
