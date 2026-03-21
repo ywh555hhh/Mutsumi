@@ -4,20 +4,20 @@
 
 | ステータス | リビングドキュメント |
 |-----------|---------------------|
-| 日付       | 2026-03-21          |
+| 日付       | 2026-03-22          |
 
 ---
 
 ## フェーズ概要
 
 ```
-Phase 0          Phase 1          Phase 2          Phase 3          Phase 4
-Foundations      Skeleton         Reactivity       CLI & Polish      Launch
-────────────     ────────────     ────────────     ────────────     ────────────
-docs & specs     static TUI       hot-reload       CLI CRUD         README
-project setup    tab switching    file watcher     i18n             GIF demo
-data model       task list        click → JSON     themes           Product Hunt
-                 detail panel     JSON → re-draw   config system    community
+Phase 0          Phase 1          Phase 2          Phase 3          Phase 3.5        Phase 4
+Foundations      Skeleton         Reactivity       CLI & Polish     Friend Beta      Launch
+────────────     ────────────     ────────────     ────────────     ────────────     ────────────
+docs & specs     static TUI       hot-reload       CLI CRUD         AGENT.md         README
+project setup    tab switching    file watcher     i18n             setup command    GIF demo
+data model       task list        click → JSON     themes           tmux scripts     Product Hunt
+                 detail panel     JSON → re-draw   config system    beta packaging   community
 ```
 
 ---
@@ -80,29 +80,46 @@ data model       task list        click → JSON     themes           Product Hu
 
 ---
 
-## Phase 3: CLI とポリッシュ（現在）
+## Phase 3: CLI とポリッシュ ✅
 
 **目標**: CLI サブコマンド、CRUD インタラクション、設定システムを充実させます。
 
-- [ ] TUI CRUD: `n` 新規 / `e` 編集 / `dd` 削除
-- [ ] CLI: `mutsumi add` / `list` / `done` / `rm` / `edit`
-- [ ] CLI: `mutsumi init` — テンプレート `tasks.json` の生成
-- [ ] CLI: `mutsumi validate` — ファイルの検証
-- [ ] CLI: `mutsumi schema` — JSON Schema の出力
-- [ ] 設定システム: `~/.config/mutsumi/config.toml`
-- [ ] テーマシステム: 4つのビルトインテーマ + カスタムテーマ読み込み
-- [ ] キーバインド: vim / emacs / arrow のプリセット
-- [ ] i18n: `en` + `zh` の二言語対応
-- [ ] 検索: `/` でリアルタイム検索フィルターを起動
-- [ ] イベントログ: TUI 操作 → `events.jsonl` に追記
-- [ ] マルチプロジェクト: `--watch` で複数パスを集約
-- [ ] `mutsumi --version` / `--help`
+- [x] TUI CRUD: `n` 新規 / `e` 編集 / `dd` 削除
+- [x] CLI: `mutsumi add` / `list` / `done` / `rm` / `edit`
+- [x] CLI: `mutsumi init` — テンプレート `tasks.json` の生成
+- [x] CLI: `mutsumi validate` — ファイルの検証
+- [x] CLI: `mutsumi schema` — JSON Schema の出力
+- [x] 設定システム: `~/.config/mutsumi/config.toml`
+- [x] テーマシステム: 4つのビルトインテーマ + カスタムテーマ読み込み
+- [x] キーバインド: vim / emacs / arrow のプリセット
+- [x] i18n: `en` + `zh` + `ja` の三言語対応
+- [x] 検索: `/` でリアルタイム検索フィルターを起動
+- [x] イベントログ: TUI 操作 → `events.jsonl` に追記
+- [x] マルチプロジェクト: `--watch` で複数パスを集約
+- [x] `mutsumi --version` / `--help`
 
 **完了条件**: `uv tool install mutsumi` の後、新規ユーザーが2分以内に一連のワークフローを完了できること。
 
 ---
 
-## Phase 4: ローンチ
+## Phase 3.5: フレンドベータ ✅（現在）
+
+**目標**: 小規模な友人ベータテストの準備 — どのエージェントも2分以内に Mutsumi の操作を習得できるようにします。
+
+- [x] `AGENT.md` — エージェント向けワンページチートシート（スキーマ、CLI、JSON プロトコル）
+- [x] `examples/` — サンプル `config.toml` と `tasks.json`
+- [x] `mutsumi setup --agent` — エージェント設定ファイルへの統合手順の注入
+- [x] `scripts/tmux-dev.sh` — ワンコマンドで tmux スプリットペイン設定
+- [x] `scripts/demo.sh` — ライブリロードを示すデモスクリプト
+- [x] バージョンを `0.4.0b1` に更新
+- [x] README: Terminal Integration セクション（tmux + iTerm2）
+- [x] `pyproject.toml`: ベータ分類子
+
+**完了条件**: 友人が `uv tool install git+...` した後、`mutsumi setup --agent claude-code` を実行して2分以内に使い始められること。
+
+---
+
+## Phase 4: ローンチ（次のステップ）
 
 **目標**: すべてのリリース素材を磨き上げ、Product Hunt でのローンチに向けてスプリントします。
 
@@ -113,7 +130,7 @@ data model       task list        click → JSON     themes           Product Hu
 - [ ] ボーナス GIF の録画: Typeless 音声 → エージェント → Mutsumi の更新
 - [ ] Product Hunt ページのコピー
 - [ ] PyPI への公開
-- [ ] GitHub Release v0.1.0
+- [ ] GitHub Release v0.5.0
 - [ ] Hacker News / Reddit /r/commandline への投稿
 - [ ] V2EX への投稿
 - [ ] コミュニティテンプレートコレクション: ユーザーが自分の tmux/zellij レイアウトを共有
@@ -148,5 +165,6 @@ data model       task list        click → JSON     themes           Product Hu
 | 0.1.0     | Phase 1 完了 — 静的レンダリングが利用可能          |
 | 0.2.0     | Phase 2 完了 — ホットリロード + インタラクション    |
 | 0.3.0     | Phase 3 完了 — CLI + 設定が完成                    |
+| 0.4.0b1   | Phase 3.5 完了 — フレンドベータ                     |
 | 0.5.0     | Phase 4 完了 — Product Hunt ローンチビルド          |
 | 1.0.0     | コミュニティのフィードバックを経た安定リリース      |

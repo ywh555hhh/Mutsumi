@@ -4,20 +4,20 @@
 
 | Status  | Living Document     |
 |---------|---------------------|
-| Date    | 2026-03-21          |
+| Date    | 2026-03-22          |
 
 ---
 
 ## Phase Overview
 
 ```
-Phase 0          Phase 1          Phase 2          Phase 3          Phase 4
-Foundations      Skeleton         Reactivity       CLI & Polish      Launch
-────────────     ────────────     ────────────     ────────────     ────────────
-docs & specs     static TUI       hot-reload       CLI CRUD         README
-project setup    tab switching    file watcher     i18n             GIF demo
-data model       task list        click → JSON     themes           Product Hunt
-                 detail panel     JSON → re-draw   config system    community
+Phase 0          Phase 1          Phase 2          Phase 3          Phase 3.5        Phase 4
+Foundations      Skeleton         Reactivity       CLI & Polish     Friend Beta      Launch
+────────────     ────────────     ────────────     ────────────     ────────────     ────────────
+docs & specs     static TUI       hot-reload       CLI CRUD         AGENT.md         README
+project setup    tab switching    file watcher     i18n             setup command    GIF demo
+data model       task list        click → JSON     themes           tmux scripts     Product Hunt
+                 detail panel     JSON → re-draw   config system    beta packaging   community
 ```
 
 ---
@@ -80,29 +80,46 @@ data model       task list        click → JSON     themes           Product Hu
 
 ---
 
-## Phase 3: CLI & Polish (Current)
+## Phase 3: CLI & Polish ✅
 
 **Goal**: Flesh out CLI sub-commands, CRUD interactions, and configuration system.
 
-- [ ] TUI CRUD: `n` new / `e` edit / `dd` delete
-- [ ] CLI: `mutsumi add` / `list` / `done` / `rm` / `edit`
-- [ ] CLI: `mutsumi init` — generate template `tasks.json`
-- [ ] CLI: `mutsumi validate` — validate file
-- [ ] CLI: `mutsumi schema` — output JSON Schema
-- [ ] Config system: `~/.config/mutsumi/config.toml`
-- [ ] Theme system: 4 built-in themes + custom theme loading
-- [ ] Key bindings: vim / emacs / arrow presets
-- [ ] i18n: `en` + `zh` bilingual
-- [ ] Search: `/` triggers real-time search filter
-- [ ] Event log: TUI actions → append to `events.jsonl`
-- [ ] Multi-project: `--watch` aggregate multiple paths
-- [ ] `mutsumi --version` / `--help`
+- [x] TUI CRUD: `n` new / `e` edit / `dd` delete
+- [x] CLI: `mutsumi add` / `list` / `done` / `rm` / `edit`
+- [x] CLI: `mutsumi init` — generate template `tasks.json`
+- [x] CLI: `mutsumi validate` — validate file
+- [x] CLI: `mutsumi schema` — output JSON Schema
+- [x] Config system: `~/.config/mutsumi/config.toml`
+- [x] Theme system: 4 built-in themes + custom theme loading
+- [x] Key bindings: vim / emacs / arrow presets
+- [x] i18n: `en` + `zh` + `ja` trilingual
+- [x] Search: `/` triggers real-time search filter
+- [x] Event log: TUI actions → append to `events.jsonl`
+- [x] Multi-project: `--watch` aggregate multiple paths
+- [x] `mutsumi --version` / `--help`
 
 **Exit Criteria**: After `uv tool install mutsumi`, a new user can complete the full workflow within 2 minutes.
 
 ---
 
-## Phase 4: Launch
+## Phase 3.5: Friend Beta ✅ (Current)
+
+**Goal**: Prepare for small-scale friend beta — any agent can learn to control Mutsumi in 2 minutes.
+
+- [x] `AGENT.md` — one-page agent cheat sheet (schema, CLI, JSON protocol)
+- [x] `examples/` — sample `config.toml` and `tasks.json`
+- [x] `mutsumi setup --agent` — inject integration instructions into agent config files
+- [x] `scripts/tmux-dev.sh` — one-command tmux split-pane setup
+- [x] `scripts/demo.sh` — demo script showing live-reload
+- [x] Version bump to `0.4.0b1`
+- [x] README: Terminal Integration section (tmux + iTerm2)
+- [x] `pyproject.toml`: Beta classifier
+
+**Exit Criteria**: A friend can `uv tool install git+...`, run `mutsumi setup --agent claude-code`, and start using Mutsumi within 2 minutes.
+
+---
+
+## Phase 4: Launch (Next)
 
 **Goal**: Polish all release materials and sprint for a Product Hunt launch.
 
@@ -113,7 +130,7 @@ data model       task list        click → JSON     themes           Product Hu
 - [ ] Record Bonus GIF: Typeless voice → Agent → Mutsumi refresh
 - [ ] Product Hunt page copy
 - [ ] Publish to PyPI
-- [ ] GitHub Release v0.1.0
+- [ ] GitHub Release v0.5.0
 - [ ] Hacker News / Reddit /r/commandline post
 - [ ] V2EX post
 - [ ] Community template collection: users show their tmux/zellij layouts
@@ -148,5 +165,6 @@ The following features are outside the MVP scope. Listed here for reference only
 | 0.1.0   | Phase 1 complete — static rendering usable         |
 | 0.2.0   | Phase 2 complete — hot-reload + interaction        |
 | 0.3.0   | Phase 3 complete — CLI + config complete           |
+| 0.4.0b1 | Phase 3.5 complete — Friend Beta                   |
 | 0.5.0   | Phase 4 complete — Product Hunt launch build       |
 | 1.0.0   | Stable release after community feedback            |

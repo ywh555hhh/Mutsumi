@@ -4,20 +4,20 @@
 
 | 状态    | 动态文档                |
 |---------|------------------------|
-| 日期    | 2026-03-21             |
+| 日期    | 2026-03-22             |
 
 ---
 
 ## 阶段概览
 
 ```
-Phase 0          Phase 1          Phase 2          Phase 3          Phase 4
-Foundations      Skeleton         Reactivity       CLI & Polish      Launch
-────────────     ────────────     ────────────     ────────────     ────────────
-docs & specs     static TUI       hot-reload       CLI CRUD         README
-project setup    tab switching    file watcher     i18n             GIF demo
-data model       task list        click → JSON     themes           Product Hunt
-                 detail panel     JSON → re-draw   config system    community
+Phase 0          Phase 1          Phase 2          Phase 3          Phase 3.5        Phase 4
+Foundations      Skeleton         Reactivity       CLI & Polish     Friend Beta      Launch
+────────────     ────────────     ────────────     ────────────     ────────────     ────────────
+docs & specs     static TUI       hot-reload       CLI CRUD         AGENT.md         README
+project setup    tab switching    file watcher     i18n             setup command    GIF demo
+data model       task list        click → JSON     themes           tmux scripts     Product Hunt
+                 detail panel     JSON → re-draw   config system    beta packaging   community
 ```
 
 ---
@@ -80,29 +80,46 @@ data model       task list        click → JSON     themes           Product Hu
 
 ---
 
-## Phase 3：打磨（当前）
+## Phase 3：打磨 ✅
 
 **目标**：完善 CLI 子命令、CRUD 交互、配置系统。
 
-- [ ] TUI CRUD：`n` 新建 / `e` 编辑 / `dd` 删除
-- [ ] CLI：`mutsumi add` / `list` / `done` / `rm` / `edit`
-- [ ] CLI：`mutsumi init` — 生成模板 `tasks.json`
-- [ ] CLI：`mutsumi validate` — 校验文件
-- [ ] CLI：`mutsumi schema` — 输出 JSON Schema
-- [ ] 配置系统：`~/.config/mutsumi/config.toml`
-- [ ] 主题系统：4 个内置主题 + 自定义主题加载
-- [ ] 键位预设方案：vim / emacs / 方向键
-- [ ] 国际化：`en` + `zh` 双语支持
-- [ ] 搜索：`/` 触发实时搜索过滤
-- [ ] 事件日志：TUI 操作 → 追加到 `events.jsonl`
-- [ ] 多项目：`--watch` 多路径聚合
-- [ ] `mutsumi --version` / `--help`
+- [x] TUI CRUD：`n` 新建 / `e` 编辑 / `dd` 删除
+- [x] CLI：`mutsumi add` / `list` / `done` / `rm` / `edit`
+- [x] CLI：`mutsumi init` — 生成模板 `tasks.json`
+- [x] CLI：`mutsumi validate` — 校验文件
+- [x] CLI：`mutsumi schema` — 输出 JSON Schema
+- [x] 配置系统：`~/.config/mutsumi/config.toml`
+- [x] 主题系统：4 个内置主题 + 自定义主题加载
+- [x] 键位预设方案：vim / emacs / 方向键
+- [x] 国际化：`en` + `zh` + `ja` 三语支持
+- [x] 搜索：`/` 触发实时搜索过滤
+- [x] 事件日志：TUI 操作 → 追加到 `events.jsonl`
+- [x] 多项目：`--watch` 多路径聚合
+- [x] `mutsumi --version` / `--help`
 
 **退出标准**：`uv tool install mutsumi` 后，新用户能在 2 分钟内跑通完整流程。
 
 ---
 
-## Phase 4：包装上市
+## Phase 3.5：朋友内测 ✅（当前）
+
+**目标**：准备小规模朋友内测 — 任何 Agent 都能 2 分钟内学会操控 Mutsumi。
+
+- [x] `AGENT.md` — Agent 一页速查表（schema、CLI、JSON 协议）
+- [x] `examples/` — 示例 `config.toml` 和 `tasks.json`
+- [x] `mutsumi setup --agent` — 注入集成说明到 Agent 配置文件
+- [x] `scripts/tmux-dev.sh` — 一条命令 tmux 分屏开发
+- [x] `scripts/demo.sh` — 演示脚本展示实时刷新
+- [x] 版本升级到 `0.4.0b1`
+- [x] README：Terminal Integration 章节（tmux + iTerm2）
+- [x] `pyproject.toml`：Beta classifier
+
+**退出标准**：朋友 `uv tool install git+...` 后，运行 `mutsumi setup --agent claude-code`，2 分钟内开始使用。
+
+---
+
+## Phase 4：包装上市（下一步）
 
 **目标**：打磨发布物料，冲刺 Product Hunt。
 
@@ -113,7 +130,7 @@ data model       task list        click → JSON     themes           Product Hu
 - [ ] 录制 Bonus GIF：Typeless 语音 → Agent → Mutsumi 刷新
 - [ ] Product Hunt 页面文案
 - [ ] 发布到 PyPI
-- [ ] GitHub Release v0.1.0
+- [ ] GitHub Release v0.5.0
 - [ ] Hacker News / Reddit /r/commandline 发帖
 - [ ] V2EX 发帖
 - [ ] 社区模板征集：用户展示自己的 tmux/zellij 布局
@@ -148,5 +165,6 @@ data model       task list        click → JSON     themes           Product Hu
 | 0.1.0   | Phase 1 完成 — 静态渲染可用                     |
 | 0.2.0   | Phase 2 完成 — 热重载 + 交互可用                |
 | 0.3.0   | Phase 3 完成 — CLI + 配置完整                   |
+| 0.4.0b1 | Phase 3.5 完成 — 朋友内测                        |
 | 0.5.0   | Phase 4 完成 — Product Hunt 发布版本            |
 | 1.0.0   | 社区反馈后的稳定版                               |
