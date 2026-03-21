@@ -1,6 +1,6 @@
 [project]
 name = "mutsumi"
-version = "0.1.0"
+version = "0.4.0b1"
 description = "A silent TUI task board that watches your JSON. Agent-agnostic. Layout-agnostic. Zero friction."
 readme = "README.md"
 license = "MIT"
@@ -10,7 +10,7 @@ authors = [
 ]
 keywords = ["tui", "task-manager", "terminal", "productivity", "agent", "textual"]
 classifiers = [
-    "Development Status :: 3 - Alpha",
+    "Development Status :: 4 - Beta",
     "Environment :: Console",
     "Intended Audience :: Developers",
     "License :: OSI Approved :: MIT License",
