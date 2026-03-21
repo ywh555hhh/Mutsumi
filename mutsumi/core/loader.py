@@ -91,3 +91,25 @@ def group_tasks_by_priority(
         if group:
             groups[p] = group
     return groups
+
+
+def sort_tasks(tasks: list[Task], field: str, reverse: bool = False) -> list[Task]:
+    """Sort tasks by *field* name. Unknown fields leave order unchanged.
+
+    Supported fields: title, priority, status, due.
+    """
+    from mutsumi.core.models import PRIORITY_SORT_ORDER
+
+    if field == "title":
+        return sorted(tasks, key=lambda t: t.title.lower(), reverse=reverse)
+    if field == "priority":
+        return sorted(
+            tasks,
+            key=lambda t: PRIORITY_SORT_ORDER.get(t.priority, 99),
+            reverse=reverse,
+        )
+    if field == "status":
+        return sorted(tasks, key=lambda t: t.status.value, reverse=reverse)
+    if field == "due":
+        return sorted(tasks, key=lambda t: t.due_date or "", reverse=reverse)
+    return list(tasks)

@@ -4,7 +4,9 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
 
-from textual.containers import Vertical, VerticalScroll
+from rich.text import Text
+from textual.containers import Horizontal, Vertical, VerticalScroll
+from textual.message import Message
 from textual.widget import Widget
 from textual.widgets import Static
 
@@ -20,13 +22,47 @@ PRIORITY_LABELS = {
 }
 
 
+class _ResponsiveSeparator(Widget):
+    """A separator line that fills the available width with ─."""
+
+    DEFAULT_CSS = """
+    _ResponsiveSeparator {
+        height: 1;
+        padding: 0 1;
+        color: #333333;
+    }
+    """
+
+    def render(self) -> Text:
+        width = self.size.width
+        return Text("\u2500" * max(width, 0), style="#333333")
+
+
+class _PanelAction(Static):
+    """A clickable label for detail panel actions (1-line height)."""
+
+    def __init__(self, label: str, action_name: str, **kwargs: Any) -> None:
+        super().__init__(label, **kwargs)
+        self._action_name = action_name
+
+    def on_click(self) -> None:
+        parent = self.parent
+        while parent is not None:
+            if isinstance(parent, DetailPanel):
+                parent.handle_action(self._action_name)
+                break
+            parent = parent.parent
+
+
 class DetailPanel(Widget):
-    """Side panel showing full task details."""
+    """Side panel showing full task details with action buttons."""
 
     DEFAULT_CSS = """
     DetailPanel {
         dock: right;
-        width: 40;
+        width: 40%;
+        max-width: 50;
+        min-width: 24;
         background: #141414;
         border-left: solid #333333;
         display: none;
@@ -36,12 +72,57 @@ class DetailPanel(Widget):
         display: block;
     }
 
-    DetailPanel .detail-header {
+    DetailPanel .detail-topbar {
         height: 1;
         padding: 0 1;
         background: #1a1a1a;
+    }
+
+    DetailPanel .detail-topbar-title {
+        width: 1fr;
         color: #5de4c7;
         text-style: bold;
+    }
+
+    DetailPanel .detail-close-btn {
+        width: auto;
+        height: 1;
+        padding: 0 1;
+        color: #666666;
+    }
+
+    DetailPanel .detail-close-btn:hover {
+        color: #e06c75;
+    }
+
+    DetailPanel .detail-actions {
+        height: 1;
+        padding: 0 1;
+        background: #1a1a1a;
+    }
+
+    DetailPanel .detail-action-btn {
+        width: auto;
+        height: 1;
+        padding: 0 1;
+        color: #5de4c7;
+    }
+
+    DetailPanel .detail-action-btn:hover {
+        background: #2a2a2a;
+        color: #ffffff;
+    }
+
+    DetailPanel .detail-delete-btn {
+        width: auto;
+        height: 1;
+        padding: 0 1;
+        color: #e06c75;
+    }
+
+    DetailPanel .detail-delete-btn:hover {
+        background: #3a1a1a;
+        color: #ff8888;
     }
 
     DetailPanel .detail-field {
@@ -57,7 +138,7 @@ class DetailPanel(Widget):
         text-style: bold;
     }
 
-    DetailPanel .detail-separator {
+    DetailPanel _ResponsiveSeparator {
         height: 1;
         padding: 0 1;
         color: #333333;
@@ -68,13 +149,45 @@ class DetailPanel(Widget):
     }
     """
 
+    class EditRequested(Message):
+        """Posted when the Edit button is clicked."""
+
+        def __init__(self, task_id: str) -> None:
+            self.task_id = task_id
+            super().__init__()
+
+    class DeleteRequested(Message):
+        """Posted when the Delete button is clicked."""
+
+        def __init__(self, task_id: str, task_title: str) -> None:
+            self.task_id = task_id
+            self.task_title = task_title
+            super().__init__()
+
     def __init__(self, **kwargs: Any) -> None:
         super().__init__(**kwargs)
         self._detail_task: Task | None = None
 
     def compose(self) -> ComposeResult:
+        with Horizontal(classes="detail-topbar"):
+            yield Static("Detail", classes="detail-topbar-title")
+            yield _PanelAction("\\[x]", "close", classes="detail-close-btn")
+        with Horizontal(classes="detail-actions"):
+            yield _PanelAction("\\[Edit]", "edit", classes="detail-action-btn")
+            yield _PanelAction("\\[Delete]", "delete", classes="detail-delete-btn")
         with VerticalScroll(classes="detail-scroll"):
             yield Vertical(id="detail-content")
+
+    def handle_action(self, action: str) -> None:
+        """Dispatch action from clickable labels."""
+        if action == "close":
+            self.hide()
+        elif action == "edit" and self._detail_task is not None:
+            self.post_message(self.EditRequested(self._detail_task.id))
+        elif action == "delete" and self._detail_task is not None:
+            self.post_message(
+                self.DeleteRequested(self._detail_task.id, self._detail_task.title)
+            )
 
     def show_task(self, task: Task) -> None:
         """Display details for a task."""
@@ -103,10 +216,10 @@ class DetailPanel(Widget):
         # Title
         status_icon = "[x]" if task.status == TaskStatus.DONE else "[ ]"
         content.mount(
-            Static(f"{status_icon} {task.title}", classes="detail-header")
+            Static(f"{status_icon} {task.title}", classes="detail-label")
         )
 
-        content.mount(Static("─" * 38, classes="detail-separator"))
+        content.mount(_ResponsiveSeparator())
 
         # Status
         content.mount(Static("Status", classes="detail-label"))
@@ -138,7 +251,7 @@ class DetailPanel(Widget):
 
         # Description
         if task.description:
-            content.mount(Static("─" * 38, classes="detail-separator"))
+            content.mount(_ResponsiveSeparator())
             content.mount(Static("Description", classes="detail-label"))
             content.mount(
                 Static(f"  {task.description}", classes="detail-field")
@@ -147,7 +260,7 @@ class DetailPanel(Widget):
         # Children summary
         done, total = task.children_progress()
         if total > 0:
-            content.mount(Static("─" * 38, classes="detail-separator"))
+            content.mount(_ResponsiveSeparator())
             content.mount(Static("Subtasks", classes="detail-label"))
             content.mount(
                 Static(f"  {done}/{total} completed", classes="detail-field")
@@ -160,7 +273,7 @@ class DetailPanel(Widget):
 
         # Created / completed timestamps
         if task.created_at or task.completed_at:
-            content.mount(Static("─" * 38, classes="detail-separator"))
+            content.mount(_ResponsiveSeparator())
             if task.created_at:
                 content.mount(Static("Created", classes="detail-label"))
                 content.mount(
@@ -171,12 +284,3 @@ class DetailPanel(Widget):
                 content.mount(
                     Static(f"  {task.completed_at}", classes="detail-field")
                 )
-
-        # Hint
-        content.mount(Static("─" * 38, classes="detail-separator"))
-        content.mount(
-            Static(
-                "  [#666666]Press Enter or Esc to close[/]",
-                classes="detail-field",
-            )
-        )
