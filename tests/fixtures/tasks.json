@@ -1,26 +1,35 @@
 {
-  "$schema": "https://mutsumi.dev/schema/v1.json",
   "version": 1,
   "tasks": [
     {
       "id": "01EXAMPLE000000000000000001",
-      "title": "Welcome to Mutsumi! Toggle me with Space or click the checkbox.",
-      "status": "pending",
+      "title": "oksss",
+      "status": "done",
       "scope": "day",
       "priority": "normal",
-      "tags": ["tutorial"],
+      "tags": [
+        "tutorialxx"
+      ],
+      "children": [],
       "created_at": "2026-03-21T08:00:00Z",
-      "children": []
+      "due_date": null,
+      "completed_at": "2026-03-21T17:33:24.498160+00:00",
+      "description": ",,"
     },
     {
       "id": "01EXAMPLE000000000000000002",
       "title": "Try editing this task with 'e' key",
-      "status": "pending",
+      "status": "done",
       "scope": "day",
       "priority": "low",
-      "tags": ["tutorial"],
+      "tags": [
+        "tutorial"
+      ],
+      "children": [],
       "created_at": "2026-03-21T08:01:00Z",
-      "children": []
+      "due_date": null,
+      "completed_at": "2026-03-21T17:33:23.716994+00:00",
+      "description": null
     },
     {
       "id": "01EXAMPLE000000000000000003",
@@ -28,40 +37,57 @@
       "status": "pending",
       "scope": "day",
       "priority": "high",
-      "tags": ["dev", "backend"],
-      "created_at": "2026-03-21T08:02:00Z",
-      "due_date": "2026-03-25",
-      "description": "Migrate session-based auth to JWT. Need to update middleware and routing layer.",
+      "tags": [
+        "dev",
+        "backend"
+      ],
       "children": [
         {
           "id": "01EXAMPLE000000000000000004",
           "title": "Install PyJWT",
-          "status": "done",
+          "status": "pending",
+          "scope": "inbox",
           "priority": "normal",
           "tags": [],
-          "completed_at": "2026-03-21T09:30:00Z",
-          "children": []
+          "children": [],
+          "created_at": null,
+          "due_date": null,
+          "completed_at": null,
+          "description": null
         },
         {
           "id": "01EXAMPLE000000000000000005",
           "title": "Write middleware",
           "status": "pending",
+          "scope": "inbox",
           "priority": "normal",
           "tags": [],
-          "children": []
+          "children": [],
+          "created_at": null,
+          "due_date": null,
+          "completed_at": null,
+          "description": null
         }
-      ]
+      ],
+      "created_at": "2026-03-21T08:02:00Z",
+      "due_date": "2026-03-25",
+      "completed_at": null,
+      "description": "Migrate session-based auth to JWT. Need to update middleware and routing layer."
     },
     {
       "id": "01EXAMPLE000000000000000006",
       "title": "Fix cache penetration bug",
-      "status": "done",
+      "status": "pending",
       "scope": "day",
       "priority": "high",
-      "tags": ["bugfix"],
+      "tags": [
+        "bugfix"
+      ],
+      "children": [],
       "created_at": "2026-03-21T07:00:00Z",
-      "completed_at": "2026-03-21T09:00:00Z",
-      "children": []
+      "due_date": null,
+      "completed_at": null,
+      "description": null
     },
     {
       "id": "01EXAMPLE000000000000000007",
@@ -69,9 +95,14 @@
       "status": "pending",
       "scope": "week",
       "priority": "normal",
-      "tags": ["life"],
+      "tags": [
+        "life"
+      ],
+      "children": [],
       "created_at": "2026-03-21T08:05:00Z",
-      "children": []
+      "due_date": null,
+      "completed_at": null,
+      "description": null
     },
     {
       "id": "01EXAMPLE000000000000000008",
@@ -79,9 +110,14 @@
       "status": "pending",
       "scope": "week",
       "priority": "low",
-      "tags": ["docs"],
+      "tags": [
+        "docs"
+      ],
+      "children": [],
       "created_at": "2026-03-21T08:10:00Z",
-      "children": []
+      "due_date": null,
+      "completed_at": null,
+      "description": null
     },
     {
       "id": "01EXAMPLE000000000000000009",
@@ -89,9 +125,15 @@
       "status": "pending",
       "scope": "inbox",
       "priority": "low",
-      "tags": ["life"],
+      "tags": [
+        "life"
+      ],
+      "children": [],
       "created_at": "2026-03-21T12:00:00Z",
-      "children": []
+      "due_date": null,
+      "completed_at": null,
+      "description": null
     }
-  ]
+  ],
+  "$schema": "https://mutsumi.dev/schema/v1.json"
 }

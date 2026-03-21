@@ -7,8 +7,14 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from mutsumi.core.models import TaskFile, TaskStatus
-from mutsumi.core.writer import save_task_file, toggle_task_status
+from mutsumi.core.models import TaskFile, TaskPriority, TaskStatus
+from mutsumi.core.writer import (
+    clone_task,
+    cycle_priority,
+    reorder_task,
+    save_task_file,
+    toggle_task_status,
+)
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -103,4 +109,89 @@ def test_toggle_child_task(sample_task_file: TaskFile) -> None:
 
 def test_toggle_nonexistent_returns_false(sample_task_file: TaskFile) -> None:
     result = toggle_task_status(sample_task_file, "nonexistent")
+    assert result is False
+
+
+# ── New writer operations tests ──────────────────────────────────────
+
+
+def test_reorder_task_down(sample_task_file: TaskFile) -> None:
+    """Move first task down → swap positions."""
+    assert sample_task_file.tasks[0].id == "t1"
+    result = reorder_task(sample_task_file, "t1", direction=1)
+    assert result is True
+    assert sample_task_file.tasks[0].id == "t2"
+    assert sample_task_file.tasks[1].id == "t1"
+
+
+def test_reorder_task_up(sample_task_file: TaskFile) -> None:
+    """Move second task up → swap positions."""
+    result = reorder_task(sample_task_file, "t2", direction=-1)
+    assert result is True
+    assert sample_task_file.tasks[0].id == "t2"
+
+
+def test_reorder_task_boundary(sample_task_file: TaskFile) -> None:
+    """Moving first task up should fail (already at boundary)."""
+    result = reorder_task(sample_task_file, "t1", direction=-1)
+    assert result is False
+
+
+def test_reorder_task_nonexistent(sample_task_file: TaskFile) -> None:
+    result = reorder_task(sample_task_file, "nope", direction=1)
+    assert result is False
+
+
+def test_clone_task(sample_task_file: TaskFile) -> None:
+    original_count = len(sample_task_file.tasks)
+    cloned = clone_task(sample_task_file, "t1")
+    assert cloned is not None
+    assert cloned.id != "t1"  # new ID
+    assert cloned.title == "Task 1"
+    assert len(sample_task_file.tasks) == original_count + 1
+
+
+def test_clone_task_with_children(sample_task_file: TaskFile) -> None:
+    """Clone should recursively assign new IDs to children."""
+    cloned = clone_task(sample_task_file, "t2")
+    assert cloned is not None
+    assert len(cloned.children) == 1
+    assert cloned.children[0].id != "t2a"
+
+
+def test_clone_task_nonexistent(sample_task_file: TaskFile) -> None:
+    result = clone_task(sample_task_file, "nope")
+    assert result is None
+
+
+def test_cycle_priority_up(sample_task_file: TaskFile) -> None:
+    """Default is NORMAL → up should become HIGH."""
+    result = cycle_priority(sample_task_file, "t1", direction=1)
+    assert result is True
+    assert sample_task_file.tasks[0].priority == TaskPriority.HIGH
+
+
+def test_cycle_priority_down(sample_task_file: TaskFile) -> None:
+    """Default is NORMAL → down should become LOW."""
+    result = cycle_priority(sample_task_file, "t1", direction=-1)
+    assert result is True
+    assert sample_task_file.tasks[0].priority == TaskPriority.LOW
+
+
+def test_cycle_priority_clamp_high(sample_task_file: TaskFile) -> None:
+    """Cycling up from HIGH should not change (boundary)."""
+    sample_task_file.tasks[0].priority = TaskPriority.HIGH
+    result = cycle_priority(sample_task_file, "t1", direction=1)
+    assert result is False
+    assert sample_task_file.tasks[0].priority == TaskPriority.HIGH
+
+
+def test_cycle_priority_clamp_low(sample_task_file: TaskFile) -> None:
+    sample_task_file.tasks[0].priority = TaskPriority.LOW
+    result = cycle_priority(sample_task_file, "t1", direction=-1)
+    assert result is False
+
+
+def test_cycle_priority_nonexistent(sample_task_file: TaskFile) -> None:
+    result = cycle_priority(sample_task_file, "nope", direction=1)
     assert result is False

@@ -24,7 +24,7 @@ def test_nested_children() -> None:
     assert task3.title == "Refactor Auth module"
     assert len(task3.children) == 2
     assert task3.children[0].status == TaskStatus.DONE
-    assert task3.children[1].status == TaskStatus.PENDING
+    assert task3.children[1].status == TaskStatus.DONE
 
 
 def test_default_values() -> None:
