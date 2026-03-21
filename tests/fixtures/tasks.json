@@ -1,0 +1,97 @@
+{
+  "$schema": "https://mutsumi.dev/schema/v1.json",
+  "version": 1,
+  "tasks": [
+    {
+      "id": "01EXAMPLE000000000000000001",
+      "title": "Welcome to Mutsumi! Toggle me with Space or click the checkbox.",
+      "status": "pending",
+      "scope": "day",
+      "priority": "normal",
+      "tags": ["tutorial"],
+      "created_at": "2026-03-21T08:00:00Z",
+      "children": []
+    },
+    {
+      "id": "01EXAMPLE000000000000000002",
+      "title": "Try editing this task with 'e' key",
+      "status": "pending",
+      "scope": "day",
+      "priority": "low",
+      "tags": ["tutorial"],
+      "created_at": "2026-03-21T08:01:00Z",
+      "children": []
+    },
+    {
+      "id": "01EXAMPLE000000000000000003",
+      "title": "Refactor Auth module",
+      "status": "pending",
+      "scope": "day",
+      "priority": "high",
+      "tags": ["dev", "backend"],
+      "created_at": "2026-03-21T08:02:00Z",
+      "due_date": "2026-03-25",
+      "description": "Migrate session-based auth to JWT. Need to update middleware and routing layer.",
+      "children": [
+        {
+          "id": "01EXAMPLE000000000000000004",
+          "title": "Install PyJWT",
+          "status": "done",
+          "priority": "normal",
+          "tags": [],
+          "completed_at": "2026-03-21T09:30:00Z",
+          "children": []
+        },
+        {
+          "id": "01EXAMPLE000000000000000005",
+          "title": "Write middleware",
+          "status": "pending",
+          "priority": "normal",
+          "tags": [],
+          "children": []
+        }
+      ]
+    },
+    {
+      "id": "01EXAMPLE000000000000000006",
+      "title": "Fix cache penetration bug",
+      "status": "done",
+      "scope": "day",
+      "priority": "high",
+      "tags": ["bugfix"],
+      "created_at": "2026-03-21T07:00:00Z",
+      "completed_at": "2026-03-21T09:00:00Z",
+      "children": []
+    },
+    {
+      "id": "01EXAMPLE000000000000000007",
+      "title": "Write weekly report",
+      "status": "pending",
+      "scope": "week",
+      "priority": "normal",
+      "tags": ["life"],
+      "created_at": "2026-03-21T08:05:00Z",
+      "children": []
+    },
+    {
+      "id": "01EXAMPLE000000000000000008",
+      "title": "Update README",
+      "status": "pending",
+      "scope": "week",
+      "priority": "low",
+      "tags": ["docs"],
+      "created_at": "2026-03-21T08:10:00Z",
+      "children": []
+    },
+    {
+      "id": "01EXAMPLE000000000000000009",
+      "title": "Buy coffee beans",
+      "status": "pending",
+      "scope": "inbox",
+      "priority": "low",
+      "tags": ["life"],
+      "created_at": "2026-03-21T12:00:00Z",
+      "children": []
+    }
+  ]
+}
