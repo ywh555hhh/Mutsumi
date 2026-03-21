@@ -1,0 +1,23 @@
+# Mutsumi Configuration Example
+# Place at: ~/.config/mutsumi/config.toml
+
+# Theme — built-in options: "monochrome-zen", "solarized", "nord", "dracula"
+theme = "monochrome-zen"
+
+# Keybindings preset — "vim", "emacs", or "arrow"
+keybindings = "vim"
+
+# Language — "en", "zh", or "ja"
+language = "en"
+
+# Default path to tasks.json (optional — defaults to ./tasks.json)
+# default_path = "/path/to/my/tasks.json"
+
+# Event log path (optional — logs TUI actions to JSONL)
+# event_log_path = "~/.local/share/mutsumi/events.jsonl"
+
+# Custom CSS file for theme overrides (optional)
+# custom_css_path = "~/.config/mutsumi/custom.tcss"
+
+# Columns to display in the task list
+columns = ["checkbox", "title", "tags", "priority"]

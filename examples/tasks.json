@@ -1,0 +1,105 @@
+{
+  "version": 1,
+  "tasks": [
+    {
+      "id": "01DEMO00000000000000000001",
+      "title": "Refactor Auth module",
+      "status": "pending",
+      "scope": "day",
+      "priority": "high",
+      "tags": ["dev", "backend"],
+      "children": [
+        {
+          "id": "01DEMO00000000000000000002",
+          "title": "Install PyJWT",
+          "status": "done",
+          "priority": "normal",
+          "tags": [],
+          "children": [],
+          "completed_at": "2026-03-22T09:30:00Z"
+        },
+        {
+          "id": "01DEMO00000000000000000003",
+          "title": "Write auth middleware",
+          "status": "pending",
+          "priority": "normal",
+          "tags": [],
+          "children": []
+        }
+      ],
+      "created_at": "2026-03-22T08:00:00Z",
+      "due_date": "2026-03-25",
+      "description": "Migrate session-based auth to JWT. Update middleware and routing layer."
+    },
+    {
+      "id": "01DEMO00000000000000000004",
+      "title": "Fix cache penetration bug",
+      "status": "pending",
+      "scope": "day",
+      "priority": "high",
+      "tags": ["bugfix", "urgent"],
+      "children": [],
+      "created_at": "2026-03-22T07:00:00Z"
+    },
+    {
+      "id": "01DEMO00000000000000000005",
+      "title": "Write unit tests for API endpoints",
+      "status": "pending",
+      "scope": "day",
+      "priority": "normal",
+      "tags": ["test", "backend"],
+      "children": [],
+      "created_at": "2026-03-22T08:30:00Z"
+    },
+    {
+      "id": "01DEMO00000000000000000006",
+      "title": "Review PR #42 — database migration",
+      "status": "pending",
+      "scope": "week",
+      "priority": "normal",
+      "tags": ["review", "dev"],
+      "children": [],
+      "created_at": "2026-03-22T09:00:00Z"
+    },
+    {
+      "id": "01DEMO00000000000000000007",
+      "title": "Write weekly progress report",
+      "status": "pending",
+      "scope": "week",
+      "priority": "normal",
+      "tags": ["docs"],
+      "children": [],
+      "created_at": "2026-03-22T10:00:00Z"
+    },
+    {
+      "id": "01DEMO00000000000000000008",
+      "title": "Update project README",
+      "status": "pending",
+      "scope": "week",
+      "priority": "low",
+      "tags": ["docs"],
+      "children": [],
+      "created_at": "2026-03-22T10:30:00Z"
+    },
+    {
+      "id": "01DEMO00000000000000000009",
+      "title": "Plan Q2 roadmap",
+      "status": "pending",
+      "scope": "month",
+      "priority": "normal",
+      "tags": ["planning"],
+      "children": [],
+      "created_at": "2026-03-22T11:00:00Z"
+    },
+    {
+      "id": "01DEMO00000000000000000010",
+      "title": "Buy coffee beans",
+      "status": "pending",
+      "scope": "inbox",
+      "priority": "low",
+      "tags": ["life"],
+      "children": [],
+      "created_at": "2026-03-22T12:00:00Z"
+    }
+  ]
+}
