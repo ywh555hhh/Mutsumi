@@ -243,9 +243,10 @@ mutsumi setup --agent custom
 | Agent | 操作 |
 |---|---|
 | `claude-code` | 将 Mutsumi 集成规则追加到项目级 `CLAUDE.md` |
-| `codex-cli` | 创建/更新 `codex.md` 或 Agent 指令文件 |
-| `aider` | 追加到 `.aider.conf.yml` 约定 |
+| `codex-cli` | 创建/更新 `AGENTS.md` |
+| `aider` | 打印到 stdout（手动集成） |
 | `opencode` | 更新 `opencode.md` 指令 |
+| `gemini-cli` | 创建/更新 `GEMINI.md` |
 | `custom` | 打印 prompt 模板到标准输出供手动集成 |
 
 #### 5.2.2 注入的 Prompt 模板
@@ -279,8 +280,8 @@ The Mutsumi TUI watches this file and re-renders automatically.
 │  你使用哪个 Agent？（点击或方向键+回车）                        │
 │                                                                │
 │  ● Claude Code     → 写入 CLAUDE.md                            │
-│  ○ Codex CLI       → 写入 codex.md                             │
-│  ○ Aider           → 写入 .aider.conf.yml                      │
+│  ○ Codex CLI       → 写入 AGENTS.md                              │
+│  ○ Aider           → 打印到 stdout                               │
 │  ○ OpenCode        → 写入 opencode.md                          │
 │  ○ Gemini CLI      → 写入 GEMINI.md                            │
 │  ○ Custom          → 打印 prompt 到标准输出                     │
@@ -393,7 +394,7 @@ Windows Terminal Quake Mode 设置（推荐）：
 
 ### 9.3 为什么 Agent 配置是独立的？
 
-Agent 配置修改的是 Mutsumi 领域之外的文件（`CLAUDE.md`、`codex.md` 等）。将其与 `mutsumi init` 分离遵循最小惊讶原则 — init 只碰 Mutsumi 自己的配置。
+Agent 配置修改的是 Mutsumi 领域之外的文件（`CLAUDE.md`、`AGENTS.md` 等）。将其与 `mutsumi init` 分离遵循最小惊讶原则 — init 只碰 Mutsumi 自己的配置。
 
 ---
 

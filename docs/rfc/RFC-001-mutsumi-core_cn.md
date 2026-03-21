@@ -267,7 +267,7 @@ TUI 支持完整的增删改查，不依赖外部 Agent 即可独立使用：
 ### 6.4 主题系统
 
 - 官方默认主题：**Monochrome Zen** — 极简黑白灰，accent 色为淡青（类似 Catppuccin 的 Teal）
-- 内置可选：`monochrome`, `catppuccin-mocha`, `nord`, `dracula`
+- 内置可选：`monochrome-zen`, `solarized`, `nord`, `dracula`
 - 用户可在 `~/.config/mutsumi/themes/` 下添加自定义 `.toml` 主题文件
 - 主题定义遵循 Textual CSS 变量映射
 
@@ -301,7 +301,7 @@ mutsumi rm <task-id>              # 删除
 # 工具
 mutsumi init                      # 在当前目录生成 tasks.json 模板
 mutsumi validate                  # 校验 tasks.json 格式
-mutsumi config --edit             # 打开配置文件
+mutsumi setup --agent claude-code    # 注入 Agent 集成说明
 mutsumi schema                    # 输出 JSON Schema（供 Agent 参考）
 ```
 
@@ -386,7 +386,7 @@ default_watch = "."        # 默认 watch 路径
 default_scope = "day"      # 启动时默认显示的 Tab
 
 [theme]
-name = "monochrome"        # 内置主题名 或自定义主题文件名
+name = "monochrome-zen"   # 内置主题名 或自定义主题文件名
 accent_color = "#94e2d5"   # 可覆盖 accent 色
 
 [keys]

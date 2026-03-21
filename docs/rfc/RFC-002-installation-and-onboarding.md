@@ -243,9 +243,10 @@ For each supported agent, `mutsumi setup --agent <name>` performs:
 | Agent | Action |
 |---|---|
 | `claude-code` | Appends Mutsumi integration rules to project-level `CLAUDE.md` |
-| `codex-cli` | Creates/updates `codex.md` or agent instructions |
-| `aider` | Appends to `.aider.conf.yml` conventions |
+| `codex-cli` | Creates/updates `AGENTS.md` |
+| `aider` | Prints prompt to stdout (manual integration) |
 | `opencode` | Updates `opencode.md` instructions |
+| `gemini-cli` | Creates/updates `GEMINI.md` |
 | `custom` | Prints the prompt template to stdout for manual integration |
 
 #### 5.2.2 Injected Prompt Template
@@ -279,8 +280,8 @@ Running `mutsumi setup --agent` with no agent name launches a picker:
 │  Which agent do you use? (click or arrow+enter)                │
 │                                                                │
 │  ● Claude Code     → writes to CLAUDE.md                       │
-│  ○ Codex CLI       → writes to codex.md                        │
-│  ○ Aider           → writes to .aider.conf.yml                 │
+│  ○ Codex CLI       → writes to AGENTS.md                        │
+│  ○ Aider           → prints to stdout                           │
 │  ○ OpenCode        → writes to opencode.md                     │
 │  ○ Gemini CLI      → writes to GEMINI.md                       │
 │  ○ Custom          → prints prompt to stdout                   │
@@ -393,7 +394,7 @@ Users who install Mutsumi are likely terminal power users who understand TOML. S
 
 ### 9.3 Why Agent Setup is Separate?
 
-Agent setup modifies files outside Mutsumi's domain (`CLAUDE.md`, `codex.md`, etc.). Keeping it separate from `mutsumi init` follows the principle of least surprise — init only touches Mutsumi's own config.
+Agent setup modifies files outside Mutsumi's domain (`CLAUDE.md`, `AGENTS.md`, etc.). Keeping it separate from `mutsumi init` follows the principle of least surprise — init only touches Mutsumi's own config.
 
 ---
 

@@ -270,7 +270,7 @@ Multiple preset keybinding schemes are provided. Users can switch between them o
 ### 6.4 Theme System
 
 - Default theme: **Monochrome Zen** — minimal black/white/gray, accent color is light teal (similar to Catppuccin Teal)
-- Built-in options: `monochrome`, `catppuccin-mocha`, `nord`, `dracula`
+- Built-in options: `monochrome-zen`, `solarized`, `nord`, `dracula`
 - Users can add custom `.toml` theme files under `~/.config/mutsumi/themes/`
 - Theme definitions follow Textual CSS variable mapping
 
@@ -304,7 +304,7 @@ mutsumi rm <task-id>              # delete
 # Utilities
 mutsumi init                      # generate tasks.json template in cwd
 mutsumi validate                  # validate tasks.json format
-mutsumi config --edit             # open config file
+mutsumi setup --agent claude-code    # inject Agent integration instructions
 mutsumi schema                    # output JSON Schema (for Agent reference)
 ```
 
@@ -389,7 +389,7 @@ default_watch = "."        # default watch path
 default_scope = "day"      # default Tab on launch
 
 [theme]
-name = "monochrome"        # built-in theme name or custom theme filename
+name = "monochrome-zen"   # built-in theme name or custom theme filename
 accent_color = "#94e2d5"   # override accent color
 
 [keys]

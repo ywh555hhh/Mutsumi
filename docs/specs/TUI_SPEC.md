@@ -272,10 +272,10 @@ docs = "#fab387"
 
 | Theme               | Vibe                                                |
 |----------------------|-----------------------------------------------------|
-| `monochrome`         | Minimalist B&W with light cyan accent (default)     |
-| `catppuccin-mocha`   | Warm tones, community favorite                      |
+| `monochrome-zen`     | Minimalist B&W with light cyan accent (default)     |
 | `nord`               | Cool tones, restrained                              |
 | `dracula`            | High contrast, purple-tinted                        |
+| `solarized`          | Warm dark, teal accent                              |
 
 ## 6. Search
 

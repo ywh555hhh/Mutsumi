@@ -270,7 +270,7 @@ TUI はフル CRUD をサポートしており、外部 Agent なしで単独で
 ### 6.4 テーマシステム
 
 - デフォルトテーマ：**Monochrome Zen** — ミニマルな白黒グレー、アクセントカラーはライトティール（Catppuccin Teal に近い）
-- 内蔵オプション：`monochrome`、`catppuccin-mocha`、`nord`、`dracula`
+- 内蔵オプション：`monochrome-zen`、`solarized`、`nord`、`dracula`
 - ユーザーは `~/.config/mutsumi/themes/` 配下にカスタム `.toml` テーマファイルを追加可能
 - テーマ定義は Textual CSS 変数マッピングに準拠
 
@@ -304,7 +304,7 @@ mutsumi rm <task-id>              # 削除
 # ユーティリティ
 mutsumi init                      # カレントディレクトリに tasks.json テンプレートを生成
 mutsumi validate                  # tasks.json のフォーマットを検証
-mutsumi config --edit             # 設定ファイルを開く
+mutsumi setup --agent claude-code    # Agent 統合手順を注入
 mutsumi schema                    # JSON Schema を出力（Agent 参照用）
 ```
 
@@ -389,7 +389,7 @@ default_watch = "."        # デフォルトの監視パス
 default_scope = "day"      # 起動時のデフォルトタブ
 
 [theme]
-name = "monochrome"        # 内蔵テーマ名またはカスタムテーマファイル名
+name = "monochrome-zen"   # 内蔵テーマ名またはカスタムテーマファイル名
 accent_color = "#94e2d5"   # アクセントカラーの上書き
 
 [keys]

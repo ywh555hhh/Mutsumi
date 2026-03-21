@@ -243,9 +243,10 @@ mutsumi setup --agent custom
 | Agent | アクション |
 |---|---|
 | `claude-code` | Mutsumi 統合ルールをプロジェクトレベルの `CLAUDE.md` に追記します |
-| `codex-cli` | `codex.md` または Agent 指示ファイルを作成・更新します |
-| `aider` | `.aider.conf.yml` のコンベンションに追記します |
+| `codex-cli` | `AGENTS.md` を作成・更新します |
+| `aider` | プロンプトを標準出力に表示します（手動統合） |
 | `opencode` | `opencode.md` の指示を更新します |
+| `gemini-cli` | `GEMINI.md` を作成・更新します |
 | `custom` | プロンプトテンプレートを標準出力に表示し、手動で統合できるようにします |
 
 #### 5.2.2 注入されるプロンプトテンプレート
@@ -279,8 +280,8 @@ Agent 名を指定せずに実行すると、選択画面が起動します：
 │  使用している Agent を選んでください（クリックまたは矢印+Enter） │
 │                                                                │
 │  ● Claude Code     → CLAUDE.md に書き込みます                   │
-│  ○ Codex CLI       → codex.md に書き込みます                    │
-│  ○ Aider           → .aider.conf.yml に書き込みます             │
+│  ○ Codex CLI       → AGENTS.md に書き込みます                     │
+│  ○ Aider           → 標準出力に表示します                          │
 │  ○ OpenCode        → opencode.md に書き込みます                 │
 │  ○ Gemini CLI      → GEMINI.md に書き込みます                   │
 │  ○ Custom          → プロンプトを標準出力に表示します             │
@@ -393,7 +394,7 @@ Mutsumi をインストールするユーザーは、おそらくターミナル
 
 ### 9.3 なぜ Agent セットアップは分離されているのか？
 
-Agent セットアップは Mutsumi のドメイン外のファイル（`CLAUDE.md`、`codex.md` など）を変更します。`mutsumi init` と分離することで、最小驚き原則に従います — init は Mutsumi 自身の設定のみを操作します。
+Agent セットアップは Mutsumi のドメイン外のファイル（`CLAUDE.md`、`AGENTS.md` など）を変更します。`mutsumi init` と分離することで、最小驚き原則に従います — init は Mutsumi 自身の設定のみを操作します。
 
 ---
 
