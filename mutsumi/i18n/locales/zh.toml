@@ -1,0 +1,30 @@
+[tabs]
+today = "今天"
+week = "本周"
+month = "本月"
+inbox = "收件箱"
+
+[status]
+tasks = "{count} 个任务"
+done = "{count} 已完成"
+pending = "{count} 待办"
+
+[actions]
+new_task = "新建任务"
+confirm_delete = "确定删除这个任务？"
+cancel = "取消"
+create = "创建"
+save = "保存"
+
+[empty]
+title = "这里还什么都没有。"
+hint = "按 [n] 新建任务，或让你的 Agent 写入 tasks.json"
+
+[errors]
+json_invalid = "tasks.json 格式错误，显示上次有效状态。"
+task_skipped = "{count} 个任务因校验错误被跳过"
+terminal_narrow = "终端宽度不足"
+
+[search]
+placeholder = "搜索..."
+no_results = "没有匹配的任务"

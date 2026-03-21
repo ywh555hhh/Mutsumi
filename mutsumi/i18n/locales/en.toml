@@ -1,0 +1,30 @@
+[tabs]
+today = "Today"
+week = "Week"
+month = "Month"
+inbox = "Inbox"
+
+[status]
+tasks = "{count} tasks"
+done = "{count} done"
+pending = "{count} pending"
+
+[actions]
+new_task = "New Task"
+confirm_delete = "Delete this task?"
+cancel = "Cancel"
+create = "Create"
+save = "Save"
+
+[empty]
+title = "Nothing here yet."
+hint = "Press [n] to create a task or let your Agent write tasks.json"
+
+[errors]
+json_invalid = "tasks.json has errors. Showing last valid state."
+task_skipped = "{count} task(s) skipped due to validation errors"
+terminal_narrow = "Terminal too narrow"
+
+[search]
+placeholder = "Search..."
+no_results = "No matching tasks"

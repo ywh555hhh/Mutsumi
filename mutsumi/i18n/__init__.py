@@ -1,0 +1,1 @@
+"""Internationalization for Mutsumi."""

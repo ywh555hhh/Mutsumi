@@ -1,0 +1,30 @@
+[tabs]
+today = "今日"
+week = "今週"
+month = "今月"
+inbox = "受信箱"
+
+[status]
+tasks = "{count} 件のタスク"
+done = "{count} 件完了"
+pending = "{count} 件未完了"
+
+[actions]
+new_task = "新規タスク"
+confirm_delete = "このタスクを削除しますか？"
+cancel = "キャンセル"
+create = "作成"
+save = "保存"
+
+[empty]
+title = "まだ何もありません。"
+hint = "[n] を押してタスクを作成するか、Agent に tasks.json を書かせてください"
+
+[errors]
+json_invalid = "tasks.json にエラーがあります。最後の有効な状態を表示しています。"
+task_skipped = "{count} 件のタスクが検証エラーによりスキップされました"
+terminal_narrow = "ターミナルの幅が不足しています"
+
+[search]
+placeholder = "検索..."
+no_results = "一致するタスクがありません"
