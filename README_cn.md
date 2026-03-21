@@ -85,7 +85,7 @@ mutsumi setup --agent claude-code
 
 - **热重载**：文件变化即时刷新 TUI（100ms 防抖）
 - **Vim/Emacs/Arrow 键位**：选你习惯的，或自定义
-- **4 套内置主题**：Monochrome（默认）、Catppuccin Mocha、Nord、Dracula
+- **4 套内置主题**：Monochrome Zen（默认）、Solarized、Nord、Dracula
 - **三语言**：英文、中文、日文开箱即用
 - **Agent 无关**：任何能写 JSON 的程序都是合法的 Controller
 - **零网络**：100% 本地，无遥测，无云端，数据永远在你手里

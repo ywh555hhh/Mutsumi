@@ -43,7 +43,8 @@ That's Mutsumi. She watches your JSON and re-renders instantly. That's it.
 ## Install
 
 ```bash
-uv tool install mutsumi
+# Beta install (from git)
+uv tool install git+https://github.com/ywh555hhh/Mutsumi.git
 ```
 
 No Python pre-install needed — `uv` manages everything.
@@ -85,7 +86,7 @@ mutsumi setup --agent claude-code
 
 - **Hot-reload**: File changes re-render the TUI instantly (100ms debounce)
 - **Vim/Emacs/Arrow keybindings**: Choose your style, or define custom keys
-- **4 built-in themes**: Monochrome (default), Catppuccin Mocha, Nord, Dracula
+- **4 built-in themes**: Monochrome Zen (default), Solarized, Nord, Dracula
 - **i18n**: English, Chinese, Japanese out of the box
 - **Agent-agnostic**: Any program that writes JSON is a valid controller
 - **Zero network**: 100% local. No telemetry. No cloud. Your data stays yours.
@@ -102,7 +103,32 @@ uv tool install mutsumi && mutsumi init --defaults && mutsumi setup --agent clau
 
 Supported agents: Claude Code, Codex CLI, Gemini CLI, OpenCode, Aider, or any custom script.
 
-See [Agent Protocol](docs/specs/AGENT_PROTOCOL.md) for details.
+See [Agent Protocol](docs/specs/AGENT_PROTOCOL.md) for details. Also see [AGENT.md](AGENT.md) for a one-page cheat sheet.
+
+## Terminal Integration
+
+### tmux (recommended)
+
+```bash
+# One command: left shell + right Mutsumi split-pane
+bash scripts/tmux-dev.sh
+
+# Custom session name & width
+MUTSUMI_WIDTH=40 bash scripts/tmux-dev.sh my-project
+```
+
+### iTerm2
+
+1. `Cmd+D` to split vertically
+2. Right pane: `mutsumi`
+3. Left pane: your agent / shell
+
+### Demo
+
+```bash
+# Run the demo script in the left pane to see live-reload in action
+bash scripts/demo.sh
+```
 
 ## Documentation
 

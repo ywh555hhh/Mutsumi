@@ -85,7 +85,7 @@ mutsumi setup --agent claude-code
 
 - **ホットリロード**：ファイル変更で TUI を即座に再描画（100ms デバウンス）
 - **Vim/Emacs/Arrow キーバインド**：好みのスタイルを選ぶか、カスタム定義
-- **4 つの組み込みテーマ**：Monochrome（デフォルト）、Catppuccin Mocha、Nord、Dracula
+- **4 つの組み込みテーマ**：Monochrome Zen（デフォルト）、Solarized、Nord、Dracula
 - **i18n**：英語、中国語、日本語を標準サポート
 - **Agent 非依存**：JSON を書けるプログラムなら何でも Controller になれる
 - **ゼロネットワーク**：100% ローカル。テレメトリなし。クラウドなし。データは永遠にあなたのもの。
