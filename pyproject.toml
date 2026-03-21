@@ -1,0 +1,55 @@
+[project]
+name = "mutsumi"
+version = "0.1.0"
+description = "A silent TUI task board that watches your JSON. Agent-agnostic. Layout-agnostic. Zero friction."
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.12"
+authors = [
+    { name = "Wayne", email = "ywh555hhh@gmail.com" },
+]
+keywords = ["tui", "task-manager", "terminal", "productivity", "agent", "textual"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Office/Business :: Scheduling",
+    "Topic :: Utilities",
+]
+dependencies = [
+    "textual>=0.50.0",
+    "click>=8.1.0",
+    "pydantic>=2.0.0",
+    "watchdog>=4.0.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/ywh555hhh/Mutsumi"
+Repository = "https://github.com/ywh555hhh/Mutsumi"
+Issues = "https://github.com/ywh555hhh/Mutsumi/issues"
+
+[project.scripts]
+mutsumi = "mutsumi.cli:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "W", "UP", "B", "SIM", "TCH"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+warn_return_any = true
+warn_unused_configs = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
