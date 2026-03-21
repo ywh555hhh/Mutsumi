@@ -36,3 +36,4 @@ coverage.xml
 events.jsonl
 error.log
 *.tmp
+/tasks.json
