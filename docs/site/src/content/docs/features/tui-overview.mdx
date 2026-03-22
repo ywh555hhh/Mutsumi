@@ -7,24 +7,24 @@ description: Layout, responsive behavior, and visual components of the Mutsumi T
 
 ```
 ┌─────────────────────────────────────────────────────┐
-│  [Today] [Week] [Month] [Inbox]          mutsumi ♪  │  ← Header
+│  [Today] [Week] [Month] [Inbox]          mutsumi ~  │  ← Header
 ├─────────────────────────────────────────────────────┤
 │                                                     │
-│  ▼ HIGH ─────────────────────────────────────────   │  ← Priority Group
-│  [ ] Refactor Auth module            dev,backend ★★★│  ← Task Row
-│  [x] Fix cache penetration bug       bugfix      ★★★│
+│  v HIGH ─────────────────────────────────────────   │  ← Priority Group
+│  [ ] Refactor Auth module            dev,backend ***│  ← Task Row
+│  [x] Fix cache penetration bug       bugfix      ***│
 │                                                     │
-│  ▼ NORMAL ───────────────────────────────────────   │
-│  [ ] Write weekly report             life        ★★ │
-│  [ ] Review PR #42                   dev         ★★ │
+│  v NORMAL ───────────────────────────────────────   │
+│  [ ] Write weekly report             life        ** │
+│  [ ] Review PR #42                   dev         ** │
 │    └─ [ ] Check type safety          (1/2)          │  ← Subtask
 │    └─ [x] Run tests                                 │
 │                                                     │
-│  ▼ LOW ──────────────────────────────────────────   │
-│  [ ] Update README                   docs        ★  │
+│  v LOW ──────────────────────────────────────────   │
+│  [ ] Update README                   docs        *  │
 │                                                     │
 ├─────────────────────────────────────────────────────┤
-│  6 tasks · 2 done · 4 pending              🔇 quiet │  ← Footer
+│  6 tasks · 2 done · 4 pending              .. quiet │  ← Footer
 └─────────────────────────────────────────────────────┘
 ```
 
@@ -45,7 +45,7 @@ Press <kbd>Enter</kbd> to expand the detail panel:
 
 ```
 ├─────────────────────────────────────────────────────┤
-│  ▶ Refactor Auth module                             │
+│  > Refactor Auth module                             │
 │  Status:   pending          Priority: high          │
 │  Scope:    day              Tags:     dev, backend  │
 │  Due:      2026-03-25       Created:  2026-03-21    │
@@ -87,7 +87,7 @@ When `mutsumi.json` is invalid:
 
 ```
 ┌─────────────────────────────────────────────────────┐
-│  ⚠ Task file has errors · showing last valid state   │
+│  ! Task file has errors · showing last valid state   │
 │  Run `mutsumi validate` for details                  │
 ├─────────────────────────────────────────────────────┤
 │  (Last valid task list)                              │

@@ -136,20 +136,20 @@ mutsumi schema --format markdown
 ```
 Agent 写入无效 JSON
        │
-       ▼
+       v
 Mutsumi watchdog 检测到变更
        │
-       ▼
+       v
 解析失败 → TUI 显示错误横幅
        │       "mutsumi.json has errors, showing last valid state"
        │
-       ▼
+       v
 错误记录到 stderr + error.log
        │
-       ▼
+       v
 发射事件: {"event":"schema_error","file":"mutsumi.json","message":"..."}
        │
-       ▼
+       v
 Agent 可读取 error.log 或 events.jsonl 进行自愈
 ```
 

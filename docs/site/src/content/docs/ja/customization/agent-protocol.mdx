@@ -131,20 +131,20 @@ mutsumi schema --format markdown
 ```
 Agent が無効な JSON を書き込む
        │
-       ▼
+       v
 Mutsumi の watchdog が変更を検知
        │
-       ▼
+       v
 パース失敗 → TUI にエラーバナー表示
        │       "mutsumi.json にエラーがあります。最後の有効な状態を表示中"
        │
-       ▼
+       v
 エラーを stderr + error.log に記録
        │
-       ▼
+       v
 イベント発行: {"event":"schema_error","file":"mutsumi.json","message":"..."}
        │
-       ▼
+       v
 Agent が error.log または events.jsonl を読んで自己修正可能
 ```
 
