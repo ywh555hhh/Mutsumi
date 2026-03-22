@@ -169,6 +169,13 @@ class DetailPanel(Widget):
             self.task_title = task_title
             super().__init__()
 
+    class AddChildRequested(Message):
+        """Posted when the +Subtask button is clicked."""
+
+        def __init__(self, task_id: str) -> None:
+            self.task_id = task_id
+            super().__init__()
+
     def __init__(self, **kwargs: Any) -> None:
         super().__init__(**kwargs)
         self._detail_task: Task | None = None
@@ -179,6 +186,7 @@ class DetailPanel(Widget):
             yield _PanelAction("\\[x]", "close", classes="detail-close-btn")
         with Horizontal(classes="detail-actions"):
             yield _PanelAction("\\[Edit]", "edit", classes="detail-action-btn")
+            yield _PanelAction("\\[+Sub]", "add_child", classes="detail-action-btn")
             yield _PanelAction("\\[Delete]", "delete", classes="detail-delete-btn")
         with VerticalScroll(classes="detail-scroll"):
             yield Vertical(id="detail-content")
@@ -189,6 +197,8 @@ class DetailPanel(Widget):
             self.hide()
         elif action == "edit" and self._detail_task is not None:
             self.post_message(self.EditRequested(self._detail_task.id))
+        elif action == "add_child" and self._detail_task is not None:
+            self.post_message(self.AddChildRequested(self._detail_task.id))
         elif action == "delete" and self._detail_task is not None:
             self.post_message(
                 self.DeleteRequested(self._detail_task.id, self._detail_task.title)

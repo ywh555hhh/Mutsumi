@@ -560,6 +560,10 @@ class MutsumiApp(App[None]):
         """Handle Delete button click in detail panel."""
         self.push_screen(ConfirmDialog(event.task_id, event.task_title))
 
+    def on_detail_panel_add_child_requested(self, event: DetailPanel.AddChildRequested) -> None:
+        """Handle +Subtask button click in detail panel."""
+        self.push_screen(TaskForm(parent_id=event.task_id))
+
     # --- TaskRow click-to-detail events ---
 
     def on_task_row_detail_clicked(self, event: TaskRow.DetailClicked) -> None:
