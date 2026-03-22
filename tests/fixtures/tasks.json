@@ -45,7 +45,7 @@
         {
           "id": "01EXAMPLE000000000000000004",
           "title": "Install PyJWT",
-          "status": "pending",
+          "status": "done",
           "scope": "inbox",
           "priority": "normal",
           "tags": [],
@@ -58,7 +58,7 @@
         {
           "id": "01EXAMPLE000000000000000005",
           "title": "Write middleware",
-          "status": "pending",
+          "status": "done",
           "scope": "inbox",
           "priority": "normal",
           "tags": [],
