@@ -753,14 +753,14 @@ class MutsumiApp(App[None]):
 
     # --- Footer action button events ---
 
-    def on_footer_bar_action_requested(self, event: FooterBar.ActionRequested) -> None:
+    async def on_footer_bar_action_requested(self, event: FooterBar.ActionRequested) -> None:
         """Handle clicks on footer action buttons."""
         if event.action == "new_task":
             self.action_new_task()
         elif event.action == "search":
             self.action_search()
         elif event.action == "sort":
-            self.action_sort()
+            await self.action_sort()
 
     def on_empty_state_new_task_requested(self, event: object) -> None:
         """Handle [+ New Task] button in empty state."""
