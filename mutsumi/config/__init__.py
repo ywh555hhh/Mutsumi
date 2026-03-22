@@ -10,9 +10,12 @@ Falls back to defaults if no file is found.
 from __future__ import annotations
 
 import tomllib
-from pathlib import Path
+from typing import TYPE_CHECKING
 
 from mutsumi.config.settings import MutsumiConfig
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 _config: MutsumiConfig | None = None
 

@@ -28,6 +28,7 @@ __all__ = [
     "KeySequence",
     "MatchResult",
     "MainDashboard",
+    "SourceCard",
     "PriorityGroup",
     "ScopeFilter",
     "SearchBar",

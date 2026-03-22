@@ -11,7 +11,8 @@ _MARKER = "## Mutsumi Task Integration"
 _PROMPT_TEMPLATE = """\
 ## Mutsumi Task Integration
 
-This project uses Mutsumi for task management. Tasks live in `./mutsumi.json` (fallback: `./tasks.json`).
+This project uses Mutsumi for task management.
+Tasks live in `./mutsumi.json` (fallback: `./tasks.json`).
 
 ### Schema
 - Required: `id` (unique string), `title` (string), `status` ("pending"|"done")

@@ -17,8 +17,6 @@ from textual.reactive import reactive
 from textual.widget import Widget
 from textual.widgets import Static
 
-from mutsumi.core.models import TaskScope
-
 if TYPE_CHECKING:
     from textual.app import ComposeResult
 

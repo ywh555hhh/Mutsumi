@@ -16,11 +16,15 @@ if TYPE_CHECKING:
 
 from mutsumi.config import load_config
 from mutsumi.config.keybindings import get_keybindings
-from mutsumi.core.loader import filter_tasks_by_scope, load_task_file, resolve_tasks_path, setup_logging
+from mutsumi.core.loader import (
+    filter_tasks_by_scope,
+    load_task_file,
+    resolve_tasks_path,
+    setup_logging,
+)
 from mutsumi.core.models import Task, TaskFile, TaskScope, TaskStatus
 from mutsumi.core.paths import personal_tasks_path
 from mutsumi.core.sources import Source, SourceRegistry
-from mutsumi.core.watcher import TaskFileWatcher
 from mutsumi.core.writer import (
     add_child_task,
     add_task,
@@ -43,12 +47,12 @@ from mutsumi.tui.detail_panel import DetailPanel
 from mutsumi.tui.footer_bar import BarMode, FooterBar
 from mutsumi.tui.header_bar import HeaderBar, TabButton
 from mutsumi.tui.key_manager import KeyManager, MatchResult, get_key_sequences
+from mutsumi.tui.main_dashboard import MainDashboard
 from mutsumi.tui.priority_group import PriorityGroup, PriorityGroupHeader
 from mutsumi.tui.scope_filter import ScopeFilter
 from mutsumi.tui.search_bar import SearchBar
 from mutsumi.tui.task_form import TaskForm
 from mutsumi.tui.task_list import TaskListPanel
-from mutsumi.tui.main_dashboard import MainDashboard
 from mutsumi.tui.task_row import TaskRow, _due_status
 
 

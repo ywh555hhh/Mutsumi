@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
 
-from textual.containers import Vertical, VerticalScroll
+from textual.containers import VerticalScroll
 from textual.message import Message
 from textual.widget import Widget
 from textual.widgets import Static
@@ -71,7 +71,14 @@ class SourceCard(Widget, can_focus=True):
             self.source_name = source_name
             super().__init__()
 
-    def __init__(self, source: Source, *, max_tasks: int = 3, show_completed: bool = True, **kwargs: Any) -> None:
+    def __init__(
+        self,
+        source: Source,
+        *,
+        max_tasks: int = 3,
+        show_completed: bool = True,
+        **kwargs: Any,
+    ) -> None:
         super().__init__(**kwargs)
         self._source = source
         self._max_tasks = max_tasks

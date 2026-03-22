@@ -80,9 +80,9 @@ class TestProjectCli:
         config_path.write_text("")
 
         with patch("mutsumi.config.get_config", return_value=MutsumiConfig()), \
-             patch("mutsumi.config.save_config") as mock_save, \
+             patch("mutsumi.config.save_config"), \
              patch("mutsumi.cli.project.get_config", return_value=MutsumiConfig()), \
-             patch("mutsumi.cli.project.save_config") as mock_save2:
+             patch("mutsumi.cli.project.save_config"):
             runner = CliRunner()
             result = runner.invoke(main, ["project", "add", str(proj_dir)], catch_exceptions=False)
             assert result.exit_code == 0
@@ -148,7 +148,7 @@ class TestInitPersonal:
             return
         monkeypatch.chdir(tmp_path)
 
-        config_dest = tmp_path / ".mutsumi" / "config.toml"
+        tmp_path / ".mutsumi" / "config.toml"
 
         with patch("mutsumi.core.paths.mutsumi_home", return_value=tmp_path / ".mutsumi"):
             runner = CliRunner()

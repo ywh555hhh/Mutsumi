@@ -3,12 +3,14 @@
 from __future__ import annotations
 
 import json
-from pathlib import Path
+from typing import TYPE_CHECKING
 
 import click
 
 from mutsumi.core.loader import resolve_tasks_path
 
+if TYPE_CHECKING:
+    from pathlib import Path
 
 _TEMPLATE = {
     "version": 1,
@@ -35,7 +37,10 @@ def _write_template(path: Path) -> None:
 
 @click.command("init")
 @click.option("--force", is_flag=True, help="Overwrite existing file")
-@click.option("--personal", is_flag=True, help="Initialize personal task file (~/.mutsumi/mutsumi.json)")
+@click.option(
+    "--personal", is_flag=True,
+    help="Initialize personal task file (~/.mutsumi/mutsumi.json)",
+)
 @click.option(
     "--project", "as_project", is_flag=True,
     help="Create mutsumi.json in cwd AND register as a project source",

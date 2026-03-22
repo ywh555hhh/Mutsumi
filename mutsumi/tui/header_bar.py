@@ -74,7 +74,14 @@ class TabButton(Static, can_focus=True):
     }
     """
 
-    def __init__(self, scope: TaskScope | None = None, *, source_name: str = "", display_name: str = "", **kwargs: Any) -> None:
+    def __init__(
+        self,
+        scope: TaskScope | None = None,
+        *,
+        source_name: str = "",
+        display_name: str = "",
+        **kwargs: Any,
+    ) -> None:
         self.scope = scope
         self.source_name = source_name
         self.display_name = display_name or source_name
@@ -172,7 +179,7 @@ class HeaderBar(Widget):
                 # Multi-source: show source tabs
                 for name in self._source_names:
                     is_active = name == self.active_source
-                    display_name = f"\u2605 Main" if name == "main" else name
+                    display_name = "\u2605 Main" if name == "main" else name
                     btn = TabButton(
                         source_name=name,
                         display_name=display_name,

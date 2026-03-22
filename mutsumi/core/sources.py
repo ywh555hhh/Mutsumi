@@ -7,16 +7,17 @@ Source tracking is runtime-only — no metadata is written to JSON files.
 from __future__ import annotations
 
 from collections import OrderedDict
-from dataclasses import dataclass, field
-from pathlib import Path
+from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from mutsumi.core.loader import load_task_file
-from mutsumi.core.models import Task, TaskFile
 from mutsumi.core.watcher import TaskFileWatcher
 
 if TYPE_CHECKING:
     from collections.abc import Callable
+    from pathlib import Path
+
+    from mutsumi.core.models import Task, TaskFile
 
 
 @dataclass

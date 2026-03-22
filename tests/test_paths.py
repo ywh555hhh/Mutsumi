@@ -3,12 +3,14 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import TYPE_CHECKING
 from unittest.mock import patch
-
-import pytest
 
 from mutsumi.config import load_config, reset_config
 from mutsumi.core.paths import mutsumi_home, personal_tasks_path
+
+if TYPE_CHECKING:
+    import pytest
 
 
 class TestMutsumiHome:

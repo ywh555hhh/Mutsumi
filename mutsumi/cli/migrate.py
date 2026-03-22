@@ -48,7 +48,7 @@ def _migrate_task_file() -> bool:
         return False
 
     old.rename(new)
-    click.echo(f"Migrated: tasks.json → mutsumi.json")
+    click.echo("Migrated: tasks.json → mutsumi.json")
     return True
 
 
