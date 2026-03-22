@@ -74,9 +74,12 @@ class TabButton(Static, can_focus=True):
 
     @staticmethod
     def _label_for(scope: TaskScope | None = None, active: bool = False) -> str:
-        """Return bracketed label when active, plain when inactive."""
+        """Return bracketed label when active, plain when inactive.
+
+        Brackets are escaped (``\\[``) so Rich does not swallow them as markup.
+        """
         name = TAB_LABELS[scope] if scope else ""
-        return f"[{name}]" if active else f" {name} "
+        return f"\\[{name}]" if active else f" {name} "
 
     def set_active(self, active: bool) -> None:
         """Update label text to reflect active/inactive state."""
