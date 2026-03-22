@@ -27,12 +27,11 @@
 
 ### 1.4 Tagline
 
-*The silent task brain for the multi-threaded you.*
+*Never lose a thread.*
 
 ### 1.5 Elevator Pitch
 
-> A minimal TUI task board that watches your JSON and stays out of your way.
-> Let your AI agent be the brain — Mutsumi is just the eyes.
+> Your threads, always in sight. A terminal task board that your AI agents write to and you glance at — summoned in a keystroke, gone in another.
 
 ---
 
@@ -44,13 +43,14 @@ Mutsumi is not a product that shouts for attention. Her personality is:
 |---------------|------------------------------------------------------------------------------------|
 | **Quiet**     | Runs silently. No unsolicited notifications — unless you ask.                      |
 | **Present**   | Always there. One glance gives you the full picture.                               |
+| **Peripheral**| She lives at the edge of your vision. Not center stage. Not hidden. Like a clock on the wall. |
 | **Humble**    | She doesn't tell you how to manage tasks. You (and your Agent) are in charge.      |
 | **Hackable**  | She loves being customized. The more you mod her, the more alive she gets.         |
 | **Fast**      | Launches in an instant. Zero-latency interactions. Exits without a trace.          |
 
 If Mutsumi were a person, she'd be like this:
 
-> Sitting quietly next to you, holding a sticky note covered with your to-dos. When you glance at her, she lifts the note a little higher. When you look away, she just waits there in peace.
+> Sitting quietly next to you, holding a sticky note covered with your threads. When you glance at her, she lifts the note a little higher. When you look away, she just waits there in peace.
 
 ---
 

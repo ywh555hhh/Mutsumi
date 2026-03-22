@@ -1,0 +1,187 @@
+---
+title: FAQ
+description: Frequently asked questions about Mutsumi — networking, agents, standalone use, sync, data format, and troubleshooting.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+## General
+
+### Does Mutsumi make any network calls?
+
+No. Mutsumi is 100% local. Zero network requests, zero telemetry, zero analytics, zero cloud dependencies. This is a foundational design constraint (Five Commandments, Rule 5: Local Only), not a missing feature.
+
+### Do I need an AI agent to use Mutsumi?
+
+No. Mutsumi works as a standalone TUI task manager. You can create, edit, delete, and manage tasks entirely through the TUI keyboard/mouse interface or the CLI (`mutsumi add`, `mutsumi done`, etc.). Agent integration is an optional feature, not a requirement.
+
+### Which agents are supported?
+
+Any program that writes valid JSON to `mutsumi.json` is a supported agent. Tested and documented agents include:
+
+- Claude Code
+- Codex CLI
+- Gemini CLI
+- OpenCode
+- Aider
+- Shell scripts and cron jobs
+
+See [Agent Setup](/getting-started/agent-setup/) for integration instructions.
+
+### Can I use Mutsumi without a config file?
+
+Yes. All configuration fields have sensible defaults:
+- Theme: `monochrome-zen`
+- Keybindings: `arrows`
+- Language: `en`
+- Default scope: `day`
+
+Run `mutsumi init --defaults` only when you want to customize.
+
+## Data
+
+### Why JSON instead of SQLite?
+
+JSON is the lingua franca of AI agents. Claude, GPT, Gemini -- they all output JSON natively. A JSON file is:
+
+- **Human-readable**: You can `cat mutsumi.json` and understand it
+- **Agent-friendly**: Any program that writes JSON is a valid controller
+- **Git-diffable**: Changes are visible in `git diff`
+- **Editable**: You can modify it with `jq`, a text editor, or any scripting language
+
+SQLite requires a driver, imposes schema constraints, and is opaque to simple inspection. See [Comparison](/introduction/comparison/) for the full analysis.
+
+### Can I sync tasks across devices?
+
+Mutsumi itself does not provide sync. However, since `mutsumi.json` is a plain file, you can sync it with:
+
+- **Git**: Commit and push `mutsumi.json` to a repository
+- **Syncthing**: Peer-to-peer file sync
+- **Cloud storage**: iCloud Drive, Dropbox, Google Drive (sync the directory containing `mutsumi.json`)
+- **rsync**: Manual or cron-based sync
+
+### What happens when mutsumi.json gets corrupted?
+
+Mutsumi never crashes on invalid JSON. It:
+
+1. Shows an error banner: "mutsumi.json has errors, showing last valid state"
+2. Retains the last valid snapshot of tasks in memory
+3. Logs the error to `~/.local/share/mutsumi/error.log`
+4. Emits a `schema_error` event to `events.jsonl` (if enabled)
+5. Never overwrites the corrupted file
+
+Fix the JSON (manually or let your agent self-correct), and Mutsumi resumes automatically on the next file change.
+
+### What about unknown fields in mutsumi.json?
+
+Mutsumi uses Pydantic's `extra="allow"` policy. Any field not in the official schema is:
+
+- **Preserved** through every read-modify-write cycle
+- **Never deleted** or modified
+- **Optionally displayed** via the `columns` config
+
+This means agents can attach arbitrary metadata (effort estimates, sprint labels, blocked-by references) without any registration or schema declaration.
+
+### What ID format should I use?
+
+UUIDv7 is recommended and is the default. It provides:
+
+- Time-sortable ordering (sorted by creation time)
+- Global uniqueness without coordination
+- Both agents and TUI can generate independently
+
+Alternative formats (`ulid`, `auto-increment`) are configurable, but UUIDv7 is the safest choice for multi-agent environments.
+
+## Usage
+
+### How do I switch keybinding presets?
+
+Edit `~/.mutsumi/config.toml`:
+
+```toml
+keybindings = "emacs"   # or "vim" or "arrows"
+```
+
+Restart Mutsumi for the change to take effect. See [Keybindings](/features/keybindings/) for all three presets.
+
+### How do I change the theme?
+
+Edit `~/.mutsumi/config.toml`:
+
+```toml
+theme = "dracula"   # or "nord" or "solarized" or a custom theme name
+```
+
+See [Themes](/features/themes/) for color palettes, or [Custom Themes](/customization/custom-themes/) to create your own.
+
+### Why do tasks show up in the wrong tab?
+
+Tasks are filtered by scope. Check the `scope` field of the task:
+
+- `"day"` appears in Today
+- `"week"` appears in Week
+- `"month"` appears in Month
+- `"inbox"` appears in Inbox
+
+If a task has no `scope` but has a `due_date`, Mutsumi auto-derives the scope based on the current date. If neither is set, the task goes to Inbox.
+
+### The TUI shows "Nothing here yet" but mutsumi.json has tasks
+
+Check which tab you're on. Tasks are filtered by scope. Press `1` for Today, `2` for Week, `3` for Month, `4` for Inbox. Your tasks may be under a different scope.
+
+### Agent changes don't show up in the TUI
+
+1. Verify the agent writes to the **same path** Mutsumi is watching (check with `mutsumi config --show`)
+2. Validate the JSON is correct: `mutsumi validate`
+3. Ensure the file is valid JSON (not truncated or half-written)
+
+### Can I use Mutsumi with multiple projects?
+
+Yes. Register each project directory with `mutsumi project add`:
+
+```bash
+mutsumi project add ~/projects/saas-app
+mutsumi project add ~/projects/oshigrid
+```
+
+Mutsumi displays all registered projects as tabs in a single TUI instance:
+
+```
+[★ Main] [Personal] [saas-app] [oshigrid]
+```
+
+Use `mutsumi project list` to view registered projects, and `mutsumi project remove NAME` to unregister one. See [CLI Reference](/reference/cli-commands/) for details.
+
+## Comparison
+
+### How is Mutsumi different from Notion or Todoist?
+
+Mutsumi is local, terminal-native, and agent-agnostic. Notion and Todoist are cloud-based, GUI-first, and platform-locked. Mutsumi is designed for developers who live in the terminal and work with AI agents. It has zero friction (no login, no loading screen, no network request) and full keyboard control.
+
+### How is Mutsumi different from Taskwarrior?
+
+Mutsumi is TUI-primary (visual kanban) while Taskwarrior is CLI-primary (text reports). Mutsumi watches `mutsumi.json` for hot-reload, supports mouse interaction, and is designed for agent integration. Taskwarrior has more features (40+ report types, sync server, hooks) but higher complexity.
+
+See [Comparison](/introduction/comparison/) for a detailed feature matrix.
+
+## Troubleshooting
+
+### `mutsumi` command not found
+
+Ensure `~/.local/bin` is in your PATH:
+
+```bash
+export PATH="$HOME/.local/bin:$PATH"
+```
+
+Add this to your shell profile (`~/.bashrc`, `~/.zshrc`, or `~/.config/fish/config.fish`).
+
+### Theme or keybindings not applied
+
+- Run `mutsumi config --show` to verify config is loaded
+- Check the config file path: `mutsumi config --path`
+- Restart Mutsumi after editing config
+
+### Where do I report bugs?
+
+File issues at: [github.com/ywh555hhh/Mutsumi/issues](https://github.com/ywh555hhh/Mutsumi/issues)

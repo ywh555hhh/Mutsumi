@@ -1,0 +1,177 @@
+---
+title: "Agent プロトコル"
+description: "Mutsumi と外部 Agent（AI CLI ツール、カスタムスクリプト等）間の完全な統合プロトコル仕様。書き込みルール、コード例、イベント消費、マルチ Agent 協調。"
+---
+
+import { Aside, Steps } from '@astrojs/starlight/components';
+
+## 概要
+
+このドキュメントは、外部 Agent（AI CLI ツール、カスタムスクリプト等）が Mutsumi の `mutsumi.json` を読み書きする方法を定義します。
+
+> **後方互換性:** Mutsumi はフォールバックとして `tasks.json` も受け付けます。ただし、`mutsumi.json` が今後の正式なファイル名です。
+
+**核心原則: Mutsumi は特定の Agent に縛られません。JSON を正しく読み書きできる**あらゆるプログラム**が正当な Controller です。**
+
+## 書き込みプロトコル（Agent → Mutsumi）
+
+### ワークフロー
+
+<Steps>
+
+1. 現在の `mutsumi.json` を読み取り（全内容）
+2. JSON としてパース
+3. `tasks` 配列を変更（追加/更新/削除）
+4. ファイル**全体**を書き戻し（部分書き込み禁止）
+5. Mutsumi の watchdog が変更を検知 → TUI を再描画
+
+</Steps>
+
+### ルール
+
+| ルール | 説明 |
+|---|---|
+| **未知フィールドの保持** | 認識しないフィールドを削除しない。そのまま保持する |
+| **アトミック書き込み** | 推奨: 一時ファイルに書いてから `os.replace()` でリネーム。Mutsumi が半分書かれた状態を読むのを防ぐ |
+| **有効な JSON** | 書き込み後のファイルは有効な JSON でなければならない |
+| **有効な ID の生成** | 新しいタスクの ID には UUIDv7 を使用。最低限、一意性を保証すること |
+| **必須フィールド** | すべてのタスクに `id`, `title`, `status` が必要 |
+| **列挙型の遵守** | `status` は `"pending"` / `"done"` のみ |
+
+### タスクの追加（Python 例）
+
+```python
+import json, uuid, datetime, tempfile, os
+
+# 読み取り
+with open("mutsumi.json") as f:
+    data = json.load(f)
+
+# 追加
+new_task = {
+    "id": str(uuid.uuid7()),
+    "title": "ログインバグを修正",
+    "status": "pending",
+    "scope": "day",
+    "priority": "high",
+    "tags": ["bugfix"],
+    "created_at": datetime.datetime.now(datetime.UTC).isoformat(),
+    "children": []
+}
+data["tasks"].append(new_task)
+
+# アトミック書き込み
+tmp = tempfile.NamedTemporaryFile(
+    mode='w', dir='.', suffix='.tmp', delete=False
+)
+json.dump(data, tmp, ensure_ascii=False, indent=2)
+tmp.close()
+os.replace(tmp.name, "mutsumi.json")
+```
+
+### タスクの完了
+
+```python
+for task in data["tasks"]:
+    if task["id"] == target_id:
+        task["status"] = "done"
+        task["completed_at"] = datetime.datetime.now(datetime.UTC).isoformat()
+        break
+```
+
+## 読み取りプロトコル（Mutsumi → Agent）
+
+### イベントログ
+
+ユーザーが TUI で操作を行うと、Mutsumi はオプションで `events.jsonl` にイベントを追記します：
+
+```jsonl
+{"ts":"2026-03-21T10:00:00Z","event":"task_completed","task_id":"01JQ...","title":"キャッシュバグを修正","source":"tui"}
+{"ts":"2026-03-21T10:01:22Z","event":"task_created","task_id":"01JQ...","title":"ユニットテストを書く","source":"tui"}
+{"ts":"2026-03-21T10:05:00Z","event":"task_deleted","task_id":"01JQ...","title":"古いタスク","source":"tui"}
+{"ts":"2026-03-21T10:06:30Z","event":"task_updated","task_id":"01JQ...","changes":{"priority":"high→low"},"source":"tui"}
+```
+
+### イベントタイプ
+
+| イベント | フィールド | 説明 |
+|---|---|---|
+| `task_created` | `task_id`, `title` | 新しいタスクが作成された |
+| `task_completed` | `task_id`, `title` | タスクが完了にマークされた |
+| `task_deleted` | `task_id`, `title` | タスクが削除された |
+| `task_updated` | `task_id`, `changes` (dict) | タスクのフィールドが変更された |
+| `schema_error` | `file`, `message` | JSON バリデーションが失敗した |
+
+### Agent による消費
+
+```bash
+# シェルでリアルタイム監視
+tail -f events.jsonl | jq .
+
+# Agent プロンプトでの参照
+"タスクに関する最近のユーザー操作を events.jsonl で確認してください"
+```
+
+## スキーマディスカバリ
+
+Agent は CLI を使って現在の JSON Schema を取得できます：
+
+```bash
+mutsumi schema
+# JSON Schema を stdout に出力
+
+mutsumi schema --format markdown
+# Markdown 形式でフィールド説明を出力
+```
+
+## エラーハンドリング
+
+### Agent が不正なデータを書いた場合
+
+```
+Agent が無効な JSON を書き込む
+       │
+       ▼
+Mutsumi の watchdog が変更を検知
+       │
+       ▼
+パース失敗 → TUI にエラーバナー表示
+       │       "mutsumi.json にエラーがあります。最後の有効な状態を表示中"
+       │
+       ▼
+エラーを stderr + error.log に記録
+       │
+       ▼
+イベント発行: {"event":"schema_error","file":"mutsumi.json","message":"..."}
+       │
+       ▼
+Agent が error.log または events.jsonl を読んで自己修正可能
+```
+
+### 自己修復プロンプト
+
+Agent のプロンプトに以下を含めることを推奨：
+
+```markdown
+mutsumi.json に書き込んだ後、~/.local/share/mutsumi/error.log を確認してください。
+スキーマバリデーションエラーがあれば、修正して再書き込みしてください。
+```
+
+## マルチ Agent 協調
+
+複数の Agent が同じ `mutsumi.json` を同時に操作する場合：
+
+### 推奨事項
+
+1. **書き込み前に読み込む** — 常に最新バージョンを読んでから書く
+2. **書き込みスコープの最小化** — 自分のタスクだけを変更。他のタスクの順序は変えない
+3. **冪等操作** — 完了マークなどの操作は冪等であるべき（繰り返してもエラーにならない）
+4. **一意な ID を使用** — UUIDv7 で異なる Agent の ID が衝突しないことを保証
+
+### コンフリクト解決
+
+Mutsumi はロック機構を提供しません。コンフリクト戦略: **Last Write Wins**。
+
+<Aside type="note">
+実際には、Agent の書き込みは離散的（通常は数秒〜数分間隔）であるため、コンフリクトの確率は極めて低いです。
+</Aside>

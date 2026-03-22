@@ -1,0 +1,54 @@
+---
+title: Plugin Vision
+description: Future plugin system plans for Mutsumi.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+<Aside type="note">
+Mutsumi does not currently have a plugin system. This page describes the future vision.
+</Aside>
+
+## Why Not Now?
+
+Plugins require:
+- Versioned API contracts
+- Error isolation between plugins
+- Dependency management
+- Documentation and community support
+
+This complexity is beyond Mutsumi's current scope (v0.4.0 beta). The design philosophy is: **keep it minimal until the core is rock-solid.**
+
+## Current "Plugin" Model
+
+Today, the "plugin" for Mutsumi is **any program that writes JSON**:
+
+- AI agents (Claude Code, Codex CLI, Gemini CLI)
+- Shell scripts
+- Cron jobs
+- Custom bots
+
+The `tasks.json` file is the universal interface. No SDK required.
+
+## Future Possibilities (Post-1.0)
+
+| Concept | Description |
+|---------|-------------|
+| **Custom view widgets** | User-defined Textual widgets loaded at runtime |
+| **Data transformers** | Plugins that pre-process tasks before rendering |
+| **Notification integrations** | Slack, Discord, desktop notification plugins |
+| **Import/export** | Convert to/from Todoist, Notion, Taskwarrior formats |
+| **Template tasks** | Recurring task templates (daily standup, sprint planning) |
+
+## Design Constraints
+
+Any future plugin system must respect:
+
+1. **No network calls** — Plugins cannot phone home
+2. **No arbitrary code execution** — TOML/JSON config only, no eval
+3. **Graceful degradation** — Missing plugins don't crash the app
+4. **User data is sacred** — Plugins cannot delete or corrupt tasks
+
+## Timeline
+
+Plugin system is planned for **post-1.0 release**. Focus for v1.0 remains on stabilizing core features.

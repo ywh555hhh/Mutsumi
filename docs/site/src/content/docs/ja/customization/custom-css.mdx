@@ -1,0 +1,175 @@
+---
+title: "カスタム CSS"
+description: "Textual CSS を使って Mutsumi の外観を細かくカスタマイズする方法。"
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+## 概要
+
+Mutsumi は Textual フレームワーク上に構築されているため、Textual CSS（TCSS）を使って外観を細かくカスタマイズできます。テーマだけでは実現できない詳細なスタイル変更に最適です。
+
+## カスタム CSS の有効化
+
+`config.toml` でカスタム CSS ファイルのパスを指定します：
+
+```toml
+custom_css_path = "~/.config/mutsumi/custom.tcss"
+```
+
+## Textual CSS の基本
+
+Textual CSS は Web CSS に似た構文を持ちますが、ターミナル UI 向けに最適化されています。
+
+### 基本構文
+
+```css
+/* ウィジェットタイプでセレクト */
+Header {
+  background: #1e1e2e;
+  color: #cdd6f4;
+}
+
+/* クラスでセレクト */
+.task-row {
+  padding: 0 1;
+}
+
+/* ID でセレクト */
+#footer-bar {
+  background: #181825;
+}
+
+/* 擬似クラス */
+.task-row:hover {
+  background: #313244;
+}
+
+.task-row:focus {
+  background: #45475a;
+}
+```
+
+### よく使うプロパティ
+
+| プロパティ | 説明 | 例 |
+|---|---|---|
+| `background` | 背景色 | `background: #1e1e2e;` |
+| `color` | テキスト色 | `color: #cdd6f4;` |
+| `padding` | 内側余白 | `padding: 1 2;` |
+| `margin` | 外側余白 | `margin: 0 1;` |
+| `border` | ボーダー | `border: solid #6c7086;` |
+| `text-style` | テキストスタイル | `text-style: bold;` |
+| `display` | 表示モード | `display: none;` |
+| `height` | 高さ | `height: auto;` |
+| `width` | 幅 | `width: 100%;` |
+
+## カスタム CSS の例
+
+### フッターの色を変更
+
+```css
+#footer-bar {
+  background: #181825;
+  color: #a6adc8;
+}
+```
+
+### タスク行のスタイルを変更
+
+```css
+.task-row {
+  padding: 0 2;
+}
+
+.task-row:hover {
+  background: #313244;
+}
+
+.task-row.-selected {
+  background: #45475a;
+  text-style: bold;
+}
+```
+
+### タブバーのスタイル
+
+```css
+.tab-button {
+  padding: 0 2;
+}
+
+.tab-button.-active {
+  text-style: bold underline;
+}
+```
+
+### 詳細パネルのスタイル
+
+```css
+#detail-panel {
+  background: #1e1e2e;
+  border: solid #6c7086;
+  padding: 1 2;
+}
+```
+
+### スクロールバーの非表示
+
+```css
+*::-webkit-scrollbar {
+  display: none;
+}
+```
+
+## ファイル全体の例
+
+```css
+/* ~/.config/mutsumi/custom.tcss */
+
+/* 全体の背景色を変更 */
+Screen {
+  background: #0d1117;
+}
+
+/* ヘッダーのカスタマイズ */
+Header {
+  background: #161b22;
+  color: #c9d1d9;
+}
+
+/* タスク行 */
+.task-row {
+  padding: 0 1;
+}
+
+.task-row:hover {
+  background: #21262d;
+}
+
+.task-row.-done {
+  color: #484f58;
+  text-style: strike;
+}
+
+/* 優先度カラーのオーバーライド */
+.priority-high {
+  color: #f85149;
+}
+
+.priority-normal {
+  color: #d29922;
+}
+
+.priority-low {
+  color: #484f58;
+}
+```
+
+<Aside type="note">
+Textual CSS は Web CSS のサブセットです。すべての Web CSS プロパティがサポートされているわけではありません。詳細は [Textual CSS リファレンス](https://textual.textualize.io/css_types/) を参照してください。
+</Aside>
+
+<Aside type="caution">
+カスタム CSS はテーマの上に重ねて適用されます。テーマで定義されたスタイルをオーバーライドしたい場合は、より具体的なセレクタを使用してください。
+</Aside>

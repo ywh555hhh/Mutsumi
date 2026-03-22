@@ -1,0 +1,182 @@
+---
+title: Agent 协议
+description: Mutsumi Agent 集成协议完整规范。书写规则、代码示例、事件消费、多 Agent 协调。
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+## 概述
+
+本文档定义了外部 Agent（AI CLI 工具、自定义脚本等）如何读写 Mutsumi 的 `mutsumi.json`。
+
+> **向后兼容：** Mutsumi 同样接受 `tasks.json` 作为备用文件名。但 `mutsumi.json` 是今后的规范名称。
+
+**核心原则：Mutsumi 不绑定任何特定 Agent。任何能正确读写 JSON 的程序都是合法的 Controller。**
+
+## 写入协议 (Agent → Mutsumi)
+
+### 工作流
+
+```
+1. 读取当前 mutsumi.json（完整内容）
+2. 解析为 JSON
+3. 修改 tasks 数组（增加/更新/删除）
+4. 写回完整文件（禁止部分写入）
+5. Mutsumi 的 watchdog 检测到变更 → 重新渲染
+```
+
+### 规则
+
+| 规则 | 说明 |
+|---|---|
+| **保留未知字段** | 不要删除你不认识的字段，原样保留 |
+| **原子写入** | 推荐写入临时文件后 `os.replace()` 重命名，避免 Mutsumi 读到写了一半的状态 |
+| **有效 JSON** | 写入后文件必须是有效的 JSON |
+| **生成有效 ID** | 新任务 ID 应使用 UUIDv7；至少确保唯一性 |
+| **必填字段** | 每个任务必须包含 `id`、`title`、`status` |
+| **枚举合规** | `status` 只能是 `"pending"` / `"done"` |
+
+### 添加任务
+
+```python
+import json, uuid, datetime
+
+# 读取
+with open("mutsumi.json") as f:
+    data = json.load(f)
+
+# 添加
+new_task = {
+    "id": str(uuid.uuid7()),  # 或任何唯一字符串
+    "title": "修复登录 Bug",
+    "status": "pending",
+    "scope": "day",
+    "priority": "high",
+    "tags": ["bugfix"],
+    "created_at": datetime.datetime.now(datetime.UTC).isoformat(),
+    "children": []
+}
+data["tasks"].append(new_task)
+
+# 原子写入
+import tempfile, os
+tmp = tempfile.NamedTemporaryFile(
+    mode='w', dir='.', suffix='.tmp', delete=False
+)
+json.dump(data, tmp, ensure_ascii=False, indent=2)
+tmp.close()
+os.replace(tmp.name, "mutsumi.json")
+```
+
+### 标记完成
+
+```python
+for task in data["tasks"]:
+    if task["id"] == target_id:
+        task["status"] = "done"
+        task["completed_at"] = datetime.datetime.now(datetime.UTC).isoformat()
+        break
+```
+
+## 读取协议 (Mutsumi → Agent)
+
+### 事件日志
+
+用户在 TUI 中操作时，Mutsumi 向 `events.jsonl` 追加事件（JSONL 格式，每行一个事件）。
+
+```jsonl
+{"ts":"2026-03-21T10:00:00Z","event":"task_completed","task_id":"01JQ...","title":"修复缓存 Bug","source":"tui"}
+{"ts":"2026-03-21T10:01:22Z","event":"task_created","task_id":"01JQ...","title":"写单元测试","source":"tui"}
+{"ts":"2026-03-21T10:05:00Z","event":"task_deleted","task_id":"01JQ...","title":"过时的任务","source":"tui"}
+{"ts":"2026-03-21T10:06:30Z","event":"task_updated","task_id":"01JQ...","changes":{"priority":"high→low"},"source":"tui"}
+```
+
+### 事件类型
+
+| 事件 | 字段 | 说明 |
+|---|---|---|
+| `task_created` | task_id, title | 创建了新任务 |
+| `task_completed` | task_id, title | 任务标记为完成 |
+| `task_deleted` | task_id, title | 任务被删除 |
+| `task_updated` | task_id, changes (dict) | 任务字段被修改 |
+| `schema_error` | file, message | JSON 校验失败 |
+
+### Agent 消费方式
+
+```bash
+# 实时监控（Shell）
+tail -f events.jsonl | jq .
+
+# 在 Agent 提示中引用
+"检查 events.jsonl 获取用户最近在任务上的操作"
+```
+
+### 事件日志轮转
+
+- 默认保留最近 1000 个事件
+- 超出部分自动截断
+- 可通过 `events.max_lines` 配置
+
+## Schema 发现
+
+Agent 可通过 CLI 获取当前 JSON Schema：
+
+```bash
+mutsumi schema
+# 将 JSON Schema 输出到 stdout，供 Agent 理解数据结构
+
+mutsumi schema --format markdown
+# 以 Markdown 格式输出字段说明
+```
+
+## 错误处理
+
+### 当 Agent 写入坏数据
+
+```
+Agent 写入无效 JSON
+       │
+       ▼
+Mutsumi watchdog 检测到变更
+       │
+       ▼
+解析失败 → TUI 显示错误横幅
+       │       "mutsumi.json has errors, showing last valid state"
+       │
+       ▼
+错误记录到 stderr + error.log
+       │
+       ▼
+发射事件: {"event":"schema_error","file":"mutsumi.json","message":"..."}
+       │
+       ▼
+Agent 可读取 error.log 或 events.jsonl 进行自愈
+```
+
+### 自愈提示
+
+建议在 Agent 提示中加入：
+
+```markdown
+写入 mutsumi.json 后，检查 ~/.local/share/mutsumi/error.log
+是否有 Schema 校验错误。如有错误，修复后重新写入。
+```
+
+## 多 Agent 协调
+
+### 建议
+
+1. **先读后写** —— 写入前始终读取最新版本
+2. **最小写入范围** —— 只修改你关心的任务；不要重排其他任务
+3. **幂等操作** —— 标记完成等操作应该幂等（重复执行不报错）
+4. **使用唯一 ID** —— UUIDv7 确保不同 Agent 的 ID 永远不冲突
+
+### 冲突解决
+
+Mutsumi 不提供锁机制。冲突策略：**Last Write Wins**。
+
+实际使用中，由于 Agent 写入是离散的（通常间隔秒到分钟），冲突概率极低。
+
+<Aside type="tip">
+推荐的 Agent 提示模板请参考 [Agent 集成](/zh-cn/getting-started/agent-setup/) 页面。
+</Aside>

@@ -1,0 +1,61 @@
+---
+title: タスク Schema
+description: tasks.json の完全なフィールドリファレンス。
+---
+
+## タスクフィールド
+
+| フィールド | 型 | 必須 | デフォルト | バリデーション |
+|-----------|------|------|-----------|--------------|
+| `id` | string | はい | — | 非空、ユニーク |
+| `title` | string | はい | — | 非空 |
+| `status` | string | はい | `"pending"` | `"pending"` \| `"done"` |
+| `scope` | string | いいえ | `"inbox"` | `"day"` \| `"week"` \| `"month"` \| `"inbox"` |
+| `priority` | string | いいえ | `"normal"` | `"high"` \| `"normal"` \| `"low"` |
+| `tags` | string[] | いいえ | `[]` | 文字列配列 |
+| `children` | Task[] | いいえ | `[]` | 再帰的タスク配列 |
+| `created_at` | string | いいえ | 自動 | ISO 8601 |
+| `due_date` | string | いいえ | — | ISO 8601 日付 |
+| `completed_at` | string | いいえ | — | ISO 8601 |
+| `description` | string | いいえ | — | Markdown 対応 |
+
+## ID フォーマット
+
+| フォーマット | 例 | 用途 |
+|-------------|------|------|
+| `uuidv7` | `01JQ8X7K3M0000000000000000` | デフォルト |
+| `ulid` | `01ARZ3NDEKTSV4RRFFQ69G5FAV` | ULID 愛好者 |
+| `auto-increment` | `1`, `2`, `3` | ミニマリスト |
+
+## 完全な例
+
+```json
+{
+  "version": 1,
+  "tasks": [
+    {
+      "id": "01JQ8X7K3M0000000000000001",
+      "title": "Auth モジュールのリファクタリング",
+      "status": "pending",
+      "scope": "day",
+      "priority": "high",
+      "tags": ["dev", "backend"],
+      "created_at": "2026-03-21T08:00:00Z",
+      "due_date": "2026-03-25",
+      "children": [
+        {
+          "id": "01JQ8X7K3M0000000000000002",
+          "title": "PyJWT インストール",
+          "status": "done",
+          "completed_at": "2026-03-21T09:30:00Z",
+          "children": []
+        }
+      ]
+    }
+  ]
+}
+```
+
+## カスタムフィールド
+
+上記以外のフィールドはカスタムフィールドです。Mutsumi は読み書き時にこれらを保持します。

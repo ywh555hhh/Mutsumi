@@ -1,0 +1,126 @@
+---
+title: "ターミナル統合"
+description: "tmux や iTerm2 で Mutsumi をサイドパネルとして使用する方法。"
+---
+
+import { Tabs, TabItem, Steps, Aside } from '@astrojs/starlight/components';
+
+## 概要
+
+Mutsumi は **レイアウト非依存** です。独立したターミナルプロセスとして動作するため、tmux、zellij、iTerm2、マルチモニターなど、お好みのレイアウトで使用できます。
+
+最も一般的な使い方は、**左ペインに Agent / シェル、右ペインに Mutsumi** です。
+
+## tmux（推奨）
+
+<Tabs>
+  <TabItem label="スクリプト（簡単）">
+
+Mutsumi リポジトリに含まれるスクリプトを使用：
+
+```bash
+bash scripts/tmux-dev.sh
+```
+
+  </TabItem>
+  <TabItem label="手動セットアップ">
+
+<Steps>
+
+1. **新しい tmux セッションを作成**
+
+   ```bash
+   tmux new-session -d -s dev
+   ```
+
+2. **右ペインに Mutsumi を起動（幅 30%）**
+
+   ```bash
+   tmux split-window -h -p 30 "mutsumi"
+   ```
+
+3. **左ペインを選択**
+
+   ```bash
+   tmux select-pane -t 0
+   ```
+
+4. **セッションにアタッチ**
+
+   ```bash
+   tmux attach -t dev
+   ```
+
+</Steps>
+
+  </TabItem>
+  <TabItem label="ワンライナー">
+
+```bash
+tmux new-session -d -s dev && tmux split-window -h -p 30 "mutsumi" && tmux select-pane -t 0 && tmux attach -t dev
+```
+
+  </TabItem>
+</Tabs>
+
+これで左ペインで Agent を通常通り使用できます。Agent が `tasks.json` を書き込むたびに、右ペインの Mutsumi が即座に更新されます。
+
+### tmux のレイアウト例
+
+```
+┌──────────────────────────┬────────────────┐
+│                          │                │
+│   Agent / Shell          │   Mutsumi TUI  │
+│                          │                │
+│   $ claude               │  [Today] Week  │
+│   > Fix the auth bug     │  ▼ HIGH        │
+│                          │  [ ] Fix auth  │
+│                          │  ▼ NORMAL      │
+│                          │  [ ] Write docs│
+│                          │                │
+└──────────────────────────┴────────────────┘
+```
+
+## iTerm2
+
+<Steps>
+
+1. `Cmd+D` でウィンドウを垂直分割
+2. 右ペインで `mutsumi` を実行
+3. 左ペインで Agent / シェルを使用
+
+</Steps>
+
+## zellij
+
+```bash
+zellij run -- mutsumi
+```
+
+または手動でペインを分割：
+
+1. `Ctrl+P` でペインモードに入る
+2. `d` で右に分割
+3. 右ペインで `mutsumi` を実行
+
+## 複数プロジェクトの監視
+
+複数の `tasks.json` を同時に監視することも可能です：
+
+```bash
+mutsumi --path ~/project-a/tasks.json --path ~/project-b/tasks.json
+```
+
+TUI にプロジェクトディメンションが追加されます。
+
+<Aside type="note">
+Mutsumi はウィンドウ分割を管理しません。ターミナルマルチプレクサ（tmux/zellij）やターミナルエミュレータ（iTerm2）のネイティブ機能を使ってください。これは意図的な設計判断です。
+</Aside>
+
+## 推奨セットアップ
+
+| ユースケース | 推奨レイアウト |
+|---|---|
+| 単一プロジェクト + Agent | tmux 左 70% シェル / 右 30% Mutsumi |
+| 複数プロジェクト | tmux 上下分割 + Mutsumi で複数パス監視 |
+| 普段使い（Agent なし） | Mutsumi 単体で全画面、CLI でタスク管理 |

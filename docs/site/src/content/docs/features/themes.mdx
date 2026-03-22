@@ -1,0 +1,74 @@
+---
+title: Themes
+description: Built-in themes and their color palettes.
+---
+
+Mutsumi ships with 4 built-in themes. Switch via `config.toml` or `mutsumi init`.
+
+## Monochrome Zen (Default)
+
+Minimalist dark theme with mint accent. Inspired by Catppuccin Teal + Vercel's black-and-white aesthetic.
+
+| Token | Hex | Usage |
+|-------|-----|-------|
+| `background` | `#0f0f0f` | Main background |
+| `surface` | `#1a1a1a` | Card/panel background |
+| `border` | `#333333` | Divider lines |
+| `text` | `#e0e0e0` | Primary text |
+| `text_muted` | `#666666` | Secondary text |
+| `accent` | `#5de4c7` | Accent (mint green) |
+| `error` | `#e06c75` | Error / high priority |
+| `priority_high` | `#e06c75` | High priority |
+| `priority_normal` | `#e5c07b` | Normal priority |
+| `priority_low` | `#666666` | Low priority |
+
+## Nord
+
+Cool tones, restrained palette.
+
+| Token | Hex |
+|-------|-----|
+| `background` | `#2e3440` |
+| `surface` | `#3b4252` |
+| `border` | `#4c566a` |
+| `text` | `#eceff4` |
+| `text_muted` | `#d8dee9` |
+| `accent` | `#88c0d0` |
+| `error` | `#bf616a` |
+
+## Dracula
+
+High contrast, purple-tinted.
+
+| Token | Hex |
+|-------|-----|
+| `background` | `#282a36` |
+| `surface` | `#44475a` |
+| `border` | `#6272a4` |
+| `text` | `#f8f8f2` |
+| `text_muted` | `#6272a4` |
+| `accent` | `#bd93f9` |
+| `error` | `#ff5555` |
+
+## Solarized
+
+Warm dark palette with teal accent.
+
+| Token | Hex |
+|-------|-----|
+| `background` | `#002b36` |
+| `surface` | `#073642` |
+| `border` | `#586e75` |
+| `text` | `#839496` |
+| `text_muted` | `#586e75` |
+| `accent` | `#2aa198` |
+| `error` | `#dc322f` |
+
+## Switch Theme
+
+```toml
+# ~/.config/mutsumi/config.toml
+theme = "monochrome-zen"   # or "nord", "dracula", "solarized"
+```
+
+See [Custom Themes](/customization/custom-themes/) to create your own.

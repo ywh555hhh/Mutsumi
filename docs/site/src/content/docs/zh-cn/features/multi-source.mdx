@@ -1,0 +1,156 @@
+---
+title: 多源指挥中心
+description: 从单个 Mutsumi 实例管理个人任务和多个项目源。
+---
+
+## 概述
+
+Mutsumi 可以将多个来源的任务聚合到一个 TUI 中 —— 全局个人待办列表 + 任意数量的 AI Agent 项目 `mutsumi.json` 文件。
+
+```
+┌─────────────────────────────────────────────────────┐
+│  [★ 总览] [个人] [saas-app] [oshigrid]              │  ← 数据源标签
+├─────────────────────────────────────────────────────┤
+│  ┌─ saas-app ─────────────────────────────── 3/5 ─┐ │
+│  │  ████████████░░░░░░░░  60%                      │ │  ← 仪表盘
+│  │  · 修复认证 Bug                                 │ │
+│  │  · 添加限流                                     │ │
+│  └─────────────────────────────────────────────────┘ │
+│  ┌─ oshigrid ─────────────────────────────── 1/4 ─┐ │
+│  │  ████░░░░░░░░░░░░░░░░  25%                      │ │
+│  │  · 更新卡片布局                                 │ │
+│  │  · 优化图片加载                                 │ │
+│  └─────────────────────────────────────────────────┘ │
+├─────────────────────────────────────────────────────┤
+│  8 个任务 · 4 已完成 · 4 待办                       │
+└─────────────────────────────────────────────────────┘
+```
+
+## 架构
+
+```
+~/.mutsumi/
+├── config.toml           # 全局配置 + [[projects]] 注册
+└── mutsumi.json          # 个人任务（全局待办）
+
+~/projects/saas-app/
+└── mutsumi.json          # 项目任务（Agent 写入）
+
+~/projects/oshigrid/
+└── mutsumi.json          # 项目任务（Agent 写入）
+```
+
+每个源独立运作 —— 独立的 `mutsumi.json` 文件、独立的文件监听器。TUI 将它们聚合成统一视图。
+
+## 设置步骤
+
+### 1. 初始化个人任务
+
+```bash
+mutsumi init --personal
+```
+
+在 `~/.mutsumi/mutsumi.json` 创建全局个人任务文件。
+
+### 2. 注册项目
+
+```bash
+mutsumi project add ~/projects/saas-app
+mutsumi project add ~/projects/oshigrid
+```
+
+每个项目的 `mutsumi.json` 成为 TUI 中的一个数据源。
+
+### 3. 启动
+
+```bash
+mutsumi
+```
+
+Mutsumi 自动发现所有注册的源，并显示为标签页。
+
+## 标签页布局
+
+### 单源模式
+
+未注册项目时，Mutsumi 显示经典的 scope 标签页：
+
+```
+[今天] [本周] [本月] [收件箱]
+```
+
+### 多源模式
+
+注册项目后，标题栏显示数据源标签：
+
+```
+[★ 总览] [个人] [saas-app] [oshigrid]
+```
+
+- **★ 总览** — 聚合仪表盘，显示所有源的进度
+- **个人** — 全局个人任务 (`~/.mutsumi/mutsumi.json`)
+- **项目标签** — 每个注册项目一个标签
+
+### Scope 子过滤器
+
+查看特定源标签（非总览）时，标题下方出现 scope 过滤器：
+
+```
+[今天] [本周] [本月] [收件箱] [全部]
+```
+
+按 `f` 循环切换 scope，或点击过滤按钮。
+
+## 项目管理 CLI
+
+```bash
+# 注册项目
+mutsumi project add ~/projects/my-app
+
+# 列出注册的项目
+mutsumi project list
+
+# 移除项目
+mutsumi project remove my-app
+```
+
+项目存储在 `~/.mutsumi/config.toml` 中：
+
+```toml
+[[projects]]
+name = "saas-app"
+path = "/Users/you/projects/saas-app"
+
+[[projects]]
+name = "oshigrid"
+path = "/Users/you/projects/oshigrid"
+```
+
+## 配置迁移
+
+从旧版本升级时：
+
+```bash
+# 迁移 tasks.json → mutsumi.json（当前目录）
+mutsumi migrate
+
+# 迁移配置目录（~/.config/mutsumi/ → ~/.mutsumi/）
+mutsumi migrate --config
+
+# 全部迁移
+mutsumi migrate --all
+```
+
+## 快捷键
+
+| 按键 | 操作 |
+|------|------|
+| `1`–`9` | 跳转到数据源标签（多源模式）或 scope 标签（单源模式） |
+| `f` | 循环切换 scope 过滤器（今天 → 本周 → 本月 → 收件箱 → 全部） |
+| `Enter` | 从仪表盘进入选中的数据源 |
+
+## 向后兼容
+
+- **文件命名**：优先使用 `mutsumi.json`，但找到 `tasks.json` 时自动回退
+- **单源模式**：未注册项目时，行为与经典单文件模式完全一致
+- **配置**：`~/.mutsumi/config.toml` 和 `~/.config/mutsumi/config.toml` 均受支持（新路径优先）

@@ -1,0 +1,159 @@
+---
+title: 命令行界面
+description: Mutsumi CLI 命令概览。
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+## 概述
+
+Mutsumi 提供完整的 CLI 接口，基于 click 框架构建。CLI 可用于脚本、Agent 集成或不想打开 TUI 时的快速操作。
+
+## 核心命令
+
+### 启动 TUI
+
+```bash
+# 监视当前目录的 mutsumi.json
+mutsumi
+
+# 指定文件路径
+mutsumi --path ./project/mutsumi.json
+
+# 查看版本
+mutsumi --version
+```
+
+### 任务 CRUD
+
+```bash
+# 添加任务
+mutsumi add "修复登录 Bug" --priority high --scope day --tags "bugfix"
+mutsumi add "写周报" -P normal -s week -t "life"
+mutsumi add "重构模块" -d "需要重写整个 auth 层"
+
+# 列出任务
+mutsumi list
+mutsumi list --scope today
+
+# 标记完成
+mutsumi done <id-prefix>
+
+# 编辑任务
+mutsumi edit <id-prefix> --title "新标题" --priority low --scope week
+
+# 删除任务
+mutsumi rm <id-prefix>
+```
+
+<Aside type="tip">
+**ID 前缀匹配**：不需要输入完整的 26 字符 ID。只要前缀唯一即可：
+
+```bash
+mutsumi done 01EX    # 匹配 "01EXAMPLE000000000000000001"（前提是前缀唯一）
+```
+</Aside>
+
+### 初始化与设置
+
+```bash
+# 交互式初始化
+mutsumi init
+
+# 使用默认值初始化
+mutsumi init --defaults
+
+# 指定语言
+mutsumi init --lang zh
+
+# Agent 集成设置
+mutsumi setup --agent claude-code   # 注入到 CLAUDE.md
+mutsumi setup --agent codex-cli     # 注入到 AGENTS.md
+mutsumi setup --agent gemini-cli    # 注入到 GEMINI.md
+mutsumi setup --agent custom        # 打印到 stdout
+mutsumi setup                       # 列出可用 Agent
+```
+
+### 迁移与项目管理
+
+```bash
+# 迁移 tasks.json → mutsumi.json（当前目录）
+mutsumi migrate
+
+# 迁移配置目录
+mutsumi migrate --config
+
+# 注册项目源
+mutsumi project add ~/projects/my-app
+
+# 列出注册的项目
+mutsumi project list
+
+# 移除项目
+mutsumi project remove my-app
+```
+
+### 配置管理
+
+```bash
+# 打开编辑器编辑
+mutsumi config --edit
+
+# 打印当前配置
+mutsumi config --show
+
+# 重置为默认值
+mutsumi config --reset
+
+# 打印配置文件路径
+mutsumi config --path
+```
+
+### 工具命令
+
+```bash
+# 校验 mutsumi.json 格式
+mutsumi validate
+
+# 输出 JSON Schema
+mutsumi schema
+
+# 以 Markdown 格式输出字段说明
+mutsumi schema --format markdown
+```
+
+## 命令参数速查
+
+### `mutsumi add`
+
+| 参数 | 缩写 | 类型 | 默认值 | 说明 |
+|---|---|---|---|---|
+| `title` | — | 位置参数 | (必填) | 任务标题 |
+| `--priority` | `-P` | high/normal/low | `normal` | 优先级 |
+| `--scope` | `-s` | day/week/month/inbox | `inbox` | 时间范围 |
+| `--tags` | `-t` | 逗号分隔 | `""` | 标签 |
+| `--description` | `-d` | string | `""` | 描述 |
+
+### `mutsumi edit`
+
+| 参数 | 类型 | 说明 |
+|---|---|---|
+| `id` | 位置参数 | 任务 ID（前缀匹配） |
+| `--title` | string | 新标题 |
+| `--priority` | high/normal/low | 新优先级 |
+| `--scope` | day/week/month/inbox | 新 scope |
+| `--tags` | 逗号分隔 | 新标签 |
+
+## 退出码
+
+| 退出码 | 含义 |
+|---|---|
+| `0` | 成功 |
+| `1` | 一般错误 |
+| `2` | 文件未找到 |
+| `3` | JSON 校验失败 |
+
+## 下一步
+
+- [CLI 命令参考](/zh-cn/reference/cli-commands/) —— 完整的命令文档
+- [Agent 集成](/zh-cn/getting-started/agent-setup/) —— 与 AI Agent 配合使用

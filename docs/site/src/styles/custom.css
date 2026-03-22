@@ -1,0 +1,227 @@
+/* Mutsumi Docs — Zinc + Mint + Sage palette
+ *
+ * Primary accent : mint   #5de4c7 (links, highlights)
+ * Secondary accent: sage   #779977 (badges, tips)
+ * Semantic colors : all desaturated to match the muted Zinc base
+ */
+
+/* ── Dark mode (default) ────────────────────────────────── */
+:root {
+  /* — Brand accents — */
+  --sl-color-accent-low: #0d2f2a;
+  --sl-color-accent: #5de4c7;
+  --sl-color-accent-high: #b4f5e4;
+
+  /* — Zinc neutrals — */
+  --sl-color-white: #e8e8e8;
+  --sl-color-gray-1: #d4d4d4;
+  --sl-color-gray-2: #a3a3a3;
+  --sl-color-gray-3: #737373;
+  --sl-color-gray-4: #404040;
+  --sl-color-gray-5: #262626;
+  --sl-color-gray-6: #171717;
+  --sl-color-black: #0a0a0b;
+  --sl-color-bg-nav: #0f0f10;
+  --sl-color-bg-sidebar: #0f0f10;
+
+  /* — Semantic: note (muted teal) — */
+  --sl-color-blue-low: #132c30;
+  --sl-color-blue: #5a9ba8;
+  --sl-color-blue-high: #b0d2d9;
+
+  /* — Semantic: tip (sage green) — */
+  --sl-color-purple-low: #1a2b1a;
+  --sl-color-purple: #779977;
+  --sl-color-purple-high: #a8c4a8;
+
+  /* — Semantic: caution (desaturated amber) — */
+  --sl-color-orange-low: #2e2818;
+  --sl-color-orange: #b89e53;
+  --sl-color-orange-high: #d9ceb0;
+
+  /* — Semantic: danger (muted rose) — */
+  --sl-color-red-low: #2e1a20;
+  --sl-color-red: #a85a6a;
+  --sl-color-red-high: #d9b3bc;
+
+  /* — Secondary accent tokens — */
+  --mu-accent2: #779977;
+  --mu-accent2-low: #1a2b1a;
+  --mu-accent2-high: #a8c4a8;
+
+  /* — Typography — */
+  --sl-font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
+    Ubuntu, Cantarell, 'Noto Sans SC', 'Noto Sans JP', sans-serif;
+  --sl-font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo,
+    Consolas, 'Noto Sans Mono', monospace;
+}
+
+/* ── Light mode ─────────────────────────────────────────── */
+:root[data-theme='light'] {
+  /* — Brand accents — */
+  --sl-color-accent-low: #e0f7f0;
+  --sl-color-accent: #0d9373;
+  --sl-color-accent-high: #064e3b;
+
+  /* — Zinc neutrals — */
+  --sl-color-white: #171717;
+  --sl-color-gray-1: #262626;
+  --sl-color-gray-2: #404040;
+  --sl-color-gray-3: #737373;
+  --sl-color-gray-4: #d4d4d4;
+  --sl-color-gray-5: #f0f0f0;
+  --sl-color-gray-6: #f8f8f8;
+  --sl-color-black: #ffffff;
+  --sl-color-bg-nav: #fafafa;
+  --sl-color-bg-sidebar: #fafafa;
+
+  /* — Semantic: note (muted teal) — */
+  --sl-color-blue-low: #e2eff2;
+  --sl-color-blue: #427d8a;
+  --sl-color-blue-high: #2a5963;
+
+  /* — Semantic: tip (sage green) — */
+  --sl-color-purple-low: #e5efe5;
+  --sl-color-purple: #577457;
+  --sl-color-purple-high: #344a34;
+
+  /* — Semantic: caution (desaturated amber) — */
+  --sl-color-orange-low: #f0eae0;
+  --sl-color-orange: #966f3d;
+  --sl-color-orange-high: #594b26;
+
+  /* — Semantic: danger (muted rose) — */
+  --sl-color-red-low: #f2e2e6;
+  --sl-color-red: #9b4f5f;
+  --sl-color-red-high: #612d38;
+
+  /* — Secondary accent tokens — */
+  --mu-accent2: #5a7a5a;
+  --mu-accent2-low: #e5efe5;
+  --mu-accent2-high: #344a34;
+}
+
+/* ── Smooth rounded corners ─────────────────────────────── */
+.card,
+starlight-tabs [role="tabpanel"],
+.expressive-code pre,
+aside {
+  border-radius: 10px !important;
+}
+
+.expressive-code pre {
+  border-radius: 8px !important;
+}
+
+/* ── Subtle scrollbar ───────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--sl-color-gray-4);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--sl-color-gray-3);
+}
+
+/* ── Smooth transitions ─────────────────────────────────── */
+a,
+button,
+.nav-link,
+starlight-tabs button {
+  transition: color 0.15s ease, background-color 0.15s ease,
+    border-color 0.15s ease;
+}
+
+/* ── Hero customization ─────────────────────────────────── */
+.hero {
+  padding-block: 3rem;
+}
+
+.hero .tagline {
+  font-style: italic;
+  opacity: 0.85;
+}
+
+/* ── Landing feature grid ───────────────────────────────── */
+.sl-markdown-content .card-grid {
+  gap: 1rem;
+}
+
+/* ── Code block accent ──────────────────────────────────── */
+.expressive-code .frame.has-title figcaption {
+  border-bottom-color: var(--sl-color-accent-low);
+}
+
+/* ── Secondary accent: badges ──────────────────────────── */
+.sl-badge.note {
+  --sl-color-bg-badge: var(--mu-accent2-low);
+  border-color: var(--mu-accent2);
+  color: var(--mu-accent2-high);
+}
+
+/* ── Secondary accent: minimal action buttons ──────────── */
+.hero .action.minimal a {
+  color: var(--mu-accent2-high);
+  border-color: var(--mu-accent2);
+}
+
+.hero .action.minimal a:hover {
+  color: var(--mu-accent2);
+  background: var(--mu-accent2-low);
+}
+
+/* ── Mermaid diagram styling ───────────────────────────── */
+.mermaid {
+  display: flex;
+  justify-content: center;
+  margin: 1.5rem 0;
+}
+
+/* ── Page bar (below title: edit · updated · copy) ──── */
+.mu-page-bar {
+  gap: 0.5rem 1.5rem;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-top: 0.5rem;
+  margin-bottom: -0.75rem;
+  font-size: var(--sl-text-xs);
+  color: var(--sl-color-gray-3);
+}
+
+.mu-page-bar a,
+.mu-page-bar button {
+  display: inline-flex;
+  gap: 0.35rem;
+  align-items: center;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font: inherit;
+  font-size: inherit;
+  color: var(--sl-color-gray-3);
+  text-decoration: none;
+}
+
+.mu-page-bar a:hover,
+.mu-page-bar button:hover {
+  color: var(--sl-color-white);
+}
+
+.mu-page-bar .mu-last-updated {
+  color: var(--sl-color-gray-3);
+}
+
+.mu-page-bar span {
+  display: inline-flex;
+  align-items: center;
+}

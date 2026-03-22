@@ -1,0 +1,309 @@
+---
+title: Configuration Reference
+description: Complete reference for every config.toml field with type, default, description, and example values.
+---
+
+## Config File Location
+
+| Platform | Path (preferred) | Legacy fallback |
+|----------|------------------|-----------------|
+| Linux | `~/.mutsumi/config.toml` | `~/.config/mutsumi/config.toml` |
+| macOS | `~/.mutsumi/config.toml` | `~/.config/mutsumi/config.toml` or `~/Library/Application Support/mutsumi/config.toml` |
+| Windows | `%APPDATA%\mutsumi\config.toml` | — |
+
+Mutsumi searches the preferred path first, then falls back to legacy locations. Run `mutsumi migrate --config` to move your config to the new location.
+
+## Full Config Template
+
+```toml
+# ── Mutsumi Configuration ──────────────────────────
+
+# Theme: built-in name or custom theme filename
+theme = "monochrome-zen"
+
+# Keybinding preset
+keybindings = "arrows"
+
+# UI language
+language = "en"
+
+# Default scope for new tasks and active tab on launch
+default_scope = "day"
+
+# Notification mode
+notification_mode = "quiet"
+
+# Default task file path (optional)
+# default_path = "/path/to/mutsumi.json"
+
+# Event log path (optional — disabled if unset)
+# event_log_path = "~/.local/share/mutsumi/events.jsonl"
+
+# Custom Textual CSS path (optional)
+# custom_css_path = "~/.mutsumi/custom.tcss"
+
+# Columns displayed in the task list
+columns = ["checkbox", "title", "tags", "priority"]
+
+# Default tab on launch (multi-source: "main", single-source: scope name)
+default_tab = "main"
+
+# Dashboard: max pending tasks shown per source card
+dashboard_max_tasks = 3
+
+# Dashboard: show completed tasks in source cards
+dashboard_show_completed = true
+
+# Registered project sources
+# [[projects]]
+# name = "saas-app"
+# path = "/Users/you/projects/saas-app"
+
+# Per-key overrides
+[key_overrides]
+# quit = "ctrl+q"
+# cursor_down = "ctrl+j"
+```
+
+## Field Reference
+
+### `theme`
+
+| Property | Value |
+|----------|-------|
+| Type | `string` |
+| Default | `"monochrome-zen"` |
+| Valid values | `"monochrome-zen"`, `"nord"`, `"dracula"`, `"solarized"`, or any custom theme filename (without `.toml`) |
+
+Sets the color theme. Custom themes are loaded from `~/.mutsumi/themes/<name>.toml`.
+
+```toml
+theme = "dracula"
+```
+
+### `keybindings`
+
+| Property | Value |
+|----------|-------|
+| Type | `string` |
+| Default | `"arrows"` |
+| Valid values | `"vim"`, `"emacs"`, `"arrows"` |
+
+Selects the keybinding preset. Per-key overrides can be applied via `[key_overrides]`.
+
+```toml
+keybindings = "emacs"
+```
+
+### `language`
+
+| Property | Value |
+|----------|-------|
+| Type | `string` |
+| Default | `"en"` |
+| Valid values | `"en"`, `"zh"`, `"ja"` |
+
+Sets the UI language. Detection priority: config > `$LANG` env > fallback `"en"`.
+
+```toml
+language = "zh"
+```
+
+### `default_scope`
+
+| Property | Value |
+|----------|-------|
+| Type | `string` |
+| Default | `"day"` |
+| Valid values | `"day"`, `"week"`, `"month"`, `"inbox"` |
+
+The default scope assigned to new tasks created via the TUI (unless overridden in the dialog). Also determines which tab is active on launch.
+
+```toml
+default_scope = "week"
+```
+
+### `notification_mode`
+
+| Property | Value |
+|----------|-------|
+| Type | `string` |
+| Default | `"quiet"` |
+| Valid values | `"quiet"`, `"badge"`, `"bell"`, `"system"` |
+
+Controls how Mutsumi notifies about overdue or updated tasks:
+
+| Mode | Behavior |
+|------|----------|
+| `quiet` | Fully silent. Status bar shows counts only. |
+| `badge` | Overdue tasks flash/highlight within the TUI. |
+| `bell` | Sends terminal bell (`\a`). Terminal app decides handling. |
+| `system` | Calls system notification API (macOS/Linux/Windows). |
+
+```toml
+notification_mode = "badge"
+```
+
+### `key_overrides`
+
+| Property | Value |
+|----------|-------|
+| Type | `dict[string, string]` |
+| Default | `{}` (empty) |
+
+Maps action names to new key strings, applied on top of the selected preset. See [Custom Keybindings](/customization/custom-keybindings/) for all action names.
+
+```toml
+[key_overrides]
+quit = "ctrl+q"
+cursor_down = "ctrl+j"
+cursor_up = "ctrl+k"
+```
+
+### `default_path`
+
+| Property | Value |
+|----------|-------|
+| Type | `Path` or `null` |
+| Default | `null` (watches `./mutsumi.json`) |
+
+Default path to `mutsumi.json`. If set, `mutsumi` (without `--path`) watches this file instead of `./mutsumi.json`.
+
+```toml
+default_path = "~/projects/main/mutsumi.json"
+```
+
+### `event_log_path`
+
+| Property | Value |
+|----------|-------|
+| Type | `Path` or `null` |
+| Default | `null` (event logging disabled) |
+
+Path for the JSONL event log. If set, Mutsumi appends events when users operate in the TUI.
+
+```toml
+event_log_path = "./events.jsonl"
+```
+
+### `custom_css_path`
+
+| Property | Value |
+|----------|-------|
+| Type | `Path` or `null` |
+| Default | `null` (no custom CSS) |
+
+Path to a Textual CSS file for visual overrides. See [Custom CSS](/customization/custom-css/).
+
+```toml
+custom_css_path = "~/.mutsumi/custom.tcss"
+```
+
+### `columns`
+
+| Property | Value |
+|----------|-------|
+| Type | `list[string]` |
+| Default | `["checkbox", "title", "tags", "priority"]` |
+
+Columns displayed in the task list. You can reference both built-in fields and custom fields added by agents.
+
+Built-in column names:
+
+| Column | Description |
+|--------|-------------|
+| `checkbox` | Done/pending checkbox |
+| `title` | Task title |
+| `tags` | Tag labels |
+| `priority` | Priority stars |
+| `due_date` | Due date |
+| `created_at` | Creation timestamp |
+| `status` | Status text |
+
+Custom field columns:
+
+```toml
+# Show agent-added fields
+columns = ["checkbox", "title", "effort", "sprint", "priority"]
+```
+
+If a task doesn't have a referenced custom field, the column cell is empty.
+
+### `default_tab`
+
+| Property | Value |
+|----------|-------|
+| Type | `string` |
+| Default | `"main"` |
+
+Default tab on launch. In multi-source mode, this is the source name (e.g., `"main"`, `"personal"`, or a project name). In single-source mode, this acts as the default scope.
+
+```toml
+default_tab = "main"
+```
+
+### `dashboard_max_tasks`
+
+| Property | Value |
+|----------|-------|
+| Type | `int` |
+| Default | `3` |
+
+Maximum number of pending tasks shown per source card on the Main dashboard.
+
+```toml
+dashboard_max_tasks = 5
+```
+
+### `dashboard_show_completed`
+
+| Property | Value |
+|----------|-------|
+| Type | `bool` |
+| Default | `true` |
+
+Whether to include completed tasks in dashboard progress counts.
+
+```toml
+dashboard_show_completed = false
+```
+
+### `projects`
+
+| Property | Value |
+|----------|-------|
+| Type | `list[{name, path}]` |
+| Default | `[]` |
+
+Registered project sources. Each entry has a `name` (display name) and `path` (absolute path to directory containing `mutsumi.json`). Managed via `mutsumi project add/remove`.
+
+```toml
+[[projects]]
+name = "saas-app"
+path = "/Users/you/projects/saas-app"
+
+[[projects]]
+name = "oshigrid"
+path = "/Users/you/projects/oshigrid"
+```
+
+## Config Commands
+
+```bash
+mutsumi config --edit     # Open in $EDITOR
+mutsumi config --show     # Print current config to stdout
+mutsumi config --reset    # Reset to defaults
+mutsumi config --path     # Print config file path
+```
+
+## Directory Structure
+
+```
+~/.mutsumi/                          (preferred location)
+├── config.toml          # Main config
+├── mutsumi.json         # Personal tasks
+├── themes/
+│   └── my-theme.toml    # Custom themes
+└── keys/
+    └── my-keys.toml     # Custom keybindings (future)
+```

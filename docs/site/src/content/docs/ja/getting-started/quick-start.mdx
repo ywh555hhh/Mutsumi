@@ -1,0 +1,118 @@
+---
+title: "クイックスタート"
+description: "5 分で Mutsumi を使い始める。タスクの作成から TUI の操作まで。"
+---
+
+import { Steps, Aside, Tabs, TabItem } from '@astrojs/starlight/components';
+
+## 5 分チュートリアル
+
+<Steps>
+
+1. **インストール**
+
+   ```bash
+   uv tool install git+https://github.com/ywh555hhh/Mutsumi.git
+   ```
+
+2. **プロジェクトディレクトリに移動**
+
+   ```bash
+   cd ~/your-project
+   ```
+
+3. **タスクを作成**
+
+   <Tabs>
+     <TabItem label="CLI で作成">
+
+   ```bash
+   mutsumi add "ログインバグを修正" --priority high --scope day --tags "bugfix"
+   mutsumi add "週報を書く" --priority normal --scope week --tags "life"
+   mutsumi add "ドキュメントを更新" --priority low --scope month --tags "docs"
+   ```
+
+   確認：
+   ```bash
+   mutsumi list
+   # 3 tasks が表示されるはず
+   ```
+
+     </TabItem>
+     <TabItem label="Agent で作成">
+
+   AI Agent に以下のように依頼するだけ：
+
+   > 「カレントディレクトリに mutsumi.json を作成して、サンプルタスクをいくつか入れて」
+
+   Agent が直接 `mutsumi.json` を書き出します。Mutsumi はこのファイルを監視します。
+
+     </TabItem>
+     <TabItem label="サンプルをコピー">
+
+   ```bash
+   # Mutsumi ソースからコピー（クローンした場合）
+   cp examples/mutsumi.json ./mutsumi.json
+   ```
+
+     </TabItem>
+   </Tabs>
+
+4. **TUI を起動**
+
+   ```bash
+   mutsumi
+   ```
+
+5. **操作してみる**
+
+   | キー | アクション |
+   |------|-----------|
+   | `↑` / `↓` | カーソルを上下に移動 |
+   | `Space` | 完了/未完了を切り替え |
+   | `n` | 新しいタスクを作成 |
+   | `Enter` | 詳細パネルを展開 |
+   | `q` | 終了 |
+
+   <Aside type="note">
+   上記はデフォルトの **arrows** プリセットのキーバインドです。`vim` プリセットでは `j`/`k` でナビゲーションします。
+   </Aside>
+
+</Steps>
+
+## TUI の画面
+
+正常に起動すると、以下のような画面が表示されます：
+
+```
+[Today] Week  Month  Inbox              mutsumi
+─────────────────────────────────────────────────
+▼ HIGH ─────────────────────────────────────
+[ ] ログインバグを修正              bugfix  ★★★
+
+▼ NORMAL ───────────────────────────────────
+[ ] 週報を書く                      life    ★★
+
+▼ LOW ──────────────────────────────────────
+[ ] ドキュメントを更新              docs    ★
+
+─────────────────────────────────────────────────
+3 tasks · 0 done · 3 pending
+```
+
+## 別のパスのファイルを監視
+
+```bash
+mutsumi --path /path/to/mutsumi.json
+```
+
+## 次のステップ
+
+<Aside type="tip">
+以下のガイドに進みましょう：
+
+- [Agent セットアップ](/ja/getting-started/agent-setup/) — AI Agent との統合
+- [ターミナル統合](/ja/getting-started/terminal-integration/) — tmux でのセットアップ
+- [キーバインド](/ja/features/keybindings/) — vim/emacs/arrows プリセット
+- [テーマ](/ja/features/themes/) — 4 種の内蔵テーマ
+</Aside>

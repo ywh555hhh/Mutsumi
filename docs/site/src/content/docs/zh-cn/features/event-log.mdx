@@ -1,0 +1,100 @@
+---
+title: 事件日志
+description: Mutsumi 的 events.jsonl 事件日志系统。
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+## 概述
+
+当用户在 TUI 中操作任务时，Mutsumi 可选地将事件追加到 `events.jsonl` 文件（JSONL 格式，每行一个事件）。Agent 可以通过读取这个文件来感知用户在 TUI 侧的操作，实现双向通信。
+
+## 启用事件日志
+
+在 `config.toml` 中配置：
+
+```toml
+event_log_path = "./events.jsonl"
+```
+
+或使用默认路径：
+
+```toml
+event_log_path = "~/.local/share/mutsumi/events.jsonl"
+```
+
+## 事件格式
+
+```jsonl
+{"ts":"2026-03-21T10:00:00Z","event":"task_completed","task_id":"01JQ...","title":"修复缓存 Bug","source":"tui"}
+{"ts":"2026-03-21T10:01:22Z","event":"task_created","task_id":"01JQ...","title":"写单元测试","source":"tui"}
+{"ts":"2026-03-21T10:05:00Z","event":"task_deleted","task_id":"01JQ...","title":"过时的任务","source":"tui"}
+{"ts":"2026-03-21T10:06:30Z","event":"task_updated","task_id":"01JQ...","changes":{"priority":"high→low"},"source":"tui"}
+```
+
+## 事件类型
+
+| 事件 | 字段 | 说明 |
+|---|---|---|
+| `task_created` | task_id, title | 创建了新任务 |
+| `task_completed` | task_id, title | 任务标记为完成 |
+| `task_deleted` | task_id, title | 任务被删除 |
+| `task_updated` | task_id, changes (dict) | 任务字段被修改 |
+| `schema_error` | file, message | JSON 校验失败 |
+
+## 公共字段
+
+每个事件都包含以下公共字段：
+
+| 字段 | 类型 | 说明 |
+|---|---|---|
+| `ts` | string | ISO 8601 时间戳 |
+| `event` | string | 事件类型 |
+| `source` | string | 事件来源（通常为 `"tui"`） |
+
+## Agent 消费事件
+
+Agent 可以通过以下方式消费事件流：
+
+### 实时监控（Shell）
+
+```bash
+tail -f events.jsonl | jq .
+```
+
+### 在 Agent 提示中引用
+
+```
+检查 events.jsonl 获取用户最近在任务上的操作。
+```
+
+### Python 读取
+
+```python
+import json
+
+with open("events.jsonl") as f:
+    for line in f:
+        event = json.loads(line)
+        if event["event"] == "task_completed":
+            print(f"用户完成了: {event['title']}")
+```
+
+## 日志轮转
+
+- 默认保留最近 1000 个事件
+- 超出部分自动截断
+- 可通过 `events.max_lines` 在 `config.toml` 中配置
+
+<Aside type="note">
+事件日志是可选功能。如果未配置 `event_log_path`，Mutsumi 不会写入任何事件文件。
+</Aside>
+
+## 使用场景
+
+| 场景 | 说明 |
+|---|---|
+| **Agent 感知** | Agent 读取事件日志了解用户操作，自动调整工作优先级 |
+| **审计追踪** | 记录所有任务变更历史 |
+| **自动化触发** | 脚本监听事件触发自动操作（如任务完成时发通知） |
+| **调试** | 排查 Agent 与 TUI 之间的同步问题 |

@@ -1,0 +1,118 @@
+---
+title: "コマンドライン"
+description: "Mutsumi の CLI コマンド概要。TUI を使わずにタスクを管理する方法。"
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+## 概要
+
+Mutsumi は TUI（ビジュアルかんばん）だけでなく、CLI によるタスク管理もサポートしています。CLI は以下のようなシーンで便利です：
+
+- スクリプトやパイプラインでの自動化
+- Agent が CLI コマンドでタスクを操作
+- TUI を起動せずに素早くタスクを追加/確認
+
+## コマンドカテゴリ
+
+### TUI 起動
+
+```bash
+# カレントディレクトリの mutsumi.json を監視して TUI を起動
+mutsumi
+
+# 特定のファイルを指定
+mutsumi --path ./project/mutsumi.json
+
+# 複数プロジェクトの集約表示
+mutsumi --path ~/a.json --path ~/b.json
+```
+
+### タスク CRUD
+
+```bash
+# タスクの追加
+mutsumi add "タスクタイトル" --priority high --scope day --tags "dev,urgent"
+
+# タスク一覧
+mutsumi list
+mutsumi list --scope today
+
+# タスクの完了
+mutsumi done <id-prefix>
+
+# タスクの編集
+mutsumi edit <id-prefix> --title "新しいタイトル" --priority low
+
+# タスクの削除
+mutsumi rm <id-prefix>
+```
+
+### セットアップ
+
+```bash
+# 初期化（インタラクティブ）
+mutsumi init
+
+# 初期化（非インタラクティブ、全デフォルト）
+mutsumi init --defaults
+
+# 言語を指定して初期化
+mutsumi init --lang ja
+
+# Agent 統合
+mutsumi setup --agent claude-code
+mutsumi setup --agent codex-cli
+mutsumi setup --agent gemini-cli
+mutsumi setup --agent custom        # プロンプトを stdout に出力
+mutsumi setup                       # 利用可能な Agent を一覧表示
+```
+
+### マイグレーションとプロジェクト管理
+
+```bash
+# tasks.json → mutsumi.json にマイグレーション（カレントディレクトリ）
+mutsumi migrate
+
+# 設定ディレクトリのマイグレーション
+mutsumi migrate --config
+
+# プロジェクトソースの登録
+mutsumi project add ~/projects/my-app
+
+# 登録済みプロジェクトの一覧
+mutsumi project list
+
+# プロジェクトの削除
+mutsumi project remove my-app
+```
+
+### 設定管理
+
+```bash
+mutsumi config --edit       # $EDITOR で設定ファイルを開く
+mutsumi config --show       # 現在の設定を表示
+mutsumi config --reset      # デフォルトにリセット
+mutsumi config --path       # 設定ファイルのパスを表示
+```
+
+### ユーティリティ
+
+```bash
+mutsumi validate            # mutsumi.json のフォーマットをバリデート
+mutsumi schema              # JSON Schema を出力
+mutsumi schema --format markdown  # Markdown 形式でフィールド説明を出力
+mutsumi --version           # バージョン表示
+```
+
+## ID プレフィックスマッチング
+
+26 文字のフル ID を入力する必要はありません。一意であるプレフィックスで十分です：
+
+```bash
+mutsumi done 01EX    # "01EXAMPLE000000000000000001" に一致（一意の場合）
+```
+
+<Aside type="tip">
+CLI コマンドの完全なリファレンスは [CLI コマンドリファレンス](/ja/reference/cli-commands/) ページを参照してください。
+</Aside>

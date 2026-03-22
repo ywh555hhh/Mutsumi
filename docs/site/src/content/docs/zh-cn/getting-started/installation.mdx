@@ -1,0 +1,197 @@
+---
+title: 安装
+description: 通过 uv、pip、pipx 或 git clone 安装 Mutsumi。
+---
+
+import { Tabs, TabItem, Steps, Aside } from '@astrojs/starlight/components';
+
+## 前提条件
+
+- Python 3.12+
+- macOS / Linux / Windows（PowerShell、CMD 或 Windows Terminal 均可）
+
+## 安装方式
+
+<Tabs>
+  <TabItem label="uv（推荐）">
+
+<Steps>
+
+1. 安装 uv（如已安装可跳过）：
+
+   <Tabs>
+     <TabItem label="Linux / macOS">
+       ```bash
+       curl -LsSf https://astral.sh/uv/install.sh | sh
+       ```
+     </TabItem>
+     <TabItem label="Windows">
+       ```powershell
+       powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
+       ```
+     </TabItem>
+   </Tabs>
+
+2. 安装 Mutsumi：
+
+   ```bash
+   uv tool install git+https://github.com/ywh555hhh/Mutsumi.git
+   ```
+
+3. 验证安装：
+
+   ```bash
+   mutsumi --version
+   # 预期输出: mutsumi, version 0.4.0b1
+   ```
+
+</Steps>
+
+<Aside type="tip">
+uv 会自动管理隔离的 Python 环境，你不需要预先安装 Python。
+</Aside>
+
+  </TabItem>
+  <TabItem label="pip">
+
+最简单的方式，只要你有 Python 3.12+ 环境即可：
+
+```bash
+pip install mutsumi
+```
+
+验证：
+
+```bash
+mutsumi --version
+```
+
+  </TabItem>
+  <TabItem label="pipx">
+
+<Steps>
+
+1. 安装 pipx（如已安装可跳过）：
+
+   ```bash
+   python3 -m pip install --user pipx
+   pipx ensurepath
+   ```
+
+2. 安装 Mutsumi：
+
+   ```bash
+   pipx install git+https://github.com/ywh555hhh/Mutsumi.git
+   ```
+
+3. 验证安装：
+
+   ```bash
+   mutsumi --version
+   ```
+
+</Steps>
+
+  </TabItem>
+  <TabItem label="Git Clone（开发者）">
+
+<Steps>
+
+1. 克隆仓库：
+
+   ```bash
+   git clone https://github.com/ywh555hhh/Mutsumi.git
+   cd Mutsumi
+   ```
+
+2. 安装并运行：
+
+   ```bash
+   pip install .
+   mutsumi --version
+   ```
+
+   或使用 uv：
+
+   ```bash
+   uv sync && uv run mutsumi --version
+   ```
+
+</Steps>
+
+  </TabItem>
+</Tabs>
+
+## 常见问题
+
+### `mutsumi` 命令未找到
+
+<Tabs>
+  <TabItem label="Linux / macOS">
+    确保 `~/.local/bin` 在你的 `PATH` 中：
+
+    ```bash
+    export PATH="$HOME/.local/bin:$PATH"
+    ```
+
+    将上面这行添加到 `~/.bashrc`、`~/.zshrc` 或 `~/.config/fish/config.fish` 中以持久化。
+  </TabItem>
+  <TabItem label="Windows">
+    如果使用 `pip install --user`，需要将 Python Scripts 目录加入 PATH：
+
+    ```powershell
+    # PowerShell — 查看 Scripts 路径:
+    python -m site --user-site
+    # 然后将对应的 Scripts\ 目录添加到 PATH
+    ```
+
+    使用 `uv tool install` 或 `pipx` 安装时会自动配置 PATH。
+  </TabItem>
+</Tabs>
+
+### 升级
+
+```bash
+# uv
+uv tool install --force git+https://github.com/ywh555hhh/Mutsumi.git
+# pip
+pip install --upgrade mutsumi
+```
+
+### 卸载
+
+<Tabs>
+  <TabItem label="pip">
+    ```bash
+    pip uninstall mutsumi
+    ```
+  </TabItem>
+  <TabItem label="uv">
+    ```bash
+    uv tool uninstall mutsumi
+    ```
+  </TabItem>
+</Tabs>
+
+配置与日志文件可手动删除：
+
+<Tabs>
+  <TabItem label="Linux / macOS">
+    ```bash
+    rm -rf ~/.config/mutsumi/           # 配置
+    rm -rf ~/.local/share/mutsumi/      # 日志
+    ```
+  </TabItem>
+  <TabItem label="Windows">
+    ```powershell
+    Remove-Item -Recurse "$env:APPDATA\mutsumi"       # 配置
+    Remove-Item -Recurse "$env:LOCALAPPDATA\mutsumi"   # 日志
+    ```
+  </TabItem>
+</Tabs>
+
+`tasks.json` 是你的数据 —— 请手动决定是否保留。
+
+## 下一步
+
+安装完成后，前往 [快速上手](/zh-cn/getting-started/quick-start/) 开始创建你的第一个任务。

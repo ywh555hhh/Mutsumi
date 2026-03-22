@@ -1,0 +1,82 @@
+---
+title: 任务 Schema
+description: tasks.json 完整字段参考表。
+---
+
+## 根对象
+
+```json
+{
+  "$schema": "https://mutsumi.dev/schema/v1.json",
+  "version": 1,
+  "tasks": []
+}
+```
+
+## 任务字段
+
+| 字段 | 类型 | 必填 | 默认值 | 校验规则 |
+|------|------|------|--------|----------|
+| `id` | string | 是 | — | 非空，唯一 |
+| `title` | string | 是 | — | 非空，建议 ≤ 120 字符 |
+| `status` | string | 是 | `"pending"` | `"pending"` \| `"done"` |
+| `scope` | string | 否 | `"inbox"` | `"day"` \| `"week"` \| `"month"` \| `"inbox"` |
+| `priority` | string | 否 | `"normal"` | `"high"` \| `"normal"` \| `"low"` |
+| `tags` | string[] | 否 | `[]` | 字符串数组 |
+| `children` | Task[] | 否 | `[]` | 递归任务数组 |
+| `created_at` | string | 否 | 自动 | ISO 8601 日期时间 |
+| `due_date` | string | 否 | — | ISO 8601 日期 (`YYYY-MM-DD`) |
+| `completed_at` | string | 否 | — | ISO 8601 日期时间 |
+| `description` | string | 否 | — | 支持 Markdown |
+
+## ID 格式
+
+| 格式 | 示例 | 用途 |
+|------|------|------|
+| `uuidv7` | `01JQ8X7K3M0000000000000000` | 默认，推荐 |
+| `ulid` | `01ARZ3NDEKTSV4RRFFQ69G5FAV` | ULID 爱好者 |
+| `auto-increment` | `1`, `2`, `3` | 极简主义者 |
+
+## 完整示例
+
+```json
+{
+  "version": 1,
+  "tasks": [
+    {
+      "id": "01JQ8X7K3M0000000000000001",
+      "title": "重构 Auth 模块",
+      "status": "pending",
+      "scope": "day",
+      "priority": "high",
+      "tags": ["dev", "backend"],
+      "created_at": "2026-03-21T08:00:00Z",
+      "due_date": "2026-03-25",
+      "description": "把 session-based auth 改成 JWT",
+      "children": [
+        {
+          "id": "01JQ8X7K3M0000000000000002",
+          "title": "安装 PyJWT",
+          "status": "done",
+          "completed_at": "2026-03-21T09:30:00Z",
+          "children": []
+        }
+      ]
+    }
+  ]
+}
+```
+
+## 自定义字段
+
+任何不在上表中的字段都是自定义字段。Mutsumi 在读写过程中会保留它们。
+
+```json
+{
+  "id": "01JQ...",
+  "title": "训练模型",
+  "status": "pending",
+  "estimated_minutes": 120,
+  "energy_level": "high-focus"
+}
+```

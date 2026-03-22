@@ -1,0 +1,84 @@
+---
+title: Mutsumi
+description: 不丢任何一根线程。
+template: splash
+hero:
+  tagline: 不丢任何一根线程。
+  image:
+    file: ../../../assets/logo-dark.svg
+  actions:
+    - text: 快速开始
+      link: /zh-cn/getting-started/installation/
+      icon: right-arrow
+      variant: primary
+    - text: GitHub
+      link: https://github.com/ywh555hhh/Mutsumi
+      icon: external
+      variant: minimal
+---
+
+import { Card, CardGrid, Badge } from '@astrojs/starlight/components';
+
+<Badge text="v0.4.0b1 Beta" variant="note" />
+
+你不缺专注力。你缺的是一张随时能瞟一眼的线程清单。
+
+写着代码忽然被拉进群聊，回完消息发现刚才那个 bug 的思路断了——
+这不是你的问题，这就是多线程工作的代价。Mutsumi 把你手头所有的事情
+钉在屏幕角落：一个快捷键唤出来，再一个快捷键收回去，轻到你根本感觉不到她的存在。
+
+```
+┌─────────────────────────────────────────────────────┐
+│  [★ 主面板] [个人] [proj-a] [proj-b]     mutsumi ♪  │
+├─────────────────────────────────────────────────────┤
+│  ▼ 高优先 ───────────────────────────────────────   │
+│  [ ] 重构 Auth 模块                  dev,backend ★★★│
+│  [x] 修复缓存穿透 Bug               bugfix      ★★★│
+│  ▼ 普通 ─────────────────────────────────────────   │
+│  [ ] 写周报                          life        ★★ │
+│  [ ] Review PR #42                   dev         ★★ │
+├─────────────────────────────────────────────────────┤
+│  6 tasks · 2 done · 4 pending                       │
+└─────────────────────────────────────────────────────┘
+```
+
+## 凭什么选她？
+
+<CardGrid>
+  <Card title="余光里的安全感" icon="open-book">
+    不抢你的注意力，也不会藏起来。她就在视野边缘待着——
+    扫一眼就知道手上几件事、Agent 推到哪了。
+  </Card>
+  <Card title="Agent 帮你建任务" icon="puzzle">
+    Claude Code、Codex CLI、Gemini CLI、随便哪个 Agent 或脚本——
+    它们干活的时候顺手把任务写进 JSON，你只管确认方向。
+  </Card>
+  <Card title="来去无痕" icon="rocket">
+    一个热键弹出来，一个热键收回去。雷神终端、tmux 弹窗、平铺分屏都行——
+    需要的时候她在，不需要的时候她不在。
+  </Card>
+  <Card title="随便改" icon="setting">
+    主题、快捷键、配色、CSS，全部开放。
+    Mutsumi 天生就是拿来被魔改的。
+  </Card>
+</CardGrid>
+
+## 怎么跑起来的
+
+```mermaid
+graph LR
+    A["AI Agent<br/>(Controller)"] -->|"写入"| T["mutsumi.json<br/>(Model)"]
+    T -->|"监视"| V["你 (TUI)<br/>(View)"]
+    V -->|"交互"| T
+```
+
+Agent 写 JSON，Mutsumi 盯着文件变化自动刷新，你瞟一眼就行。想改就直接在 TUI 里点，改完自动写回去。
+
+## 装一下试试
+
+```bash
+uv tool install git+https://github.com/ywh555hhh/Mutsumi.git
+mutsumi
+```
+
+然后跟着 [快速上手](/zh-cn/getting-started/quick-start/) 走一遍。

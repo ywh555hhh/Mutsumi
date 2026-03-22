@@ -1,0 +1,128 @@
+---
+title: 配置
+description: Mutsumi 的 config.toml 配置文件详解。
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+## 配置文件位置
+
+Mutsumi 按以下顺序搜索配置文件：
+
+```
+1. ~/.mutsumi/config.toml          （推荐位置）
+2. ~/.config/mutsumi/config.toml   （旧版兼容）
+```
+
+```
+~/.mutsumi/
+├── config.toml          # 主配置文件
+├── mutsumi.json         # 个人任务
+├── themes/
+│   └── my-theme.toml    # 自定义主题
+└── keys/
+    └── my-keys.toml     # 自定义快捷键
+```
+
+平台差异：
+
+| 平台 | 路径 |
+|---|---|
+| Linux | `~/.mutsumi/` |
+| macOS | `~/.mutsumi/`（也接受 `~/Library/Application Support/mutsumi/` 和 `~/.config/mutsumi/`） |
+| Windows | `%APPDATA%\mutsumi\` |
+
+## 创建配置
+
+```bash
+# 交互式创建
+mutsumi init
+
+# 使用默认值创建
+mutsumi init --defaults
+
+# 指定语言
+mutsumi init --lang zh
+```
+
+<Aside type="tip">
+Mutsumi 不需要任何配置文件即可工作 —— 所有选项都有合理的默认值。
+</Aside>
+
+## 配置文件示例
+
+```toml
+# ~/.mutsumi/config.toml
+
+# 主题 — "monochrome-zen" (默认), "solarized", "nord", "dracula"
+theme = "monochrome-zen"
+
+# 快捷键 — "arrows" (默认), "vim", "emacs"
+keybindings = "arrows"
+
+# 语言 — "en" (默认), "zh", "ja"
+language = "en"
+
+# 默认 scope — 启动时默认选中的标签
+default_scope = "day"
+
+# 通知模式 — "quiet" (默认), "badge", "bell", "system"
+notification_mode = "quiet"
+
+# 默认任务文件路径（可选）
+# default_path = "/path/to/mutsumi.json"
+
+# 列表显示列
+columns = ["checkbox", "title", "tags", "priority"]
+
+# 事件日志路径（可选）
+# event_log_path = "~/.local/share/mutsumi/events.jsonl"
+
+# 自定义 CSS 路径（可选）
+# custom_css_path = "~/.config/mutsumi/custom.tcss"
+
+# 快捷键覆盖（可选）
+# [key_overrides]
+# quit = "ctrl+q"
+# cursor_down = "ctrl+j"
+```
+
+## 配置项说明
+
+| 配置项 | 类型 | 默认值 | 说明 |
+|---|---|---|---|
+| `theme` | string | `"monochrome-zen"` | 主题名称 |
+| `keybindings` | string | `"arrows"` | 快捷键预设 |
+| `language` | string | `"en"` | 界面语言 |
+| `default_scope` | string | `"day"` | 启动时默认标签 |
+| `notification_mode` | string | `"quiet"` | 通知模式 |
+| `default_path` | path | `null` | 默认任务文件路径 |
+| `columns` | string[] | `["checkbox", "title", "tags", "priority"]` | 显示列 |
+| `event_log_path` | path | `null` | 事件日志路径 |
+| `custom_css_path` | path | `null` | 自定义 CSS 路径 |
+| `key_overrides` | dict | `{}` | 快捷键覆盖映射 |
+
+## 通知模式
+
+| 模式 | 行为 | 配置值 |
+|---|---|---|
+| **quiet** | 完全静音；状态栏只显示计数（默认） | `"quiet"` |
+| **badge** | 过期任务在 TUI 中闪烁/高亮 | `"badge"` |
+| **bell** | 发送终端铃声 (`\a`)；终端应用决定如何处理 | `"bell"` |
+| **system** | 调用系统通知 API (macOS/Linux/Windows) | `"system"` |
+
+## 管理配置
+
+```bash
+# 打开编辑器编辑配置
+mutsumi config --edit
+
+# 打印当前配置
+mutsumi config --show
+
+# 重置为默认值
+mutsumi config --reset
+
+# 打印配置文件路径
+mutsumi config --path
+```

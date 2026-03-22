@@ -1,0 +1,191 @@
+---
+title: 数据契约
+description: mutsumi.json 的完整 Schema 定义与校验规则。
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+## 文件结构
+
+一个 Mutsumi 数据源是一个包含任务数组的有效 JSON 文件。
+
+```json
+{
+  "$schema": "https://mutsumi.dev/schema/v1.json",
+  "version": 1,
+  "tasks": [
+    { ... },
+    { ... }
+  ]
+}
+```
+
+### 根字段
+
+| 字段 | 类型 | 必填 | 说明 |
+|---|---|---|---|
+| `$schema` | string | 否 | JSON Schema URL（可选，用于编辑器提示） |
+| `version` | integer | 是 | 数据格式版本，当前为 `1` |
+| `tasks` | array | 是 | 任务对象数组 |
+
+## 任务对象
+
+### 基础字段（官方）
+
+| 字段 | 类型 | 必填 | 默认值 | 说明 |
+|---|---|---|---|---|
+| `id` | string | **是** | — | UUIDv7 格式，如 `"01JQ8X7K3M..."` |
+| `title` | string | **是** | — | 任务标题，建议 ≤ 120 字符 |
+| `status` | string | **是** | `"pending"` | 枚举：`"pending"`、`"done"` |
+| `scope` | string | 否 | `"inbox"` | 枚举：`"day"`、`"week"`、`"month"`、`"inbox"` |
+| `priority` | string | 否 | `"normal"` | 枚举：`"high"`、`"normal"`、`"low"` |
+| `tags` | string[] | 否 | `[]` | 自定义标签数组 |
+| `children` | Task[] | 否 | `[]` | 子任务数组（递归嵌套） |
+| `created_at` | string | 否 | auto | ISO 8601 时间戳 |
+| `due_date` | string | 否 | — | ISO 8601 日期（如 `"2026-03-25"`） |
+| `completed_at` | string | 否 | — | 完成时间，status 变为 done 时自动填充 |
+| `description` | string | 否 | — | 详细描述（支持 Markdown） |
+
+### 自定义字段（用户定义）
+
+Mutsumi **保证**：
+- 上表以外的任何字段都会被**保留** —— 永远不会被删除或修改
+- TUI 渲染时忽略自定义字段
+- Agent 可自由添加自定义字段用于自身逻辑
+
+示例 —— 用户自定义字段：
+
+```json
+{
+  "id": "01JQ8X7K3M0000000000000000",
+  "title": "训练模型 v2",
+  "status": "pending",
+  "scope": "week",
+  "priority": "high",
+  "tags": ["ml"],
+  "estimated_minutes": 120,
+  "energy_level": "high-focus",
+  "pomodoro_count": 0,
+  "context": "需要 GPU 机器"
+}
+```
+
+`estimated_minutes`、`energy_level`、`pomodoro_count` 和 `context` 都是用户自定义字段。Mutsumi 不会干扰它们。
+
+## ID 规范
+
+### UUIDv7
+
+默认使用 UUIDv7 (RFC 9562)。
+
+```
+01JQ8X7K3M0000000000000000
+├──────────┤├──────────────┤
+  时间部分     随机部分
+  (ms 精度)
+```
+
+属性：
+- 按创建时间自然排序
+- 全局唯一，无需中央协调
+- Agent 和 TUI 可独立生成
+- 紧凑的 26 字符 Crockford Base32 编码
+
+### 备选格式（可配置）
+
+用户可在 `config.toml` 中配置不同的 ID 格式：
+
+| 格式 | 示例 | 适用场景 |
+|---|---|---|
+| `uuidv7` | `01JQ8X7K3M0000000000000000` | 默认，推荐 |
+| `ulid` | `01ARZ3NDEKTSV4RRFFQ69G5FAV` | ULID 爱好者 |
+| `auto-increment` | `1`, `2`, `3` | 极简主义者 |
+
+## Scope 解析
+
+### 优先级顺序
+
+```
+手动 scope > due_date 自动推导 > 回退到 "inbox"
+```
+
+### 自动推导规则
+
+当任务有 `due_date` 但没有手动 `scope` 时：
+
+| 条件 | 推导结果 |
+|---|---|
+| `due_date` == 今天 | `day` |
+| `due_date` 在本周内 | `week` |
+| `due_date` 在本月内 | `month` |
+| `due_date` 已过期 | `day`（升级处理） |
+| `due_date` 超出本月 | `month` |
+
+## 嵌套
+
+子任务通过 `children` 数组递归嵌套。
+
+```json
+{
+  "id": "01JQ8X7K3M...",
+  "title": "重构用户系统",
+  "status": "pending",
+  "children": [
+    {
+      "id": "01JQ8X7K4N...",
+      "title": "设计新的数据库 schema",
+      "status": "done",
+      "children": []
+    },
+    {
+      "id": "01JQ8X7K5P...",
+      "title": "实现 migration 脚本",
+      "status": "pending",
+      "children": [
+        {
+          "id": "01JQ8X7K6Q...",
+          "title": "备份现有数据",
+          "status": "pending",
+          "children": []
+        }
+      ]
+    }
+  ]
+}
+```
+
+### 渲染规则
+
+| 嵌套深度 | 默认行为 | 可配置 |
+|---|---|---|
+| 1-3 层 | 完整渲染，带缩进 | — |
+| 4+ 层 | 折叠为"3 subtasks..."，点击展开 | 是 |
+| 无限 | 数据层无限制，渲染层可配置上限 | 是 |
+
+### 父子状态规则
+
+- 所有子任务都 `done` 时，父任务**不会**自动标记完成（用户有显式控制权）
+- TUI 会显示 `2/5 done` 进度指示器
+- Agent 可自行实现自动完成逻辑
+
+## 校验规则
+
+### 严格度级别
+
+| 级别 | 行为 | 适用场景 |
+|---|---|---|
+| `strict` | 拒绝任何无效字段/值 | CI/CD 校验 |
+| `normal` | 跳过无效任务，渲染有效任务（默认） | TUI 日常使用 |
+| `loose` | 尽力渲染，静默忽略未知字段 | 快速原型 |
+
+### 必填字段校验
+
+- `id` —— 非空字符串
+- `title` —— 非空字符串
+- `status` —— 必须是 `"pending"` 或 `"done"`
+
+缺少以上任一字段的任务被视为**无效**，按严格度级别处理。
+
+<Aside type="note">
+校验错误会写入 stderr 并记录到 `~/.local/share/mutsumi/error.log`。
+</Aside>

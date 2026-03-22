@@ -1,0 +1,177 @@
+---
+title: 常见问题
+description: Mutsumi 的常见问题与解答。
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+## 安装相关
+
+### `mutsumi` 命令未找到
+
+确保 `~/.local/bin` 在你的 `PATH` 中：
+
+```bash
+export PATH="$HOME/.local/bin:$PATH"
+```
+
+将上面这行添加到你的 shell 配置文件中以持久化：
+- Bash: `~/.bashrc`
+- Zsh: `~/.zshrc`
+- Fish: `~/.config/fish/config.fish`（使用 `set -gx PATH $HOME/.local/bin $PATH`）
+
+### 需要预先安装 Python 吗？
+
+使用 `uv tool install` 时**不需要**。uv 会自动管理隔离的 Python 环境。
+
+### 支持 Windows 吗？
+
+Mutsumi 设计用于 macOS 和 Linux。Windows 用户请使用 WSL (Windows Subsystem for Linux)。
+
+### 如何升级到最新版本？
+
+```bash
+uv tool install --force git+https://github.com/ywh555hhh/Mutsumi.git
+```
+
+---
+
+## TUI 相关
+
+### TUI 显示 "Nothing here yet" 但 mutsumi.json 有任务
+
+检查你在哪个标签页上 -- 任务按 `scope` 过滤。按 `1` 查看 Today，`2` 查看 Week，`3` 查看 Month，`4` 查看 Inbox。
+
+如果任务没有 `scope` 字段也没有 `due_date`，它们会出现在 Inbox 标签中。
+
+### Agent 修改后 TUI 没有更新
+
+1. 确保 Agent 写入的是 Mutsumi 正在监视的同一个 `mutsumi.json` 路径
+2. 运行 `mutsumi validate` 检查 JSON 是否有效
+3. 确认 Agent 写入的是完整文件而非部分内容
+
+### TUI 显示错误横幅
+
+这通常意味着 `mutsumi.json` 格式有误。TUI 会保留上次有效状态的任务列表。运行以下命令查看详细错误：
+
+```bash
+mutsumi validate
+```
+
+### 终端显示乱码
+
+确保你的终端支持 Unicode 并使用支持的字体。推荐使用：
+- iTerm2 (macOS)
+- Alacritty
+- Kitty
+- WezTerm
+
+### 如何退出 Mutsumi？
+
+- vim 预设：按 `q`
+- emacs 预设：按 `Ctrl+q`
+- arrow 预设：按 `q`
+
+---
+
+## 配置相关
+
+### 主题/快捷键配置不生效
+
+1. 运行 `mutsumi config --show` 确认配置已加载
+2. 确认配置文件路径：`mutsumi config --path`
+3. 检查 TOML 语法是否正确
+
+### 配置文件在哪里？
+
+```bash
+mutsumi config --path
+```
+
+通常在：
+- Linux: `~/.mutsumi/config.toml`
+- macOS: `~/.mutsumi/config.toml` 或 `~/Library/Application Support/mutsumi/config.toml`
+
+### 可以不用配置文件吗？
+
+可以。Mutsumi 在没有配置文件时使用合理的默认值正常工作：
+- 主题：`monochrome-zen`
+- 快捷键：`arrows`
+- 语言：`en`
+
+---
+
+## Agent 集成相关
+
+### Mutsumi 支持哪些 Agent？
+
+Mutsumi 是 Agent 无关的。任何能读写 JSON 的程序都可以作为 Controller：
+
+| Agent | 集成方式 |
+|---|---|
+| Claude Code | `mutsumi setup --agent claude-code` |
+| Codex CLI | `mutsumi setup --agent codex-cli` |
+| Gemini CLI | `mutsumi setup --agent gemini-cli` |
+| 其他 Agent | `mutsumi setup --agent custom` |
+
+### Agent 写入后 mutsumi.json 格式错误怎么办？
+
+Mutsumi 会显示错误横幅但不会崩溃，保留上次有效的任务列表。建议在 Agent 提示中加入自愈指令：
+
+```markdown
+写入 mutsumi.json 后，检查 ~/.local/share/mutsumi/error.log
+是否有 Schema 校验错误。如有错误，修复后重新写入。
+```
+
+### 多个 Agent 同时写入会冲突吗？
+
+极少发生。Mutsumi 使用 Last Write Wins 策略。由于 Agent 写入通常间隔秒到分钟，实际冲突概率极低。建议 Agent 每次写入前先读取最新文件。
+
+---
+
+## 数据相关
+
+### mutsumi.json 在哪里？
+
+默认在当前工作目录下。你也可以用 `--path` 指定路径：
+
+```bash
+mutsumi --path /path/to/mutsumi.json
+```
+
+### Mutsumi 会删除我的自定义字段吗？
+
+**绝不会。** 这是 Mutsumi 的核心承诺。任何 Mutsumi 不认识的字段都会被原样保留，永远不会被删除或修改。
+
+### 如何备份任务数据？
+
+`mutsumi.json` 是纯文本 JSON 文件，天然 Git 友好。推荐：
+
+```bash
+# 加入 Git 版本管理
+git add mutsumi.json
+git commit -m "backup tasks"
+```
+
+### 任务 ID 用什么格式？
+
+默认使用 UUIDv7 -- 按时间排序的全局唯一标识符。也可配置为 ULID 或自增数字。
+
+---
+
+## 性能相关
+
+### Mutsumi 会消耗很多资源吗？
+
+不会。Mutsumi 是轻量级终端应用：
+- 内存占用通常 < 50MB
+- CPU 近乎为零（只在文件变更时做少量工作）
+- 无网络请求、无后台同步
+
+### 能处理多少任务？
+
+对于日常使用（几十到几百个任务），性能没有任何问题。mutsumi.json 是全量加载的，如果超过数千个任务，考虑归档已完成的任务。
+
+<Aside type="tip">
+还有问题？欢迎在 [GitHub Issues](https://github.com/ywh555hhh/Mutsumi/issues) 提出。
+</Aside>

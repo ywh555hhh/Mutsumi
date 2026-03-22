@@ -1,0 +1,95 @@
+---
+title: TUI Overview
+description: Layout, responsive behavior, and visual components of the Mutsumi TUI.
+---
+
+## Default Layout
+
+```
+┌─────────────────────────────────────────────────────┐
+│  [Today] [Week] [Month] [Inbox]          mutsumi ♪  │  ← Header
+├─────────────────────────────────────────────────────┤
+│                                                     │
+│  ▼ HIGH ─────────────────────────────────────────   │  ← Priority Group
+│  [ ] Refactor Auth module            dev,backend ★★★│  ← Task Row
+│  [x] Fix cache penetration bug       bugfix      ★★★│
+│                                                     │
+│  ▼ NORMAL ───────────────────────────────────────   │
+│  [ ] Write weekly report             life        ★★ │
+│  [ ] Review PR #42                   dev         ★★ │
+│    └─ [ ] Check type safety          (1/2)          │  ← Subtask
+│    └─ [x] Run tests                                 │
+│                                                     │
+│  ▼ LOW ──────────────────────────────────────────   │
+│  [ ] Update README                   docs        ★  │
+│                                                     │
+├─────────────────────────────────────────────────────┤
+│  6 tasks · 2 done · 4 pending              🔇 quiet │  ← Footer
+└─────────────────────────────────────────────────────┘
+```
+
+## Components
+
+### Header Bar
+- **Scope tabs**: Today, Week, Month, Inbox — click or press `1`-`4`
+- **App title**: "mutsumi ♪" aligned right
+
+### Task List
+- Tasks grouped by priority: HIGH → NORMAL → LOW
+- Each row shows: checkbox, title, tags, priority stars
+- Subtasks indented with `└─` prefix
+- Selected row highlighted with accent background
+
+### Detail Panel
+Press `Enter` to expand the detail panel:
+
+```
+├─────────────────────────────────────────────────────┤
+│  ▶ Refactor Auth module                             │
+│  Status:   pending          Priority: high          │
+│  Scope:    day              Tags:     dev, backend  │
+│  Due:      2026-03-25       Created:  2026-03-21    │
+│  Description:                                       │
+│  Change session-based auth to JWT...                │
+│  Subtasks: 1/2 done                                 │
+├─────────────────────────────────────────────────────┤
+```
+
+### Footer Bar
+- Task statistics: `N tasks · N done · N pending`
+- Notification mode indicator
+- Action buttons: `[+New]` `[/Search]`
+
+## Responsive Behavior
+
+| Terminal Width | Behavior |
+|----------------|----------|
+| ≥ 80 cols | Full layout: title + tags + priority stars |
+| 60–79 cols | Tags omitted, show title + priority only |
+| 40–59 cols | Minimal mode: checkbox + title only |
+| < 40 cols | "Terminal too narrow" warning |
+
+## Empty State
+
+```
+┌─────────────────────────────────────────┐
+│                                         │
+│           Nothing here yet.             │
+│       Press [n] to create a task        │
+│  or let your Agent write mutsumi.json  │
+│                                         │
+└─────────────────────────────────────────┘
+```
+
+## Error State
+
+When `mutsumi.json` is invalid:
+
+```
+┌─────────────────────────────────────────────────────┐
+│  ⚠ Task file has errors · showing last valid state   │
+│  Run `mutsumi validate` for details                  │
+├─────────────────────────────────────────────────────┤
+│  (Last valid task list)                              │
+└─────────────────────────────────────────────────────┘
+```

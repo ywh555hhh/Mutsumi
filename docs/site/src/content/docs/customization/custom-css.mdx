@@ -1,0 +1,161 @@
+---
+title: Custom CSS
+description: Override Mutsumi's TUI styles using Textual CSS. Widget class names, config setup, and examples.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+## Overview
+
+Mutsumi's TUI is built with [Textual](https://textual.textualize.io/), which uses a CSS-like styling system. You can inject custom CSS to override any visual aspect of the interface.
+
+## Configuration
+
+Set the `custom_css_path` in `config.toml`:
+
+```toml
+custom_css_path = "~/.config/mutsumi/custom.tcss"
+```
+
+Create the file at that path. Mutsumi loads it on startup and applies it on top of the default styles.
+
+## Textual CSS Basics
+
+Textual CSS looks like web CSS but targets terminal widgets:
+
+```css
+/* Target by widget class name */
+TaskRow {
+  background: #1e1e2e;
+  color: #cdd6f4;
+}
+
+/* Target by ID */
+#header-bar {
+  background: #181825;
+}
+
+/* Target by CSS class */
+.priority-high {
+  color: #f38ba8;
+}
+
+/* Pseudo-classes */
+TaskRow:hover {
+  background: #313244;
+}
+
+TaskRow:focus {
+  background: #45475a;
+}
+```
+
+<Aside type="note">
+Textual CSS is not web CSS. It supports a subset of properties relevant to terminal rendering: `background`, `color`, `padding`, `margin`, `border`, `width`, `height`, `display`, `visibility`, `text-style`, and more. See the [Textual CSS reference](https://textual.textualize.io/css_types/) for the full list.
+</Aside>
+
+## Widget Class Names
+
+These are the main widget classes you can target:
+
+| Widget | Description |
+|--------|-------------|
+| `MutsumiApp` | Root application |
+| `HeaderBar` | Top bar with tabs and branding |
+| `TaskList` | Main scrollable task container |
+| `TaskRow` | Individual task row |
+| `PriorityGroup` | Priority section header (HIGH/NORMAL/LOW) |
+| `DetailPanel` | Expanded task detail view |
+| `FooterBar` | Bottom status bar |
+| `ConfirmBar` | Inline delete confirmation |
+| `ConfirmDialog` | Modal delete confirmation |
+| `SearchBar` | Search input bar |
+| `SortOverlay` | Sort field picker |
+| `HelpScreen` | Keybinding help overlay |
+| `TaskForm` | New/edit task dialog |
+
+## CSS Classes
+
+| Class | Applied to |
+|-------|-----------|
+| `.priority-high` | Task rows with high priority |
+| `.priority-normal` | Task rows with normal priority |
+| `.priority-low` | Task rows with low priority |
+| `.task-done` | Completed task rows |
+| `.task-pending` | Pending task rows |
+| `.tab-active` | Currently active scope tab |
+| `.search-match` | Tasks matching search query |
+| `.search-dim` | Tasks not matching search query |
+
+## Example: Wider Task List
+
+```css
+TaskList {
+  width: 100%;
+  max-width: 120;
+}
+```
+
+## Example: Custom Priority Colors
+
+```css
+.priority-high {
+  color: #ff6b6b;
+}
+
+.priority-normal {
+  color: #ffd93d;
+}
+
+.priority-low {
+  color: #6bcb77;
+}
+```
+
+## Example: Strikethrough for Done Tasks
+
+```css
+.task-done {
+  text-style: strike;
+  color: #666666;
+}
+```
+
+## Example: Hide the Footer
+
+```css
+FooterBar {
+  display: none;
+}
+```
+
+## Example: Custom Header Background
+
+```css
+HeaderBar {
+  background: #181825;
+  border-bottom: solid #313244;
+}
+```
+
+## Example: Rounded Detail Panel
+
+```css
+DetailPanel {
+  border: round #45475a;
+  padding: 1 2;
+  margin: 1;
+}
+```
+
+## Tips
+
+- **Restart Mutsumi** after editing the CSS file for changes to take effect.
+- Use `mutsumi config --path` to confirm where your config file is located.
+- Textual CSS supports `!important` for overriding specificity.
+- Colors can be specified as hex (`#ff5555`), named (`red`), or RGB (`rgb(255, 85, 85)`).
+- `text-style` accepts: `bold`, `italic`, `underline`, `strike`, `reverse`, `dim`.
+
+<Aside type="tip">
+For a deep dive into Textual CSS properties and selectors, see the [Textual documentation](https://textual.textualize.io/guide/CSS/). Mutsumi uses standard Textual widgets, so all documented selectors and properties apply.
+</Aside>

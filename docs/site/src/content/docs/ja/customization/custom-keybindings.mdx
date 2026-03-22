@@ -1,0 +1,127 @@
+---
+title: "カスタムキーバインド"
+description: "key_overrides を使って Mutsumi のキーバインドをカスタマイズする方法。"
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+## 概要
+
+Mutsumi では、プリセット（vim/emacs/arrows）をベースに、個別のキーバインドをオーバーライドできます。
+
+## key_overrides の設定
+
+`config.toml` の `key_overrides` セクションで、アクション名に新しいキーを割り当てます：
+
+```toml
+keybindings = "vim"    # ベースプリセット
+
+[key_overrides]
+quit = "ctrl+q"        # 'q' の代わりに Ctrl+Q で終了
+cursor_down = "ctrl+j" # 'j' の代わりに Ctrl+J で下に移動
+cursor_up = "ctrl+k"   # 'k' の代わりに Ctrl+K で上に移動
+```
+
+## オーバーライド可能なアクション
+
+以下のアクション名を使用して、任意のキーバインドをオーバーライドできます：
+
+### ナビゲーション
+
+| アクション名 | 説明 | vim デフォルト |
+|---|---|---|
+| `cursor_down` | カーソルを下に移動 | `j` |
+| `cursor_up` | カーソルを上に移動 | `k` |
+| `cursor_top` | リストの先頭にジャンプ | `gg` |
+| `cursor_bottom` | リストの末尾にジャンプ | `G` |
+
+### タスク操作
+
+| アクション名 | 説明 | vim デフォルト |
+|---|---|---|
+| `toggle_done` | 完了/未完了の切り替え | `space` |
+| `new_task` | 新しいタスクの作成 | `n` |
+| `edit_task` | タスクの編集 | `e` |
+| `inline_edit` | インライン編集 | `i` |
+| `show_detail` | 詳細パネルの展開 | `enter` |
+| `close_detail` | パネルを閉じる | `escape` |
+| `priority_up` | 優先度を上げる | `+` |
+| `priority_down` | 優先度を下げる | `-` |
+| `copy_task` | タスクをコピー | `y` |
+| `paste_task` | ペースト（下） | `p` |
+| `paste_task_above` | ペースト（上） | `P` |
+| `add_child` | サブタスクの追加 | `A` |
+| `toggle_fold` | サブタスクの折りたたみ | `z` |
+| `sort` | ソート | `s` |
+
+### タブ操作
+
+| アクション名 | 説明 | vim デフォルト |
+|---|---|---|
+| `next_tab` | 次のタブへ | `tab` |
+| `prev_tab` | 前のタブへ | `shift+tab` |
+| `tab_1` | Today タブ | `1` |
+| `tab_2` | Week タブ | `2` |
+| `tab_3` | Month タブ | `3` |
+| `tab_4` | Inbox タブ | `4` |
+
+### グループ操作
+
+| アクション名 | 説明 | vim デフォルト |
+|---|---|---|
+| `collapse_group` | グループを折りたたみ | `h` |
+| `expand_group` | グループを展開 | `l` |
+
+### 移動操作
+
+| アクション名 | 説明 | vim デフォルト |
+|---|---|---|
+| `move_down` | タスクを下に移動 | `J` |
+| `move_up` | タスクを上に移動 | `K` |
+
+### その他
+
+| アクション名 | 説明 | vim デフォルト |
+|---|---|---|
+| `quit` | Mutsumi を終了 | `q` |
+| `search` | 検索 | `/` |
+| `show_help` | ヘルプ画面 | `?` |
+
+## カスタムキーマップファイル
+
+`~/.config/mutsumi/keys/custom.toml` にフルカスタムのキーマップを定義することもできます：
+
+```toml
+[keys]
+move_down = "j"
+move_up = "k"
+toggle_done = "space"
+new_task = "n"
+edit_task = "e"
+delete_task = "d,d"    # コード: 2 回キー押下
+quit = "q"
+search = "/"
+help = "?"
+tab_next = "tab"
+tab_prev = "shift+tab"
+tab_1 = "1"
+tab_2 = "2"
+tab_3 = "3"
+tab_4 = "4"
+expand = "enter"
+top = "g"
+bottom = "shift+g"
+```
+
+## キー記法
+
+| 記法 | 説明 | 例 |
+|---|---|---|
+| 単一キー | そのままの文字 | `j`, `k`, `n` |
+| 修飾キー | `ctrl+`, `shift+`, `alt+` | `ctrl+q`, `shift+g` |
+| 特殊キー | キー名 | `space`, `enter`, `escape`, `tab` |
+| コード | カンマ区切り | `d,d`（dd シーケンス） |
+
+<Aside type="tip">
+オーバーライドは**プリセットの上に重ねて適用**されます。オーバーライドしなかったキーはプリセットのデフォルトが維持されます。
+</Aside>

@@ -1,0 +1,73 @@
+---
+title: Configuration
+description: Configure Mutsumi via config.toml.
+---
+
+## Config File Location
+
+Mutsumi searches for config in this order:
+
+```
+1. ~/.mutsumi/config.toml          (preferred)
+2. ~/.config/mutsumi/config.toml   (legacy fallback)
+```
+
+Platform exceptions:
+- macOS also accepts: `~/Library/Application Support/mutsumi/`
+- Windows: `%APPDATA%\mutsumi\`
+
+## Config Fields
+
+```toml
+# Theme — "monochrome-zen" (default), "solarized", "nord", "dracula"
+theme = "monochrome-zen"
+
+# Keybindings — "arrows" (default), "vim", "emacs"
+keybindings = "arrows"
+
+# Language — "en" (default), "zh", "ja"
+language = "en"
+
+# Default scope tab on launch
+default_scope = "day"
+
+# Notification mode — "quiet" (default), "badge", "bell", "system"
+notification_mode = "quiet"
+
+# Custom keybinding overrides (action = "key")
+[key_overrides]
+# quit = "ctrl+q"
+# cursor_down = "ctrl+j"
+
+# Columns to show in task list
+columns = ["checkbox", "title", "tags", "priority"]
+
+# Default task file path (optional)
+# default_path = "/path/to/mutsumi.json"
+
+# Event log path (optional)
+# event_log_path = "~/.local/share/mutsumi/events.jsonl"
+
+# Custom Textual CSS overrides (optional)
+# custom_css_path = "~/.config/mutsumi/custom.tcss"
+```
+
+## Config Commands
+
+```bash
+mutsumi config --edit     # Open in $EDITOR
+mutsumi config --show     # Print current config
+mutsumi config --reset    # Reset to defaults
+mutsumi config --path     # Print config file path
+```
+
+## Initial Setup
+
+```bash
+mutsumi init              # Interactive setup
+mutsumi init --defaults   # Non-interactive, all defaults
+mutsumi init --lang zh    # Set language to Chinese
+mutsumi init --personal   # Initialize personal tasks (~/.mutsumi/mutsumi.json)
+```
+
+Mutsumi works without any config file — all settings have sensible defaults.

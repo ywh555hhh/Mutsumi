@@ -1,0 +1,107 @@
+---
+title: 主题
+description: Mutsumi 的 4 款内置主题及其配色方案。
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+## 内置主题
+
+Mutsumi 附带 4 款精心设计的暗色主题。
+
+### Monochrome Zen（默认）
+
+极简黑白灰，点缀色为淡青绿。
+
+| 颜色变量 | 色值 | 说明 |
+|---|---|---|
+| background | `#0f0f0f` | 深黑背景 |
+| surface | `#1a1a1a` | 卡片/面板背景 |
+| border | `#333333` | 边框 |
+| text | `#e0e0e0` | 主文字 |
+| text_muted | `#666666` | 次要文字 |
+| accent | `#5de4c7` | 点缀色（青绿） |
+| error | `#e06c75` | 错误色 |
+| priority_high | `#e06c75` | 高优先级 |
+| priority_normal | `#e5c07b` | 普通优先级 |
+| priority_low | `#666666` | 低优先级 |
+
+### Nord
+
+冷色调，克制优雅。
+
+| 颜色变量 | 色值 | 说明 |
+|---|---|---|
+| background | `#2e3440` | 深蓝灰背景 |
+| surface | `#3b4252` | 面板背景 |
+| border | `#4c566a` | 边框 |
+| text | `#eceff4` | 主文字 |
+| text_muted | `#d8dee9` | 次要文字 |
+| accent | `#88c0d0` | 点缀色（冰蓝） |
+| error | `#bf616a` | 错误色 |
+
+### Dracula
+
+高对比度，紫色调。
+
+| 颜色变量 | 色值 | 说明 |
+|---|---|---|
+| background | `#282a36` | 深紫背景 |
+| surface | `#44475a` | 面板背景 |
+| border | `#6272a4` | 边框 |
+| text | `#f8f8f2` | 主文字 |
+| text_muted | `#6272a4` | 次要文字 |
+| accent | `#bd93f9` | 点缀色（紫色） |
+| error | `#ff5555` | 错误色 |
+
+### Solarized
+
+暖色暗底，青蓝点缀。
+
+| 颜色变量 | 色值 | 说明 |
+|---|---|---|
+| background | `#002b36` | 深青背景 |
+| surface | `#073642` | 面板背景 |
+| border | `#586e75` | 边框 |
+| text | `#839496` | 主文字 |
+| text_muted | `#586e75` | 次要文字 |
+| accent | `#2aa198` | 点缀色（青蓝） |
+| error | `#dc322f` | 错误色 |
+
+## 切换主题
+
+在 `~/.config/mutsumi/config.toml` 中设置：
+
+```toml
+theme = "monochrome-zen"   # "monochrome-zen" | "nord" | "dracula" | "solarized"
+```
+
+## 主题对照表
+
+| 主题 | 风格 | 点缀色 |
+|---|---|---|
+| `monochrome-zen` | 极简黑白，青绿点缀（默认） | `#5de4c7` |
+| `nord` | 冷色调，克制 | `#88c0d0` |
+| `dracula` | 高对比度，紫色调 | `#bd93f9` |
+| `solarized` | 暖色暗底，青蓝点缀 | `#2aa198` |
+
+<Aside type="tip">
+想要更多自定义？可以创建自己的 TOML 主题文件。详见 [自定义主题](/zh-cn/customization/custom-themes/)。
+</Aside>
+
+## 颜色变量说明
+
+每个主题包含以下颜色变量：
+
+| 变量 | 用途 |
+|---|---|
+| `background` | 整体背景色 |
+| `surface` | 卡片、面板的背景色 |
+| `border` | 边框颜色 |
+| `text` | 主文字颜色 |
+| `text_muted` | 次要/灰色文字 |
+| `accent` | 品牌/交互点缀色 |
+| `error` | 错误提示色 |
+| `priority_high` | 高优先级任务颜色 |
+| `priority_normal` | 普通优先级任务颜色 |
+| `priority_low` | 低优先级任务颜色 |

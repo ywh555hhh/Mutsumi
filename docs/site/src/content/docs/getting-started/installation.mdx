@@ -1,0 +1,121 @@
+---
+title: Installation
+description: Install Mutsumi via uv, pip, pipx, or from source.
+---
+
+import { Tabs, TabItem, Aside } from '@astrojs/starlight/components';
+
+## Prerequisites
+
+- Python 3.12+
+- macOS / Linux / Windows (PowerShell, CMD, or Windows Terminal)
+
+## Install
+
+<Tabs>
+  <TabItem label="uv (recommended)">
+    ```bash
+    uv tool install git+https://github.com/ywh555hhh/Mutsumi.git
+    ```
+  </TabItem>
+  <TabItem label="pip">
+    ```bash
+    pip install mutsumi
+    ```
+  </TabItem>
+  <TabItem label="pipx">
+    ```bash
+    pipx install mutsumi
+    ```
+  </TabItem>
+  <TabItem label="From source">
+    ```bash
+    git clone https://github.com/ywh555hhh/Mutsumi.git
+    cd Mutsumi
+    pip install .
+    ```
+
+    Or with uv:
+
+    ```bash
+    cd Mutsumi && uv sync && uv run mutsumi
+    ```
+  </TabItem>
+</Tabs>
+
+## Verify
+
+```bash
+mutsumi --version
+# Expected: mutsumi, version 0.4.0b1
+```
+
+<Aside type="tip" title="command not found?">
+<Tabs>
+  <TabItem label="Linux / macOS">
+    Ensure `~/.local/bin` is in your `PATH`:
+
+    ```bash
+    export PATH="$HOME/.local/bin:$PATH"
+    ```
+  </TabItem>
+  <TabItem label="Windows">
+    If installed with `pip install --user`, add the Scripts directory to PATH:
+
+    ```powershell
+    # PowerShell — check your user Scripts path:
+    python -m site --user-site
+    # Then add the corresponding Scripts/ directory to PATH
+    ```
+
+    With `uv tool install` or `pipx`, the PATH is configured automatically.
+  </TabItem>
+</Tabs>
+</Aside>
+
+## Install uv (optional)
+
+<Tabs>
+  <TabItem label="Linux / macOS">
+    ```bash
+    curl -LsSf https://astral.sh/uv/install.sh | sh
+    ```
+  </TabItem>
+  <TabItem label="Windows">
+    ```powershell
+    powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
+    ```
+  </TabItem>
+</Tabs>
+
+## Uninstall
+
+<Tabs>
+  <TabItem label="pip">
+    ```bash
+    pip uninstall mutsumi
+    ```
+  </TabItem>
+  <TabItem label="uv">
+    ```bash
+    uv tool uninstall mutsumi
+    ```
+  </TabItem>
+</Tabs>
+
+Config and log files can be removed manually:
+
+<Tabs>
+  <TabItem label="Linux / macOS">
+    ```bash
+    rm -rf ~/.config/mutsumi/           # Config
+    rm -rf ~/.local/share/mutsumi/      # Logs
+    ```
+  </TabItem>
+  <TabItem label="Windows">
+    ```powershell
+    Remove-Item -Recurse "$env:APPDATA\mutsumi"       # Config
+    Remove-Item -Recurse "$env:LOCALAPPDATA\mutsumi"   # Logs
+    ```
+  </TabItem>
+</Tabs>

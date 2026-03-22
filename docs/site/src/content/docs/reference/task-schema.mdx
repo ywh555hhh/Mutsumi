@@ -1,0 +1,265 @@
+---
+title: Task Schema Reference
+description: Complete reference for every field in the Mutsumi task object. Types, required status, defaults, validation rules, and examples.
+---
+
+## Root Object
+
+The `tasks.json` file has the following root structure:
+
+```json
+{
+  "$schema": "https://mutsumi.dev/schema/v1.json",
+  "version": 1,
+  "tasks": []
+}
+```
+
+| Field | Type | Required | Default | Validation |
+|-------|------|----------|---------|------------|
+| `$schema` | `string` | No | -- | Valid URL. For editor hints only; Mutsumi does not fetch it. |
+| `version` | `integer` | Yes | -- | Must be `1`. Future versions may change the schema. |
+| `tasks` | `Task[]` | Yes | `[]` | Array of task objects. |
+
+## Task Object Fields
+
+### `id`
+
+| Property | Value |
+|----------|-------|
+| Type | `string` |
+| Required | **Yes** |
+| Default | -- |
+| Validation | Non-empty string. UUIDv7 format recommended but not enforced. |
+
+```json
+"id": "01JQ8X7K3M0000000000000001"
+```
+
+UUIDv7 encodes a millisecond-precision timestamp, making IDs naturally sortable by creation time. Both agents and the TUI can generate IDs independently without coordination.
+
+### `title`
+
+| Property | Value |
+|----------|-------|
+| Type | `string` |
+| Required | **Yes** |
+| Default | -- |
+| Validation | Non-empty string. Recommended 120 characters max. |
+
+```json
+"title": "Refactor Auth module"
+```
+
+### `status`
+
+| Property | Value |
+|----------|-------|
+| Type | `string` |
+| Required | **Yes** |
+| Default | `"pending"` |
+| Validation | Must be `"pending"` or `"done"`. Unknown values trigger a warning badge. |
+
+```json
+"status": "pending"
+```
+
+When toggled to `"done"`, Mutsumi auto-fills `completed_at`. When toggled back to `"pending"`, `completed_at` is cleared.
+
+### `scope`
+
+| Property | Value |
+|----------|-------|
+| Type | `string` |
+| Required | No |
+| Default | `"inbox"` |
+| Validation | Must be one of `"day"`, `"week"`, `"month"`, `"inbox"`. |
+
+```json
+"scope": "day"
+```
+
+Scope determines which tab the task appears under. If omitted, scope is auto-derived from `due_date`. If neither `scope` nor `due_date` is set, the task falls to `"inbox"`.
+
+Resolution order: `manual scope > due_date derivation > fallback "inbox"`.
+
+### `priority`
+
+| Property | Value |
+|----------|-------|
+| Type | `string` |
+| Required | No |
+| Default | `"normal"` |
+| Validation | Must be one of `"high"`, `"normal"`, `"low"`. |
+
+```json
+"priority": "high"
+```
+
+Displayed as stars in the TUI: `high` = 3 stars, `normal` = 2 stars, `low` = 1 star. Tasks are grouped by priority within each scope tab.
+
+### `tags`
+
+| Property | Value |
+|----------|-------|
+| Type | `string[]` |
+| Required | No |
+| Default | `[]` |
+| Validation | Array of strings. No constraints on tag values. |
+
+```json
+"tags": ["dev", "backend", "urgent"]
+```
+
+Tags are displayed in the task row (space permitting) and are searchable via the `/` search bar.
+
+### `children`
+
+| Property | Value |
+|----------|-------|
+| Type | `Task[]` |
+| Required | No |
+| Default | `[]` |
+| Validation | Array of task objects following the same schema (recursive). |
+
+```json
+"children": [
+  {
+    "id": "01JQ8X7K4N...",
+    "title": "Install PyJWT",
+    "status": "done",
+    "children": []
+  }
+]
+```
+
+Nesting is unlimited at the data layer. The TUI renders 3 levels by default; deeper levels are collapsed.
+
+### `created_at`
+
+| Property | Value |
+|----------|-------|
+| Type | `string` |
+| Required | No |
+| Default | Auto-generated on creation |
+| Validation | ISO 8601 datetime string. |
+
+```json
+"created_at": "2026-03-21T08:00:00Z"
+```
+
+### `due_date`
+
+| Property | Value |
+|----------|-------|
+| Type | `string` |
+| Required | No |
+| Default | -- |
+| Validation | ISO 8601 date string (date only, no time). |
+
+```json
+"due_date": "2026-03-25"
+```
+
+Used for scope auto-derivation when `scope` is not manually set. Overdue tasks (past `due_date`) are escalated to the Today tab and rendered with an overdue color indicator.
+
+### `completed_at`
+
+| Property | Value |
+|----------|-------|
+| Type | `string` |
+| Required | No |
+| Default | -- |
+| Validation | ISO 8601 datetime string. |
+
+```json
+"completed_at": "2026-03-21T14:30:00Z"
+```
+
+Auto-filled when `status` changes to `"done"`. Cleared when `status` changes back to `"pending"`.
+
+### `description`
+
+| Property | Value |
+|----------|-------|
+| Type | `string` |
+| Required | No |
+| Default | -- |
+| Validation | Free-form string. Markdown content is supported in the detail panel. |
+
+```json
+"description": "Change session-based auth to JWT.\nNeed to modify both middleware and routing layer."
+```
+
+Displayed in the detail panel (press `Enter` to expand).
+
+## Custom Fields
+
+Any field not listed above is a custom field. Mutsumi's Pydantic model uses `extra="allow"`, which means:
+
+- Custom fields are **read** from `tasks.json` and stored in memory
+- Custom fields are **preserved** through every read-modify-write cycle
+- Custom fields are **never deleted** or modified by Mutsumi
+- Custom fields can be **displayed** by adding them to the `columns` config
+
+```json
+{
+  "id": "01JQ...",
+  "title": "Train model v2",
+  "status": "pending",
+  "estimated_minutes": 120,
+  "energy_level": "high-focus",
+  "sprint": "2026-W12",
+  "blocked_by": "01JQ8X7K3M0000000000000005"
+}
+```
+
+## Full Example
+
+```json
+{
+  "$schema": "https://mutsumi.dev/schema/v1.json",
+  "version": 1,
+  "tasks": [
+    {
+      "id": "01JQ8X7K3M0000000000000001",
+      "title": "Refactor Auth module",
+      "status": "pending",
+      "scope": "day",
+      "priority": "high",
+      "tags": ["dev", "backend"],
+      "created_at": "2026-03-21T08:00:00Z",
+      "due_date": "2026-03-25",
+      "description": "Change session-based auth to JWT",
+      "children": [
+        {
+          "id": "01JQ8X7K3M0000000000000002",
+          "title": "Install PyJWT",
+          "status": "done",
+          "priority": "normal",
+          "tags": [],
+          "completed_at": "2026-03-21T09:30:00Z",
+          "children": []
+        },
+        {
+          "id": "01JQ8X7K3M0000000000000003",
+          "title": "Write middleware",
+          "status": "pending",
+          "priority": "normal",
+          "tags": [],
+          "children": []
+        }
+      ]
+    },
+    {
+      "id": "01JQ8X7K3M0000000000000004",
+      "title": "Buy coffee beans",
+      "status": "pending",
+      "scope": "inbox",
+      "priority": "low",
+      "tags": ["life"],
+      "children": []
+    }
+  ]
+}
+```

@@ -1,0 +1,137 @@
+---
+title: 設定リファレンス
+description: config.toml の全設定項目リファレンス。
+---
+
+## ファイル場所
+
+| プラットフォーム | パス（推奨） | レガシーフォールバック |
+|----------------|-------------|---------------------|
+| Linux | `~/.mutsumi/config.toml` | `~/.config/mutsumi/config.toml` |
+| macOS | `~/.mutsumi/config.toml` | `~/.config/mutsumi/config.toml` または `~/Library/Application Support/mutsumi/config.toml` |
+| Windows | `%APPDATA%\mutsumi\config.toml` | — |
+
+Mutsumi は推奨パスを最初に検索し、レガシーパスにフォールバックします。`mutsumi migrate --config` で設定を新しい場所に移行できます。
+
+## 完全な設定テンプレート
+
+```toml
+# ── Mutsumi Configuration ──────────────────────────
+
+# テーマ：ビルトイン名またはカスタムテーマファイル名
+theme = "monochrome-zen"
+
+# キーバインドプリセット
+keybindings = "arrows"
+
+# UI 言語
+language = "ja"
+
+# 新規タスクのデフォルトスコープと起動時のアクティブタブ
+default_scope = "day"
+
+# 通知モード
+notification_mode = "quiet"
+
+# デフォルトタスクファイルパス（オプション）
+# default_path = "/path/to/mutsumi.json"
+
+# イベントログパス（オプション — 未設定で無効）
+# event_log_path = "~/.local/share/mutsumi/events.jsonl"
+
+# カスタム Textual CSS パス（オプション）
+# custom_css_path = "~/.mutsumi/custom.tcss"
+
+# タスクリストに表示するカラム
+columns = ["checkbox", "title", "tags", "priority"]
+
+# 起動時のデフォルトタブ（マルチソース："main"、シングルソース：スコープ名）
+default_tab = "main"
+
+# ダッシュボード：ソースカードに表示する最大保留タスク数
+dashboard_max_tasks = 3
+
+# ダッシュボード：ソースカードに完了タスクを表示するか
+dashboard_show_completed = true
+
+# 登録済みプロジェクトソース
+# [[projects]]
+# name = "saas-app"
+# path = "/Users/you/projects/saas-app"
+
+# キー個別オーバーライド
+[key_overrides]
+# quit = "ctrl+q"
+# cursor_down = "ctrl+j"
+```
+
+## 設定項目
+
+| フィールド | 型 | デフォルト | 説明 |
+|-----------|------|-----------|------|
+| `theme` | string | `"monochrome-zen"` | テーマ名 |
+| `keybindings` | string | `"arrows"` | プリセット：`"vim"`, `"emacs"`, `"arrows"` |
+| `language` | string | `"en"` | 言語：`"en"`, `"zh"`, `"ja"` |
+| `default_scope` | string | `"day"` | 新規タスクのデフォルトスコープ |
+| `notification_mode` | string | `"quiet"` | `"quiet"`, `"badge"`, `"bell"`, `"system"` |
+| `columns` | string[] | `["checkbox","title","tags","priority"]` | 表示カラム |
+| `default_path` | path | — | デフォルト mutsumi.json パス |
+| `event_log_path` | path | — | イベントログパス |
+| `custom_css_path` | path | — | カスタム CSS パス |
+| `default_tab` | string | `"main"` | 起動時のデフォルトタブ |
+| `dashboard_max_tasks` | int | `3` | ダッシュボード各ソースカードの最大保留タスク数 |
+| `dashboard_show_completed` | bool | `true` | ダッシュボードに完了タスクを表示するか |
+
+## key_overrides
+
+個別のキーバインドを上書き：
+
+```toml
+[key_overrides]
+quit = "ctrl+q"
+cursor_down = "ctrl+j"
+```
+
+## `[[projects]]`
+
+登録済みプロジェクトソース。各エントリには `name`（表示名）と `path`（`mutsumi.json` を含むディレクトリの絶対パス）があります。`mutsumi project add/remove` で管理します。
+
+```toml
+[[projects]]
+name = "saas-app"
+path = "/Users/you/projects/saas-app"
+
+[[projects]]
+name = "oshigrid"
+path = "/Users/you/projects/oshigrid"
+```
+
+## 通知モード
+
+| モード | 動作 |
+|--------|------|
+| `quiet` | 完全サイレント（デフォルト） |
+| `badge` | 期限切れタスクをハイライト |
+| `bell` | ターミナルベルを送信 |
+| `system` | システム通知 |
+
+## 設定コマンド
+
+```bash
+mutsumi config --edit     # $EDITOR で開く
+mutsumi config --show     # 現在の設定を表示
+mutsumi config --reset    # デフォルトにリセット
+mutsumi config --path     # 設定ファイルパスを表示
+```
+
+## ディレクトリ構造
+
+```
+~/.mutsumi/                          （推奨場所）
+├── config.toml          # メイン設定
+├── mutsumi.json         # 個人タスク
+├── themes/
+│   └── my-theme.toml    # カスタムテーマ
+└── keys/
+    └── my-keys.toml     # カスタムキーバインド（予定）
+```

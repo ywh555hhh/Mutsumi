@@ -1,0 +1,69 @@
+---
+title: Comparison
+description: How Mutsumi compares to other terminal task managers.
+---
+
+## Feature Matrix
+
+| Feature | Mutsumi | Dooit | Taskwarrior | Ultralist | dstask |
+|---------|:-------:|:-----:|:-----------:|:---------:|:------:|
+| TUI | Textual | Textual | ncurses | Bubble Tea | Custom |
+| CLI | click | — | Custom | Custom | Custom |
+| Storage | JSON | SQLite | Flat file | JSON | Git |
+| Config | TOML | Python | RC file | YAML | YAML |
+| Custom fields | `extra="allow"` | — | UDA | — | — |
+| Priority | 3-level enum | Integer | Integer | Boolean | P1-P3 |
+| Subtasks | Nested JSON | parent_id | Depends | — | — |
+| Multi-key sequences | `dd`, `gg` | `dd`, `da` | — | — | — |
+| Keybinding presets | 3 | 1 | N/A | 1 | N/A |
+| Cascading completion | Yes | Yes | — | — | — |
+| File watching | watchdog | — | — | — | — |
+| Agent integration | First-class | — | Hooks | — | — |
+| i18n | 3 languages | — | — | — | — |
+| Themes | 4 + custom | Yes | — | — | — |
+| Network | Never | Never | Sync server | Never | Git |
+| Search | Dim-as-filter | Filter | Report filter | — | — |
+
+## What We Borrowed
+
+### From Dooit
+- **Multi-key sequences**: Key buffer with prefix matching, no timeout
+- **Inline confirmation bar**: `"Delete 'xxx'? [y/N]"` — one keystroke
+- **Cascading completion**: Parent done → children done
+- **Priority cycling**: `+`/`-` keys
+- **Sort overlay**: `s` key picker
+- **Help screen**: `?` auto-generated reference
+
+### From Taskwarrior
+- **CLI-for-every-action**: Agent/script integration
+- **Custom fields concept**: Arbitrary metadata on tasks
+
+### From Vim/Neovim
+- **Keybinding muscle memory**: `j/k/dd/gg/G/y/p`
+
+### From Linear
+- **Keyboard-first philosophy**: Primary interaction mode
+
+## What We Rejected
+
+| Feature | Source | Why |
+|---------|--------|-----|
+| SQLite | Dooit | Agents output JSON natively |
+| Python config | Dooit | RCE vector — TOML is safe |
+| Plugin system | Dooit | Complexity budget |
+| Unbounded urgency | Dooit | 3 named levels suffice |
+| Sync server | Taskwarrior | Local Only principle |
+| Hook scripts | Taskwarrior | Event logs are passive |
+| NLP dates | Todoist | Ambiguous — use ISO 8601 |
+
+## Mutsumi Originals
+
+| Design | Why Unique |
+|--------|-----------|
+| **JSON as Model** | Lingua franca of AI agents |
+| **Agent Agnostic MVC** | Explicit AI agent integration |
+| **3 keybinding presets** | Respects personal muscle memory |
+| **`extra="allow"`** | Zero-ceremony custom fields |
+| **Scope hybrid** | Manual > due_date > fallback inbox |
+| **Dim-as-filter search** | Preserves spatial context |
+| **Triple input parity** | Keyboard + Mouse + CLI |

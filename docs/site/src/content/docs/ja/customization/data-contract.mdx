@@ -1,0 +1,52 @@
+---
+title: データコントラクト
+description: mutsumi.json スキーマの詳細仕様。
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+## ファイル構造
+
+```json
+{
+  "$schema": "https://mutsumi.dev/schema/v1.json",
+  "version": 1,
+  "tasks": [ ... ]
+}
+```
+
+## タスクオブジェクト
+
+| フィールド | 型 | 必須 | デフォルト | 説明 |
+|-----------|------|------|-----------|------|
+| `id` | string | **はい** | — | UUIDv7 形式 |
+| `title` | string | **はい** | — | タスクタイトル |
+| `status` | string | **はい** | `"pending"` | `"pending"` \| `"done"` |
+| `scope` | string | いいえ | `"inbox"` | `"day"` \| `"week"` \| `"month"` \| `"inbox"` |
+| `priority` | string | いいえ | `"normal"` | `"high"` \| `"normal"` \| `"low"` |
+| `tags` | string[] | いいえ | `[]` | カスタムタグ |
+| `children` | Task[] | いいえ | `[]` | サブタスク（再帰的） |
+| `due_date` | string | いいえ | — | ISO 8601 日付 |
+| `description` | string | いいえ | — | 詳細説明 |
+
+## カスタムフィールド
+
+Pydantic の `extra="allow"` により、上記以外のフィールドは**保持**されます。Agent は自由にカスタムフィールドを追加できます。
+
+## Scope 解決
+
+```
+手動 scope  >  due_date 自動推定  >  フォールバック "inbox"
+```
+
+## バリデーションレベル
+
+| レベル | 動作 |
+|--------|------|
+| `strict` | 無効なフィールド/値を拒否 |
+| `normal` | 無効なタスクをスキップ（デフォルト） |
+| `loose` | ベストエフォート |
+
+<Aside>
+Mutsumi はユーザーデータを神聖なものとして扱います。認識できないフィールドを削除することは絶対にありません。
+</Aside>

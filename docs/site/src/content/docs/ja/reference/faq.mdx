@@ -1,0 +1,53 @@
+---
+title: よくある質問
+description: Mutsumi に関するよくある質問と回答。
+---
+
+## 基本的な質問
+
+### Mutsumi はネットワーク接続が必要ですか？
+
+**いいえ。** Mutsumi は 100% ローカルで動作します。テレメトリ、API コール、アナリティクス、クラウドサービスは一切ありません。
+
+### どの AI Agent が使えますか？
+
+JSON の読み書きができるすべてのプログラム：Claude Code、Codex CLI、Gemini CLI、OpenCode、Aider、カスタムスクリプトなど。
+
+### AI Agent なしでも使えますか？
+
+**はい。** Mutsumi の TUI と CLI は完全な CRUD 操作をサポートしています。
+
+### なぜ SQLite ではなく JSON なのですか？
+
+JSON は AI Agent の共通言語です。JSON ファイルは人間が読め、`cat`/`jq` で操作でき、git diff が可能です。
+
+### Notion や Todoist との違いは？
+
+Mutsumi はターミナルユーザー向けです。起動 < 1 秒、ログイン不要、オフラインで動作します。
+
+## 使い方の質問
+
+### TUI に "Nothing here yet" と表示されるが mutsumi.json にはタスクがある
+
+現在のタブを確認してください。タスクは scope でフィルタリングされます。`2` で Week、`3` で Month、`4` で Inbox を表示します。
+
+### Agent の変更が TUI に反映されない
+
+- Agent が Mutsumi と同じ `mutsumi.json` パスに書き込んでいるか確認
+- JSON が有効か確認：`mutsumi validate`
+
+### テーマやキーバインドが適用されない
+
+- `mutsumi config --show` で設定の読み込みを確認
+- 設定ファイル：`~/.mutsumi/config.toml`
+
+### デバイス間でタスクを同期するには？
+
+Mutsumi には同期機能がありません（Local Only 原則）。代替手段：
+- **Git**: `mutsumi.json` をコミット＆プッシュ
+- **Syncthing**: `mutsumi.json` を含むディレクトリを同期
+- **クラウドストレージ**: 同期フォルダに `mutsumi.json` を配置
+
+### バグを報告するには？
+
+GitHub で Issue を作成：https://github.com/ywh555hhh/Mutsumi/issues

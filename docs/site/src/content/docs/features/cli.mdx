@@ -1,0 +1,69 @@
+---
+title: CLI Overview
+description: Command-line interface for Mutsumi.
+---
+
+## Command Groups
+
+### Launch TUI
+
+```bash
+mutsumi                              # Watch mutsumi.json in current dir
+mutsumi --path /path/to/mutsumi.json # Specify path
+```
+
+### Task CRUD
+
+```bash
+mutsumi add "title" [-P high|normal|low] [-s day|week|month|inbox] [-t "tag1,tag2"] [-d "description"]
+mutsumi list                         # List all tasks
+mutsumi done <id-prefix>             # Mark task as done
+mutsumi edit <id-prefix> [--title "new"] [--priority high] [--scope week]
+mutsumi rm <id-prefix>               # Delete task
+```
+
+### Setup
+
+```bash
+mutsumi init                         # Interactive setup
+mutsumi init --defaults              # Non-interactive defaults
+mutsumi setup --agent claude-code    # Agent integration
+mutsumi setup                        # List available agents
+```
+
+### Config
+
+```bash
+mutsumi config --edit                # Open in $EDITOR
+mutsumi config --show                # Print config
+mutsumi config --reset               # Reset to defaults
+mutsumi config --path                # Print config path
+```
+
+### Utility
+
+```bash
+mutsumi validate                     # Validate mutsumi.json
+mutsumi schema                       # Print JSON Schema
+mutsumi --version                    # Print version
+```
+
+## ID Prefix Matching
+
+You don't need to type the full 26-character task ID. Any unique prefix works:
+
+```bash
+mutsumi done 01EX    # Matches "01EXAMPLE000000000000000001" if unique
+```
+
+### Migration & Projects
+
+```bash
+mutsumi migrate                      # Migrate tasks.json → mutsumi.json
+mutsumi migrate --config             # Migrate config directory
+mutsumi project add ~/projects/app   # Register a project source
+mutsumi project list                 # List registered projects
+mutsumi project remove app           # Remove a project
+```
+
+See [CLI Command Reference](/reference/cli-commands/) for complete syntax.

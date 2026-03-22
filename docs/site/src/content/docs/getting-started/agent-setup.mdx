@@ -1,0 +1,76 @@
+---
+title: Agent Setup
+description: Integrate Mutsumi with your AI agent.
+---
+
+import { Tabs, TabItem, Aside } from '@astrojs/starlight/components';
+
+## Supported Agents
+
+| Agent | Type | Integration |
+|-------|------|-------------|
+| Claude Code | AI CLI | Native (recommended) |
+| Codex CLI | AI CLI | Native |
+| Gemini CLI | AI CLI | Native |
+| OpenCode | AI CLI | Native |
+| Aider | AI CLI | Native |
+| Shell scripts | Custom | Native |
+| Cron jobs | System | Native |
+
+"Native" means only JSON file read/write is needed — no SDK or plugin required.
+
+## Setup Methods
+
+<Tabs>
+  <TabItem label="Auto-inject (recommended)">
+    ```bash
+    cd ~/your-project
+    mutsumi setup --agent claude-code   # Appends rules to CLAUDE.md
+    mutsumi setup --agent codex-cli     # Appends to AGENTS.md
+    mutsumi setup --agent gemini-cli    # Appends to GEMINI.md
+    ```
+
+    This appends a `## Mutsumi Task Integration` section to the agent's config file. Running setup again is safe — it won't duplicate the section.
+  </TabItem>
+  <TabItem label="Manual">
+    Tell your agent this when starting a session:
+
+    > This project uses Mutsumi for task management. Tasks live in `./mutsumi.json`.
+    > Read the file, modify the `tasks` array, write the entire file back.
+    > Required fields: `id` (unique string), `title` (string), `status` ("pending" or "done").
+    > Optional: `scope`, `priority`, `tags`, `description`.
+  </TabItem>
+  <TabItem label="Custom">
+    ```bash
+    mutsumi setup --agent custom   # Prints prompt to stdout
+    ```
+
+    Copy the output and paste it into your agent's system prompt.
+  </TabItem>
+</Tabs>
+
+## Agent Prompt Template
+
+```markdown
+## Task Management (Mutsumi Integration)
+
+You have access to a local task file at `./mutsumi.json`.
+When the user asks you to manage tasks, read and write this file.
+
+Schema:
+- Required: id (unique string), title (string), status ("pending" | "done")
+- Optional: scope ("day"|"week"|"month"|"inbox"), priority ("high"|"normal"|"low"),
+  tags (string[]), children (Task[]), due_date (ISO date), description (string)
+- Preserve any fields you don't recognize — do NOT delete them
+- Use atomic write (temp file + rename) when possible
+```
+
+## Verify Setup
+
+```bash
+cat CLAUDE.md   # Should contain "## Mutsumi Task Integration"
+```
+
+<Aside>
+Your agent only needs to read and write `mutsumi.json`. No special SDK, no API calls, no plugins. If it can write JSON, it works with Mutsumi.
+</Aside>

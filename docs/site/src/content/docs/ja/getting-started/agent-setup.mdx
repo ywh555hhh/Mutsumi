@@ -1,0 +1,153 @@
+---
+title: "Agent セットアップ"
+description: "Mutsumi と AI Agent（Claude Code、Codex CLI、Gemini CLI 等）を統合する 3 つの方法。"
+---
+
+import { Tabs, TabItem, Steps, Aside } from '@astrojs/starlight/components';
+
+## 概要
+
+Mutsumi は **Agent 非依存** です。JSON を正しく書ける**あらゆるプログラム**が Controller として動作します。Agent との統合には 3 つの方法があります。
+
+## 方法 A: 自動注入（推奨）
+
+`mutsumi setup` コマンドで、Agent の設定ファイルに統合ルールを自動注入します。
+
+<Tabs>
+  <TabItem label="Claude Code">
+
+```bash
+cd ~/your-project
+mutsumi setup --agent claude-code
+```
+
+これで `CLAUDE.md` の末尾に `## Mutsumi Task Integration` セクションが追記されます。
+
+確認：
+```bash
+cat CLAUDE.md
+# 末尾に "## Mutsumi Task Integration" が含まれているはず
+```
+
+  </TabItem>
+  <TabItem label="Codex CLI">
+
+```bash
+mutsumi setup --agent codex-cli
+```
+
+`AGENTS.md` に統合ルールが追記されます。
+
+  </TabItem>
+  <TabItem label="Gemini CLI">
+
+```bash
+mutsumi setup --agent gemini-cli
+```
+
+`GEMINI.md` に統合ルールが追記されます。
+
+  </TabItem>
+</Tabs>
+
+<Aside type="note">
+`mutsumi setup` は何度実行しても安全です。セクションの重複は発生しません。
+</Aside>
+
+## 方法 B: 手動指示（任意の Agent で動作）
+
+Agent とのセッション開始時に以下を伝えてください：
+
+> このプロジェクトは Mutsumi をタスク管理に使用しています。タスクは `./mutsumi.json` にあります。
+> ファイルを読み取り、`tasks` 配列を変更し、ファイル全体を書き戻してください。
+> 必須フィールド: `id`（一意の文字列）、`title`（文字列）、`status`（`"pending"` または `"done"`）。
+> オプション: `scope`（`"day"`/`"week"`/`"month"`/`"inbox"`）、`priority`（`"high"`/`"normal"`/`"low"`）、`tags`（文字列配列）、`description`（文字列）。
+
+## 方法 C: プロンプトテンプレート出力
+
+```bash
+mutsumi setup --agent custom
+```
+
+これは統合プロンプトを stdout に出力します。コピーして任意の Agent のシステムプロンプトや設定にペーストしてください。
+
+## Agent プロンプトテンプレート
+
+以下は Agent のシステムプロンプトに埋め込む推奨テンプレートです：
+
+```markdown
+## Task Management (Mutsumi Integration)
+
+You have access to a local task file at `./mutsumi.json`.
+When the user asks you to manage tasks, read and write this file.
+
+Schema:
+- Required fields: id (unique string), title (string), status ("pending" | "done")
+- Optional fields: scope ("day"|"week"|"month"|"inbox"), priority ("high"|"normal"|"low"),
+  tags (string[]), children (Task[]), due_date (ISO date), description (string)
+- Preserve any fields you don't recognize — do NOT delete them
+- Use atomic write (temp file + rename) when possible
+- Generate UUIDv7 for new task IDs
+
+Example task:
+{"id":"01JQ...","title":"Fix auth","status":"pending","scope":"day","priority":"high","tags":["dev"],"children":[]}
+```
+
+## 対応 Agent 一覧
+
+| Agent | タイプ | 統合レベル |
+|---|---|---|
+| Claude Code | AI CLI | ネイティブ（推奨） |
+| Codex CLI | AI CLI | ネイティブ |
+| Gemini CLI | AI CLI | ネイティブ |
+| OpenCode | AI CLI | ネイティブ |
+| Aider | AI CLI | ネイティブ |
+| シェルスクリプト | カスタム | ネイティブ |
+| cron ジョブ | システム | ネイティブ |
+
+<Aside type="tip">
+「ネイティブ」とは、JSON ファイルの読み書きのみで統合できることを意味します。SDK やプラグインのインストールは不要です。
+</Aside>
+
+## Agent がタスクを書く例
+
+### タスクの追加（Python）
+
+```python
+import json, uuid, datetime, tempfile, os
+
+# 読み取り
+with open("mutsumi.json") as f:
+    data = json.load(f)
+
+# 追加
+new_task = {
+    "id": str(uuid.uuid7()),
+    "title": "ログインバグを修正",
+    "status": "pending",
+    "scope": "day",
+    "priority": "high",
+    "tags": ["bugfix"],
+    "created_at": datetime.datetime.now(datetime.UTC).isoformat(),
+    "children": []
+}
+data["tasks"].append(new_task)
+
+# アトミック書き込み
+tmp = tempfile.NamedTemporaryFile(
+    mode='w', dir='.', suffix='.tmp', delete=False
+)
+json.dump(data, tmp, ensure_ascii=False, indent=2)
+tmp.close()
+os.rename(tmp.name, "mutsumi.json")
+```
+
+### タスクの完了
+
+```python
+for task in data["tasks"]:
+    if task["id"] == target_id:
+        task["status"] = "done"
+        task["completed_at"] = datetime.datetime.now(datetime.UTC).isoformat()
+        break
+```

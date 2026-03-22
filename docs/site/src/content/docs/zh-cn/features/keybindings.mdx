@@ -1,0 +1,110 @@
+---
+title: 快捷键
+description: Mutsumi 的三种键位预设：vim、emacs 和 arrow。
+---
+
+import { Tabs, TabItem, Aside } from '@astrojs/starlight/components';
+
+## 概述
+
+Mutsumi 提供三种键位预设，在配置中一键切换。所有预设共享相同的鼠标行为和功能键（Space、Enter、Escape、Tab 等），只有导航键和退出键不同。
+
+## 键位预设
+
+<Tabs>
+  <TabItem label="vim（默认）">
+
+| 按键 | 操作 |
+|---|---|
+| `j` | 光标下移 |
+| `k` | 光标上移 |
+| `gg` | 跳到列表顶部 |
+| `G` (Shift+g) | 跳到列表底部 |
+| `h` | 折叠分组 |
+| `l` | 展开分组 |
+| `J` (Shift+j) | 下移任务 |
+| `K` (Shift+k) | 上移任务 |
+| `q` | 退出 |
+
+  </TabItem>
+  <TabItem label="emacs">
+
+| 按键 | 操作 |
+|---|---|
+| `Ctrl+n` | 光标下移 |
+| `Ctrl+p` | 光标上移 |
+| `Ctrl+a` | 跳到顶部 |
+| `Ctrl+e` | 跳到底部 |
+| `Ctrl+b` | 折叠分组 |
+| `Ctrl+f` | 展开分组 |
+| `Ctrl+Shift+n` | 下移任务 |
+| `Ctrl+Shift+p` | 上移任务 |
+| `Ctrl+q` | 退出 |
+
+  </TabItem>
+  <TabItem label="arrow">
+
+| 按键 | 操作 |
+|---|---|
+| `↓` | 光标下移 |
+| `↑` | 光标上移 |
+| `Home` | 跳到顶部 |
+| `End` | 跳到底部 |
+| `←` | 折叠分组 |
+| `→` | 展开分组 |
+| `Shift+↓` | 下移任务 |
+| `Shift+↑` | 上移任务 |
+| `q` | 退出 |
+
+  </TabItem>
+</Tabs>
+
+## 通用快捷键（所有预设共享）
+
+以下快捷键在所有预设中完全相同：
+
+| 按键 | 操作 |
+|---|---|
+| `Space` | 切换任务完成状态 |
+| `Enter` | 展开/折叠详情面板 |
+| `Escape` | 关闭详情面板 |
+| `Tab` | 切换到下一个标签页 |
+| `Shift+Tab` | 切换到上一个标签页 |
+| `1` / `2` / `3` / `4` | 快速切换到第 N 个标签页 |
+| `n` | 新建任务 |
+| `e` | 编辑任务 |
+| `i` | 行内编辑标题 |
+| `/` | 搜索任务 |
+| `dd` | 删除任务（需确认） |
+| `+` / `=` | 提升优先级 |
+| `-` / `_` | 降低优先级 |
+| `y` | 复制任务 |
+| `p` | 粘贴任务（下方） |
+| `P` (Shift+p) | 粘贴任务（上方） |
+| `z` | 切换子任务折叠 |
+| `s` | 排序 |
+| `A` (Shift+a) | 添加子任务 |
+| `?` | 显示帮助 |
+
+<Aside type="note">
+`dd` 和 `gg` 是多键序列（chord），由 KeyManager 处理。按第一个键后需在短时间内按第二个键。
+</Aside>
+
+## 切换预设
+
+在 `~/.config/mutsumi/config.toml` 中设置：
+
+```toml
+keybindings = "vim"     # "vim" | "emacs" | "arrows"
+```
+
+或使用 CLI：
+
+```bash
+mutsumi init --defaults   # 然后编辑 config.toml
+mutsumi config --edit     # 直接打开编辑器
+```
+
+## 自定义快捷键
+
+如果预设不能满足需求，可以通过 `key_overrides` 覆盖个别快捷键。详见 [自定义快捷键](/zh-cn/customization/custom-keybindings/)。

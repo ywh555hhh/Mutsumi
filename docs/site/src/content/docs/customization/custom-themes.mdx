@@ -1,0 +1,169 @@
+---
+title: Custom Themes
+description: Create custom Mutsumi themes using TOML. Color fields, file placement, and loading priority.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+## Theme File Format
+
+Custom themes are TOML files placed in `~/.config/mutsumi/themes/`.
+
+```toml
+# ~/.config/mutsumi/themes/my-theme.toml
+
+[meta]
+name = "My Custom Theme"
+author = "your-name"
+
+[colors]
+background = "#1e1e2e"
+foreground = "#cdd6f4"
+accent = "#94e2d5"
+muted = "#6c7086"
+error = "#f38ba8"
+warning = "#fab387"
+success = "#a6e3a1"
+
+[priority_colors]
+high = "#f38ba8"
+normal = "#cdd6f4"
+low = "#6c7086"
+
+[tag_colors]
+dev = "#89b4fa"
+bugfix = "#f38ba8"
+life = "#a6e3a1"
+docs = "#fab387"
+# Unmatched tags use the accent color
+```
+
+## Color Fields
+
+### Required
+
+| Field | Description | Example |
+|-------|-------------|---------|
+| `colors.background` | Main background | `#1e1e2e` |
+| `colors.foreground` | Primary text | `#cdd6f4` |
+| `colors.accent` | Accent color for highlights, active tabs, links | `#94e2d5` |
+| `colors.muted` | Secondary/dimmed text | `#6c7086` |
+| `colors.error` | Error states, danger actions | `#f38ba8` |
+
+### Optional
+
+| Field | Description | Fallback |
+|-------|-------------|----------|
+| `colors.warning` | Warning indicators | Derived from accent |
+| `colors.success` | Completed task indicators | Derived from accent |
+| `priority_colors.high` | High priority star/indicator | `colors.error` |
+| `priority_colors.normal` | Normal priority star/indicator | `colors.foreground` |
+| `priority_colors.low` | Low priority star/indicator | `colors.muted` |
+| `tag_colors.<name>` | Color for specific tag names | `colors.accent` |
+
+## File Placement
+
+Place custom theme files in:
+
+```
+~/.config/mutsumi/themes/
+├── catppuccin.toml
+├── gruvbox.toml
+└── my-theme.toml
+```
+
+Platform-specific paths:
+
+| Platform | Path |
+|----------|------|
+| Linux | `~/.config/mutsumi/themes/` |
+| macOS | `~/.config/mutsumi/themes/` |
+| Windows | `%APPDATA%\mutsumi\themes\` |
+
+## Loading Priority
+
+1. **Custom theme file** in `~/.config/mutsumi/themes/<name>.toml`
+2. **Built-in theme** matching the name (`monochrome-zen`, `nord`, `dracula`, `solarized`)
+3. **Fallback** to `monochrome-zen` if the theme is not found
+
+## Activating a Custom Theme
+
+Set the theme name in `config.toml` (without the `.toml` extension):
+
+```toml
+theme = "catppuccin"
+```
+
+This loads `~/.config/mutsumi/themes/catppuccin.toml`.
+
+## Example: Catppuccin Mocha
+
+```toml
+[meta]
+name = "Catppuccin Mocha"
+author = "catppuccin"
+
+[colors]
+background = "#1e1e2e"
+foreground = "#cdd6f4"
+accent = "#94e2d5"
+muted = "#6c7086"
+error = "#f38ba8"
+warning = "#fab387"
+success = "#a6e3a1"
+
+[priority_colors]
+high = "#f38ba8"
+normal = "#f9e2af"
+low = "#6c7086"
+
+[tag_colors]
+dev = "#89b4fa"
+bugfix = "#f38ba8"
+life = "#a6e3a1"
+docs = "#fab387"
+ml = "#cba6f7"
+```
+
+## Example: Gruvbox Dark
+
+```toml
+[meta]
+name = "Gruvbox Dark"
+author = "morhetz"
+
+[colors]
+background = "#282828"
+foreground = "#ebdbb2"
+accent = "#8ec07c"
+muted = "#928374"
+error = "#fb4934"
+warning = "#fabd2f"
+success = "#b8bb26"
+
+[priority_colors]
+high = "#fb4934"
+normal = "#fabd2f"
+low = "#928374"
+```
+
+<Aside type="note">
+Theme colors are mapped to Textual CSS variables at runtime. Each token in the theme file directly controls a CSS variable used by Mutsumi's widgets. This means custom themes affect the entire TUI consistently.
+</Aside>
+
+## Built-in Theme Reference
+
+For reference, here are the hex values of all four built-in themes:
+
+| Token | monochrome-zen | nord | dracula | solarized |
+|-------|---------------|------|---------|-----------|
+| background | `#0f0f0f` | `#2e3440` | `#282a36` | `#002b36` |
+| surface | `#1a1a1a` | `#3b4252` | `#44475a` | `#073642` |
+| border | `#333333` | `#4c566a` | `#6272a4` | `#586e75` |
+| text | `#e0e0e0` | `#eceff4` | `#f8f8f2` | `#839496` |
+| text_muted | `#666666` | `#d8dee9` | `#6272a4` | `#586e75` |
+| accent | `#5de4c7` | `#88c0d0` | `#bd93f9` | `#2aa198` |
+| error | `#e06c75` | `#bf616a` | `#ff5555` | `#dc322f` |
+| priority_high | `#e06c75` | `#bf616a` | `#ff5555` | `#dc322f` |
+| priority_normal | `#e5c07b` | `#ebcb8b` | `#f1fa8c` | `#b58900` |
+| priority_low | `#666666` | `#4c566a` | `#6272a4` | `#586e75` |

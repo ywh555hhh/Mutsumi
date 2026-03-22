@@ -1,0 +1,89 @@
+---
+title: Keybindings
+description: Three keybinding presets — vim, emacs, and arrows.
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+
+Mutsumi ships with three keybinding presets. Mouse behavior is identical across all presets.
+
+## Presets
+
+<Tabs>
+  <TabItem label="vim (default)">
+    | Key | Action |
+    |-----|--------|
+    | `j` / `k` | Move down / up |
+    | `G` | Jump to bottom |
+    | `gg` | Jump to top (multi-key) |
+    | `h` / `l` | Collapse / expand group |
+    | `J` / `K` | Move task down / up |
+    | `dd` | Delete task (multi-key) |
+    | `q` | Quit |
+  </TabItem>
+  <TabItem label="emacs">
+    | Key | Action |
+    |-----|--------|
+    | `Ctrl+N` / `Ctrl+P` | Move down / up |
+    | `Ctrl+E` | Jump to bottom |
+    | `Ctrl+A` | Jump to top |
+    | `Ctrl+B` / `Ctrl+F` | Collapse / expand group |
+    | `Ctrl+Shift+N` / `Ctrl+Shift+P` | Move task down / up |
+    | `dd` | Delete task |
+    | `Ctrl+Q` | Quit |
+  </TabItem>
+  <TabItem label="arrows">
+    | Key | Action |
+    |-----|--------|
+    | `↓` / `↑` | Move down / up |
+    | `End` | Jump to bottom |
+    | `Home` | Jump to top |
+    | `←` / `→` | Collapse / expand group |
+    | `Shift+↓` / `Shift+↑` | Move task down / up |
+    | `dd` | Delete task |
+    | `q` | Quit |
+  </TabItem>
+</Tabs>
+
+## Shared Bindings (All Presets)
+
+| Key | Action |
+|-----|--------|
+| `Space` | Toggle done/pending |
+| `Enter` | Show detail panel |
+| `Escape` | Close detail / cancel |
+| `Tab` / `Shift+Tab` | Next / previous tab |
+| `1` `2` `3` `4` | Switch to Today / Week / Month / Inbox |
+| `n` | New task |
+| `e` | Edit task |
+| `i` | Inline edit title |
+| `/` | Search |
+| `s` | Sort |
+| `+` / `-` | Priority up / down |
+| `y` / `p` | Copy / paste task |
+| `A` (Shift+A) | Add subtask |
+| `z` | Toggle fold |
+| `?` | Show help screen |
+
+## Multi-Key Sequences
+
+Mutsumi supports multi-key sequences via `KeyManager`:
+
+- `dd` — Delete selected task (with confirmation)
+- `gg` — Jump to top of list (vim preset)
+
+Type the keys in sequence — no timeout. Press `Escape` to cancel a partial sequence.
+
+## Switch Preset
+
+In `~/.config/mutsumi/config.toml`:
+
+```toml
+keybindings = "vim"     # or "emacs" or "arrows"
+```
+
+Or during initial setup:
+
+```bash
+mutsumi init
+```

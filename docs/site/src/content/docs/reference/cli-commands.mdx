@@ -1,0 +1,401 @@
+---
+title: CLI Command Reference
+description: Complete reference for every Mutsumi CLI command with full syntax, options, and examples.
+---
+
+## mutsumi (TUI Launch)
+
+Launch the Mutsumi TUI task board.
+
+```bash
+mutsumi [OPTIONS]
+```
+
+| Option | Description | Default |
+|--------|-------------|---------|
+| `--path PATH` | Path to `mutsumi.json` to watch | `./mutsumi.json` |
+| `--version` | Print version and exit | -- |
+| `--help` | Show help and exit | -- |
+
+### Examples
+
+```bash
+# Watch mutsumi.json in current directory
+mutsumi
+
+# Watch a specific file
+mutsumi --path /path/to/mutsumi.json
+
+# Print version
+mutsumi --version
+# Output: mutsumi, version 0.4.0b1
+```
+
+---
+
+## mutsumi add
+
+Create a new task and append it to `mutsumi.json`.
+
+```bash
+mutsumi add TITLE [OPTIONS]
+```
+
+| Option | Short | Type | Values | Default |
+|--------|-------|------|--------|---------|
+| `--priority` | `-P` | string | `high`, `normal`, `low` | `normal` |
+| `--scope` | `-s` | string | `day`, `week`, `month`, `inbox` | Config `default_scope` |
+| `--tags` | `-t` | string | Comma-separated | `[]` |
+| `--description` | `-d` | string | Free text | -- |
+
+### Examples
+
+```bash
+# Minimal
+mutsumi add "Fix login bug"
+
+# Full options
+mutsumi add "Fix login bug" --priority high --scope day --tags "bugfix,urgent" -d "Session expires on refresh"
+
+# Short flags
+mutsumi add "Write tests" -P low -s week -t "dev"
+```
+
+A UUIDv7 ID and `created_at` timestamp are auto-generated.
+
+---
+
+## mutsumi list
+
+List all tasks in `mutsumi.json`.
+
+```bash
+mutsumi list [OPTIONS]
+```
+
+| Option | Type | Values | Description |
+|--------|------|--------|-------------|
+| `--scope` | string | `today`, `week`, `month`, `inbox` | Filter by scope |
+
+### Examples
+
+```bash
+# List all tasks
+mutsumi list
+
+# Filter by scope
+mutsumi list --scope today
+```
+
+---
+
+## mutsumi done
+
+Mark a task as done.
+
+```bash
+mutsumi done ID_PREFIX
+```
+
+| Argument | Description |
+|----------|-------------|
+| `ID_PREFIX` | Full task ID or any unique prefix |
+
+### Examples
+
+```bash
+# Full ID
+mutsumi done 01JQ8X7K3M0000000000000001
+
+# Prefix matching
+mutsumi done 01JQ
+
+# If prefix is ambiguous, Mutsumi lists matches
+mutsumi done 01
+# Error: Multiple tasks match '01'. Be more specific.
+```
+
+Sets `status` to `"done"` and auto-fills `completed_at`.
+
+---
+
+## mutsumi edit
+
+Edit an existing task's fields.
+
+```bash
+mutsumi edit ID_PREFIX [OPTIONS]
+```
+
+| Option | Type | Values | Description |
+|--------|------|--------|-------------|
+| `--title` | string | -- | New task title |
+| `--priority` | string | `high`, `normal`, `low` | New priority |
+| `--scope` | string | `day`, `week`, `month`, `inbox` | New scope |
+| `--tags` | string | Comma-separated | Replace tags |
+
+### Examples
+
+```bash
+# Change title
+mutsumi edit 01JQ --title "New title"
+
+# Change priority and scope
+mutsumi edit 01JQ --priority low --scope week
+
+# Replace tags
+mutsumi edit 01JQ --tags "docs,review"
+```
+
+---
+
+## mutsumi rm
+
+Delete a task from `mutsumi.json`.
+
+```bash
+mutsumi rm ID_PREFIX
+```
+
+| Argument | Description |
+|----------|-------------|
+| `ID_PREFIX` | Full task ID or any unique prefix |
+
+### Examples
+
+```bash
+mutsumi rm 01JQ
+```
+
+Removes the task and all its children. Emits a `task_deleted` event to `events.jsonl`.
+
+---
+
+## mutsumi init
+
+Initialize Mutsumi configuration.
+
+```bash
+mutsumi init [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `--defaults` | Non-interactive mode, use all defaults |
+| `--lang LANG` | Set language (`en`, `zh`, `ja`) |
+| `--personal` | Initialize personal tasks at `~/.mutsumi/mutsumi.json` |
+| `--project` | Create `mutsumi.json` and register project in config |
+
+### Examples
+
+```bash
+# Interactive setup
+mutsumi init
+
+# Non-interactive with defaults
+mutsumi init --defaults
+
+# Set language to Chinese
+mutsumi init --lang zh
+
+# Initialize personal tasks
+mutsumi init --personal
+
+# Create and register project
+mutsumi init --project
+```
+
+Creates `~/.mutsumi/config.toml` (or `~/.config/mutsumi/config.toml`) with the specified settings.
+
+---
+
+## mutsumi setup
+
+Configure agent integration.
+
+```bash
+mutsumi setup [--agent AGENT]
+```
+
+| Option | Values | Description |
+|--------|--------|-------------|
+| `--agent` | `claude-code`, `codex-cli`, `gemini-cli`, `custom` | Target agent |
+
+### Examples
+
+```bash
+# List available agents
+mutsumi setup
+
+# Auto-inject for Claude Code (appends to CLAUDE.md)
+mutsumi setup --agent claude-code
+
+# Auto-inject for Codex CLI (appends to AGENTS.md)
+mutsumi setup --agent codex-cli
+
+# Auto-inject for Gemini CLI (appends to GEMINI.md)
+mutsumi setup --agent gemini-cli
+
+# Print prompt to stdout (for any agent)
+mutsumi setup --agent custom
+```
+
+Running setup again is safe -- it detects existing sections and does not duplicate.
+
+---
+
+## mutsumi config
+
+Manage configuration.
+
+```bash
+mutsumi config [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `--edit` | Open config in `$EDITOR` |
+| `--show` | Print current config |
+| `--reset` | Reset to defaults |
+| `--path` | Print config file path |
+
+### Examples
+
+```bash
+mutsumi config --edit
+mutsumi config --show
+mutsumi config --reset
+mutsumi config --path
+# Output: /Users/you/.mutsumi/config.toml
+```
+
+---
+
+## mutsumi migrate
+
+Migrate from legacy file names and config locations.
+
+```bash
+mutsumi migrate [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `--config` | Migrate config directory (`~/.config/mutsumi/` → `~/.mutsumi/`) |
+| `--all` | Migrate both task file and config |
+
+### Examples
+
+```bash
+# Migrate tasks.json → mutsumi.json in current directory
+mutsumi migrate
+
+# Migrate config directory
+mutsumi migrate --config
+
+# Migrate everything
+mutsumi migrate --all
+```
+
+---
+
+## mutsumi project
+
+Manage registered project sources.
+
+### mutsumi project add
+
+```bash
+mutsumi project add PATH
+```
+
+Register a project directory. The directory should contain (or will contain) a `mutsumi.json`.
+
+```bash
+mutsumi project add ~/projects/saas-app
+```
+
+### mutsumi project remove
+
+```bash
+mutsumi project remove NAME
+```
+
+Remove a project from the registry.
+
+```bash
+mutsumi project remove saas-app
+```
+
+### mutsumi project list
+
+```bash
+mutsumi project list
+```
+
+List all registered projects with their paths.
+
+---
+
+## mutsumi validate
+
+Validate `mutsumi.json` schema.
+
+```bash
+mutsumi validate [PATH]
+```
+
+| Argument | Description | Default |
+|----------|-------------|---------|
+| `PATH` | Path to mutsumi.json | `./mutsumi.json` |
+
+### Examples
+
+```bash
+# Validate current directory
+mutsumi validate
+
+# Validate specific file
+mutsumi validate /path/to/mutsumi.json
+```
+
+Reports validation errors: missing required fields, invalid enum values, malformed JSON.
+
+---
+
+## mutsumi schema
+
+Output the JSON Schema for `mutsumi.json`.
+
+```bash
+mutsumi schema [OPTIONS]
+```
+
+| Option | Values | Description |
+|--------|--------|-------------|
+| `--format` | `json` (default), `markdown` | Output format |
+
+### Examples
+
+```bash
+# JSON Schema (for agent consumption)
+mutsumi schema
+
+# Markdown field descriptions
+mutsumi schema --format markdown
+
+# Pipe to a file
+mutsumi schema > schema.json
+```
+
+---
+
+## Exit Codes
+
+| Code | Meaning |
+|------|---------|
+| `0` | Success |
+| `1` | General error |
+| `2` | Invalid arguments |
+| `3` | File not found |
+| `4` | Validation error |

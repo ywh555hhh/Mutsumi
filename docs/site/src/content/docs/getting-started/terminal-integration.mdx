@@ -1,0 +1,69 @@
+---
+title: Terminal Integration
+description: Set up tmux, iTerm2, or other terminal multiplexers with Mutsumi.
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+
+The recommended workflow: your agent or shell on the left, Mutsumi on the right.
+
+## tmux (Recommended)
+
+<Tabs>
+  <TabItem label="Quick script">
+    ```bash
+    bash scripts/tmux-dev.sh
+    ```
+
+    This creates a tmux session with your shell on the left and Mutsumi on the right.
+
+    Custom session name and width:
+    ```bash
+    MUTSUMI_WIDTH=40 bash scripts/tmux-dev.sh my-project
+    ```
+  </TabItem>
+  <TabItem label="Manual">
+    ```bash
+    tmux new-session -d -s dev
+    tmux split-window -h -p 30 "mutsumi"
+    tmux select-pane -t 0
+    tmux attach -t dev
+    ```
+  </TabItem>
+</Tabs>
+
+In the left pane, use your agent normally. Every time the agent writes to `tasks.json`, the right pane updates instantly.
+
+## iTerm2
+
+1. `Cmd+D` to split vertically
+2. Right pane: `mutsumi`
+3. Left pane: your agent / shell
+
+## Zellij
+
+```bash
+zellij action new-pane -d right -- mutsumi
+```
+
+## General Pattern
+
+```
+┌──────────────────────┬──────────────┐
+│                      │              │
+│  Your shell /        │   Mutsumi    │
+│  AI Agent            │   TUI        │
+│                      │              │
+│  (writes tasks.json) │  (watches)   │
+│                      │              │
+└──────────────────────┴──────────────┘
+```
+
+Mutsumi is layout-agnostic — she works in any terminal arrangement. Use tmux, zellij, iTerm2 splits, multiple monitors, or multiple terminal windows.
+
+## Demo
+
+```bash
+# Run the demo script to see live-reload in action
+bash scripts/demo.sh
+```

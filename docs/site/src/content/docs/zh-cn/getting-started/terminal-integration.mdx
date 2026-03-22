@@ -1,0 +1,110 @@
+---
+title: 终端集成
+description: 通过 tmux 或 iTerm2 实现分屏工作流。
+---
+
+import { Tabs, TabItem, Aside } from '@astrojs/starlight/components';
+
+## 概述
+
+Mutsumi 是布局无关的 —— 她是一个独立的终端进程，不关心你如何排列窗口。以下是推荐的集成方式。
+
+## tmux 分屏（推荐）
+
+左侧运行你的 Agent，右侧运行 Mutsumi：
+
+<Tabs>
+  <TabItem label="一键脚本">
+
+如果你克隆了 Mutsumi 仓库：
+
+```bash
+bash scripts/tmux-dev.sh
+```
+
+  </TabItem>
+  <TabItem label="手动设置">
+
+```bash
+# 创建新的 tmux 会话
+tmux new-session -d -s dev
+
+# 右侧 30% 区域运行 Mutsumi
+tmux split-window -h -p 30 "mutsumi"
+
+# 选择左侧面板
+tmux select-pane -t 0
+
+# 附加到会话
+tmux attach -t dev
+```
+
+  </TabItem>
+</Tabs>
+
+现在在左侧面板正常使用你的 Agent。每次 Agent 写入 `tasks.json`，右侧面板的 Mutsumi 都会即时更新。
+
+### tmux 常用操作
+
+| 按键 | 操作 |
+|---|---|
+| `Ctrl+b %` | 垂直分屏 |
+| `Ctrl+b "` | 水平分屏 |
+| `Ctrl+b ←/→` | 在面板间切换 |
+| `Ctrl+b z` | 最大化/恢复当前面板 |
+| `Ctrl+b d` | 断开会话（后台运行） |
+| `tmux attach -t dev` | 重新连接到会话 |
+
+<Aside type="tip">
+使用 `Ctrl+b z` 可以快速最大化 Mutsumi 面板查看全部任务，再按一次恢复分屏。
+</Aside>
+
+## iTerm2 分屏
+
+适用于 macOS 的 iTerm2 用户：
+
+1. `Cmd+D` —— 垂直分屏
+2. 右侧面板：运行 `mutsumi`
+3. 左侧面板：运行你的 Agent 或 Shell
+
+### iTerm2 快捷键
+
+| 按键 | 操作 |
+|---|---|
+| `Cmd+D` | 垂直分屏 |
+| `Cmd+Shift+D` | 水平分屏 |
+| `Cmd+[` / `Cmd+]` | 在面板间切换 |
+| `Cmd+Shift+Enter` | 最大化/恢复面板 |
+
+## Zellij
+
+```bash
+# 打开新标签页
+zellij action new-tab
+
+# 或在现有布局中分屏
+zellij action new-pane --direction right -- mutsumi
+```
+
+## 多显示器
+
+如果你有多个显示器，最简单的方式是在一个终端窗口中运行 Mutsumi，放在副屏上：
+
+```bash
+# 终端窗口 1（副屏）
+mutsumi --path ~/project/tasks.json
+
+# 终端窗口 2（主屏）
+# 你的正常工作流...
+```
+
+## 最佳实践
+
+1. **Mutsumi 放右侧/副屏** —— 她是视觉锚点，适合"瞥一眼"而非持续操作
+2. **给她 30-40% 的宽度** —— 足够显示标题和状态
+3. **不要关闭她** —— 让她一直运行，随时可以一键查看/勾选
+4. **使用 tmux 会话** —— 断开/重连不会丢失状态
+
+<Aside type="note">
+Mutsumi 支持响应式布局。终端宽度 &ge; 80 列时显示完整信息，60-79 列省略标签，40-59 列只显示标题。
+</Aside>

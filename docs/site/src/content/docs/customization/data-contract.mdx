@@ -1,0 +1,79 @@
+---
+title: Data Contract
+description: The mutsumi.json schema specification.
+---
+
+## File Structure
+
+```json
+{
+  "$schema": "https://mutsumi.dev/schema/v1.json",
+  "version": 1,
+  "tasks": [ ... ]
+}
+```
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `$schema` | string | No | JSON Schema URL (editor hints) |
+| `version` | integer | Yes | Data format version, currently `1` |
+| `tasks` | array | Yes | Array of task objects |
+
+## Task Object
+
+| Field | Type | Required | Default | Description |
+|-------|------|----------|---------|-------------|
+| `id` | string | **Yes** | — | UUIDv7 format |
+| `title` | string | **Yes** | — | Task title (≤ 120 chars) |
+| `status` | string | **Yes** | `"pending"` | `"pending"` or `"done"` |
+| `scope` | string | No | `"inbox"` | `"day"`, `"week"`, `"month"`, `"inbox"` |
+| `priority` | string | No | `"normal"` | `"high"`, `"normal"`, `"low"` |
+| `tags` | string[] | No | `[]` | Custom tags |
+| `children` | Task[] | No | `[]` | Subtask array (recursive) |
+| `created_at` | string | No | auto | ISO 8601 timestamp |
+| `due_date` | string | No | — | ISO 8601 date |
+| `completed_at` | string | No | — | Auto-filled when done |
+| `description` | string | No | — | Detailed description |
+
+## Custom Fields
+
+Mutsumi uses Pydantic `extra="allow"` — any field not listed above is **preserved** and never deleted. Agents are free to add custom fields:
+
+```json
+{
+  "id": "01JQ...",
+  "title": "Train model v2",
+  "status": "pending",
+  "estimated_minutes": 120,
+  "energy_level": "high-focus",
+  "context": "Needs GPU"
+}
+```
+
+## Scope Resolution
+
+```
+Manual scope  >  due_date auto-derivation  >  fallback "inbox"
+```
+
+| Condition | Derived Scope |
+|-----------|---------------|
+| `due_date` == today | `day` |
+| `due_date` within this week | `week` |
+| `due_date` within this month | `month` |
+| `due_date` in the past (overdue) | `day` (escalated) |
+| `due_date` beyond this month | `month` |
+
+## Nesting
+
+Subtasks are recursively nested via `children`. TUI renders up to 3 levels by default; deeper levels are collapsed.
+
+## Validation Levels
+
+| Level | Behavior |
+|-------|----------|
+| `strict` | Reject any invalid fields/values |
+| `normal` | Skip invalid tasks, render valid ones (default) |
+| `loose` | Best-effort rendering |
+
+See [Task Schema Reference](/reference/task-schema/) for complete field details.

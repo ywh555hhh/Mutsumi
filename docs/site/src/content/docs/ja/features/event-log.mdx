@@ -1,0 +1,94 @@
+---
+title: "イベントログ"
+description: "Mutsumi のイベントログ機能。events.jsonl による Agent への逆通知。"
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+## 概要
+
+Mutsumi は、ユーザーが TUI で操作を行った際に、オプションで `events.jsonl` にイベントを追記します。Agent はこのファイルを監視することで、ユーザーの操作を感知し、双方向通信を実現できます。
+
+## 有効化
+
+`config.toml` でイベントログを有効にします：
+
+```toml
+event_log_path = "./events.jsonl"
+```
+
+または特定のパスを指定：
+
+```toml
+event_log_path = "~/.local/share/mutsumi/events.jsonl"
+```
+
+## イベント形式
+
+イベントは JSONL（JSON Lines）形式で出力されます。1 行 1 イベントです。
+
+```jsonl
+{"ts":"2026-03-21T10:00:00Z","event":"task_completed","task_id":"01JQ8X7K3M...","title":"キャッシュバグを修正","source":"tui"}
+{"ts":"2026-03-21T10:01:22Z","event":"task_created","task_id":"01JQ8X7K4N...","title":"ユニットテストを書く","source":"tui"}
+{"ts":"2026-03-21T10:05:00Z","event":"task_deleted","task_id":"01JQ8X7K5P...","title":"古いタスク","source":"tui"}
+{"ts":"2026-03-21T10:06:30Z","event":"task_updated","task_id":"01JQ8X7K6Q...","changes":{"priority":"high→low"},"source":"tui"}
+```
+
+## イベントタイプ
+
+| イベント | フィールド | 説明 |
+|---|---|---|
+| `task_created` | `task_id`, `title` | 新しいタスクが作成された |
+| `task_completed` | `task_id`, `title` | タスクが完了にマークされた |
+| `task_deleted` | `task_id`, `title` | タスクが削除された |
+| `task_updated` | `task_id`, `changes` (dict) | タスクのフィールドが変更された |
+| `schema_error` | `file`, `message` | JSON バリデーションが失敗した |
+
+## Agent による消費
+
+Agent はイベントストリームを以下の方法で消費できます：
+
+### シェルでリアルタイム監視
+
+```bash
+tail -f events.jsonl | jq .
+```
+
+### Agent プロンプトでの参照
+
+Agent のプロンプトに以下を追加：
+
+```
+タスクに関するユーザーの最近の操作を確認するには events.jsonl をチェックしてください。
+```
+
+### スクリプトでのパース
+
+```python
+import json
+
+with open("events.jsonl") as f:
+    for line in f:
+        event = json.loads(line)
+        if event["event"] == "task_completed":
+            print(f"完了: {event['title']}")
+```
+
+## イベントログのローテーション
+
+- デフォルトで最新の **1000 イベント** を保持
+- 古いイベントは自動的に切り詰められます
+- `config.toml` の `events.max_lines` で設定可能
+
+## ユースケース
+
+| ユースケース | 説明 |
+|---|---|
+| Agent の自動反応 | ユーザーがタスクを完了したら、Agent が次のタスクを提案 |
+| 進捗レポート | 完了イベントを集計して日次/週次レポートを生成 |
+| 外部連携 | イベントをトリガーにして Slack 通知やカレンダー更新 |
+| デバッグ | TUI の操作履歴をトレース |
+
+<Aside type="note">
+イベントログはオプション機能です。`event_log_path` を設定しなければ、イベントは出力されません。パフォーマンスへの影響はありません。
+</Aside>

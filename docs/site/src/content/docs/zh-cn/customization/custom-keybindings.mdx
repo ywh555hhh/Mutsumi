@@ -1,0 +1,144 @@
+---
+title: 自定义快捷键
+description: 通过 key_overrides 覆盖个别快捷键。
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+## 概述
+
+如果预设方案（vim / emacs / arrows）不能完全满足你的需求，可以通过 `key_overrides` 覆盖个别快捷键，而不必从头定义整套键位。
+
+## 基本用法
+
+在 `config.toml` 中添加 `key_overrides` 字段：
+
+```toml
+keybindings = "vim"
+
+[key_overrides]
+quit = "ctrl+q"
+cursor_down = "ctrl+j"
+cursor_up = "ctrl+k"
+```
+
+这会基于 vim 预设，但把退出键改为 `Ctrl+q`，导航键改为 `Ctrl+j`/`Ctrl+k`。
+
+## 可覆盖的操作
+
+以下是所有可覆盖的操作名称：
+
+### 导航
+
+| 操作名 | 默认键 (vim) | 说明 |
+|---|---|---|
+| `cursor_down` | `j` | 光标下移 |
+| `cursor_up` | `k` | 光标上移 |
+| `cursor_top` | `gg` | 跳到顶部 |
+| `cursor_bottom` | `G` | 跳到底部 |
+| `collapse_group` | `h` | 折叠分组 |
+| `expand_group` | `l` | 展开分组 |
+
+### 任务操作
+
+| 操作名 | 默认键 | 说明 |
+|---|---|---|
+| `toggle_done` | `Space` | 切换完成状态 |
+| `new_task` | `n` | 新建任务 |
+| `edit_task` | `e` | 编辑任务 |
+| `inline_edit` | `i` | 行内编辑标题 |
+| `delete_task` | `dd` | 删除任务 |
+| `show_detail` | `Enter` | 展开详情面板 |
+| `close_detail` | `Escape` | 关闭详情面板 |
+
+### 优先级与移动
+
+| 操作名 | 默认键 | 说明 |
+|---|---|---|
+| `priority_up` | `+` / `=` | 提升优先级 |
+| `priority_down` | `-` / `_` | 降低优先级 |
+| `move_down` | `J` | 下移任务 |
+| `move_up` | `K` | 上移任务 |
+| `copy_task` | `y` | 复制任务 |
+| `paste_task` | `p` | 粘贴任务 |
+| `paste_task_above` | `P` | 在上方粘贴 |
+
+### 视图切换
+
+| 操作名 | 默认键 | 说明 |
+|---|---|---|
+| `next_tab` | `Tab` | 下一个标签页 |
+| `prev_tab` | `Shift+Tab` | 上一个标签页 |
+| `tab_1` | `1` | Today 标签 |
+| `tab_2` | `2` | Week 标签 |
+| `tab_3` | `3` | Month 标签 |
+| `tab_4` | `4` | Inbox 标签 |
+
+### 其他
+
+| 操作名 | 默认键 | 说明 |
+|---|---|---|
+| `search` | `/` | 搜索 |
+| `sort` | `s` | 排序 |
+| `toggle_fold` | `z` | 切换折叠 |
+| `add_child` | `A` | 添加子任务 |
+| `show_help` | `?` | 显示帮助 |
+| `quit` | `q` | 退出 |
+
+## 键名格式
+
+键名使用 Textual 的按键格式：
+
+| 格式 | 示例 |
+|---|---|
+| 单键 | `j`, `k`, `n`, `q` |
+| 修饰键 | `ctrl+q`, `shift+g`, `ctrl+shift+n` |
+| 特殊键 | `space`, `enter`, `escape`, `tab` |
+| 方向键 | `up`, `down`, `left`, `right` |
+| 功能键 | `home`, `end`, `delete`, `insert` |
+
+## 示例：混合方案
+
+```toml
+# 基于 vim 预设，但用 Ctrl+q 退出，用方向键导航
+keybindings = "vim"
+
+[key_overrides]
+quit = "ctrl+q"
+cursor_down = "down"
+cursor_up = "up"
+cursor_top = "home"
+cursor_bottom = "end"
+```
+
+<Aside type="note">
+`key_overrides` 只替换已有绑定的按键。如果指定的操作名在预设中不存在，覆盖会被忽略。
+</Aside>
+
+## 完全自定义键位
+
+如果需要从头定义所有键位，可以创建自定义键位文件：
+
+```toml
+# ~/.config/mutsumi/keys/custom.toml
+
+[keys]
+move_down = "j"
+move_up = "k"
+toggle_done = "space"
+new_task = "n"
+edit_task = "e"
+delete_task = "d,d"    # chord：两次按键
+quit = "q"
+search = "/"
+help = "?"
+tab_next = "tab"
+tab_prev = "shift+tab"
+tab_1 = "1"
+tab_2 = "2"
+tab_3 = "3"
+tab_4 = "4"
+expand = "enter"
+top = "g"
+bottom = "shift+g"
+```

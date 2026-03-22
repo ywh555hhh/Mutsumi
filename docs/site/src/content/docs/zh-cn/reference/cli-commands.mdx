@@ -1,0 +1,177 @@
+---
+title: CLI 命令参考
+description: Mutsumi 所有 CLI 命令的完整参考。
+---
+
+## mutsumi
+
+启动 TUI。
+
+```bash
+mutsumi                              # 监听当前目录的 mutsumi.json
+mutsumi --path /path/to/mutsumi.json # 指定文件路径
+mutsumi --version                    # 打印版本号
+```
+
+## mutsumi add
+
+创建新任务。
+
+```bash
+mutsumi add "标题" [选项]
+```
+
+| 选项 | 短写 | 可选值 | 默认 |
+|------|------|--------|------|
+| `--priority` | `-P` | `high`, `normal`, `low` | `normal` |
+| `--scope` | `-s` | `day`, `week`, `month`, `inbox` | `inbox` |
+| `--tags` | `-t` | 逗号分隔 | — |
+| `--description` | `-d` | 字符串 | — |
+
+```bash
+mutsumi add "修复登录 Bug" -P high -s day -t "bugfix,urgent"
+```
+
+## mutsumi list
+
+列出所有任务。
+
+```bash
+mutsumi list
+mutsumi list --scope today
+```
+
+## mutsumi done
+
+标记任务完成。
+
+```bash
+mutsumi done <id-前缀>
+```
+
+## mutsumi edit
+
+编辑任务。
+
+```bash
+mutsumi edit <id-前缀> [--title "新标题"] [--priority high] [--scope week]
+```
+
+## mutsumi rm
+
+删除任务。
+
+```bash
+mutsumi rm <id-前缀>
+```
+
+## mutsumi init
+
+初始化配置。
+
+```bash
+mutsumi init              # 交互式
+mutsumi init --defaults   # 非交互式，使用默认值
+mutsumi init --lang zh    # 设置语言
+```
+
+## mutsumi setup
+
+配置 Agent 集成。
+
+```bash
+mutsumi setup                       # 列出可用 Agent
+mutsumi setup --agent claude-code   # Claude Code 集成
+mutsumi setup --agent codex-cli     # Codex CLI 集成
+mutsumi setup --agent custom        # 输出 prompt 到标准输出
+```
+
+## mutsumi config
+
+管理配置。
+
+```bash
+mutsumi config --edit    # 用 $EDITOR 编辑
+mutsumi config --show    # 打印当前配置
+mutsumi config --reset   # 重置为默认值
+mutsumi config --path    # 打印配置文件路径
+```
+
+## mutsumi migrate
+
+从旧版文件名和配置位置迁移。
+
+```bash
+mutsumi migrate [选项]
+```
+
+| 选项 | 说明 |
+|------|------|
+| `--config` | 迁移配置目录（`~/.config/mutsumi/` → `~/.mutsumi/`） |
+| `--all` | 迁移任务文件和配置 |
+
+```bash
+# 在当前目录迁移 tasks.json → mutsumi.json
+mutsumi migrate
+
+# 迁移配置目录
+mutsumi migrate --config
+
+# 全部迁移
+mutsumi migrate --all
+```
+
+---
+
+## mutsumi project
+
+管理注册的项目来源。
+
+### mutsumi project add
+
+```bash
+mutsumi project add PATH
+```
+
+注册一个项目目录。该目录应包含（或将包含）`mutsumi.json`。
+
+```bash
+mutsumi project add ~/projects/saas-app
+```
+
+### mutsumi project remove
+
+```bash
+mutsumi project remove NAME
+```
+
+从注册表中移除一个项目。
+
+```bash
+mutsumi project remove saas-app
+```
+
+### mutsumi project list
+
+```bash
+mutsumi project list
+```
+
+列出所有注册的项目及其路径。
+
+---
+
+## mutsumi validate / schema
+
+```bash
+mutsumi validate         # 校验 mutsumi.json
+mutsumi schema           # 输出 JSON Schema
+```
+
+## ID 前缀匹配
+
+无需输入完整 26 位 ID，输入唯一前缀即可：
+
+```bash
+mutsumi done 01EX    # 如果只有一个 ID 以 "01EX" 开头则匹配
+```

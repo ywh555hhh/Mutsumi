@@ -1,0 +1,149 @@
+---
+title: CLI コマンドリファレンス
+description: Mutsumi の全 CLI コマンドの完全なリファレンス。
+---
+
+## mutsumi
+
+TUI を起動します。
+
+```bash
+mutsumi                              # カレントディレクトリの mutsumi.json を監視
+mutsumi --path /path/to/mutsumi.json # パスを指定
+mutsumi --version                    # バージョンを表示
+```
+
+## mutsumi add
+
+新しいタスクを作成します。
+
+```bash
+mutsumi add "タイトル" [オプション]
+```
+
+| オプション | 短縮 | 値 | デフォルト |
+|-----------|------|------|-----------|
+| `--priority` | `-P` | `high`, `normal`, `low` | `normal` |
+| `--scope` | `-s` | `day`, `week`, `month`, `inbox` | `inbox` |
+| `--tags` | `-t` | カンマ区切り | — |
+| `--description` | `-d` | 文字列 | — |
+
+## mutsumi list
+
+すべてのタスクを一覧表示します。
+
+```bash
+mutsumi list
+```
+
+## mutsumi done
+
+タスクを完了にします。
+
+```bash
+mutsumi done <id-プレフィックス>
+```
+
+## mutsumi edit
+
+タスクを編集します。
+
+```bash
+mutsumi edit <id-プレフィックス> [--title "新タイトル"] [--priority high]
+```
+
+## mutsumi rm
+
+タスクを削除します。
+
+```bash
+mutsumi rm <id-プレフィックス>
+```
+
+## mutsumi init / setup / config
+
+```bash
+mutsumi init --defaults              # デフォルト設定で初期化
+mutsumi setup --agent claude-code    # Agent 統合
+mutsumi config --edit                # エディタで開く
+mutsumi config --show                # 設定を表示
+```
+
+## mutsumi migrate
+
+レガシーファイル名と設定場所からの移行を行います。
+
+```bash
+mutsumi migrate [オプション]
+```
+
+| オプション | 説明 |
+|-----------|------|
+| `--config` | 設定ディレクトリを移行（`~/.config/mutsumi/` → `~/.mutsumi/`） |
+| `--all` | タスクファイルと設定の両方を移行 |
+
+```bash
+# カレントディレクトリで tasks.json → mutsumi.json に移行
+mutsumi migrate
+
+# 設定ディレクトリを移行
+mutsumi migrate --config
+
+# すべて移行
+mutsumi migrate --all
+```
+
+---
+
+## mutsumi project
+
+登録済みプロジェクトソースを管理します。
+
+### mutsumi project add
+
+```bash
+mutsumi project add PATH
+```
+
+プロジェクトディレクトリを登録します。ディレクトリには `mutsumi.json` が含まれている（または含まれる予定の）必要があります。
+
+```bash
+mutsumi project add ~/projects/saas-app
+```
+
+### mutsumi project remove
+
+```bash
+mutsumi project remove NAME
+```
+
+プロジェクトを登録から削除します。
+
+```bash
+mutsumi project remove saas-app
+```
+
+### mutsumi project list
+
+```bash
+mutsumi project list
+```
+
+登録済みのすべてのプロジェクトとそのパスを一覧表示します。
+
+---
+
+## mutsumi validate / schema
+
+```bash
+mutsumi validate                     # mutsumi.json を検証
+mutsumi schema                       # JSON Schema を出力
+```
+
+## ID プレフィックスマッチング
+
+完全な 26 文字の ID を入力する必要はありません。ユニークなプレフィックスで十分です：
+
+```bash
+mutsumi done 01EX
+```

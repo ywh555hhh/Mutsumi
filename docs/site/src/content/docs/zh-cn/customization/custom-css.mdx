@@ -1,0 +1,128 @@
+---
+title: 自定义样式
+description: 使用 Textual CSS 自定义 Mutsumi 的外观。
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+## 概述
+
+Mutsumi 基于 Textual 框架构建，Textual 使用类 CSS 的样式系统（TCSS）。你可以通过自定义 CSS 文件覆盖默认样式。
+
+## 启用自定义 CSS
+
+在 `config.toml` 中指定自定义 CSS 文件路径：
+
+```toml
+custom_css_path = "~/.config/mutsumi/custom.tcss"
+```
+
+## TCSS 基础
+
+Textual CSS (TCSS) 与 Web CSS 类似，但语法有一些差异。以下是常用属性：
+
+| 属性 | 说明 | 示例 |
+|---|---|---|
+| `background` | 背景色 | `background: #1e1e2e;` |
+| `color` | 文字颜色 | `color: #cdd6f4;` |
+| `border` | 边框 | `border: solid #333333;` |
+| `padding` | 内边距 | `padding: 1 2;` |
+| `margin` | 外边距 | `margin: 0 1;` |
+| `width` | 宽度 | `width: 100%;` |
+| `height` | 高度 | `height: auto;` |
+| `text-style` | 文字样式 | `text-style: bold;` |
+| `display` | 显示模式 | `display: none;` |
+
+<Aside type="note">
+TCSS 的长度单位是终端字符单元，不是像素。`padding: 1 2;` 表示上下 1 行、左右 2 列。
+</Aside>
+
+## 自定义示例
+
+### 调整任务行样式
+
+```css
+/* ~/.config/mutsumi/custom.tcss */
+
+/* 任务行高亮效果 */
+.task-row:hover {
+    background: #2a2a3a;
+}
+
+/* 已完成任务的样式 */
+.task-row.done {
+    color: #6c7086;
+    text-style: italic;
+}
+
+/* 高优先级任务边框 */
+.task-row.priority-high {
+    border-left: thick #f38ba8;
+}
+```
+
+### 调整标签页样式
+
+```css
+/* 标签页激活状态 */
+.tab-button:focus {
+    background: #333333;
+    text-style: bold;
+}
+```
+
+### 调整详情面板
+
+```css
+/* 详情面板背景 */
+.detail-panel {
+    background: #1a1a2e;
+    border: solid #444466;
+    padding: 1 2;
+}
+```
+
+### 隐藏元素
+
+```css
+/* 隐藏底部状态栏 */
+.footer-bar {
+    display: none;
+}
+```
+
+## 常用选择器
+
+| 选择器 | 目标元素 |
+|---|---|
+| `.task-row` | 任务行 |
+| `.task-row.done` | 已完成的任务 |
+| `.task-row.priority-high` | 高优先级任务 |
+| `.task-row.priority-normal` | 普通优先级任务 |
+| `.task-row.priority-low` | 低优先级任务 |
+| `.tab-button` | 标签页按钮 |
+| `.detail-panel` | 详情面板 |
+| `.footer-bar` | 底部状态栏 |
+| `.header-bar` | 头部栏 |
+| `.search-input` | 搜索输入框 |
+
+<Aside type="caution">
+具体的选择器名称可能会随版本更新而变化。建议先查看 Mutsumi 源码中的 Widget 类定义来确认可用的选择器。
+</Aside>
+
+## Textual CSS 参考
+
+Textual CSS 的完整文档请参考：
+
+- [Textual CSS Guide](https://textual.textualize.io/css_types/)
+- [Textual Styles Reference](https://textual.textualize.io/styles/)
+
+## 与主题的关系
+
+自定义 CSS 在主题之上应用。加载顺序为：
+
+```
+Textual 默认样式 → 内置/自定义主题 → 自定义 CSS
+```
+
+这意味着自定义 CSS 可以覆盖主题中的任何样式，而不需要修改主题文件本身。

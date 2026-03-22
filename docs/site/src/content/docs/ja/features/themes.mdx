@@ -1,0 +1,112 @@
+---
+title: "テーマ"
+description: "Mutsumi の 4 つの内蔵テーマとテーマシステム。"
+---
+
+import { Aside, Card, CardGrid } from '@astrojs/starlight/components';
+
+## 内蔵テーマ
+
+Mutsumi は 4 つのテーマを内蔵しています。`config.toml` で切り替え可能です。
+
+```toml
+theme = "monochrome-zen"
+```
+
+<CardGrid>
+  <Card title="monochrome-zen（デフォルト）">
+    ミニマルな白黒グレー。ライトシアンのアクセントカラー。最もクリーンで集中力を削がない。
+  </Card>
+  <Card title="nord">
+    クールなトーン、控えめな配色。Nord カラーパレットに基づく。
+  </Card>
+  <Card title="dracula">
+    高コントラスト、パープル寄り。人気の Dracula テーマに基づく。
+  </Card>
+  <Card title="solarized">
+    暖かみのあるダーク配色。ティールのアクセント。
+  </Card>
+</CardGrid>
+
+## カラー詳細
+
+### monochrome-zen
+
+| 要素 | カラーコード |
+|---|---|
+| background | `#0f0f0f` |
+| surface | `#1a1a1a` |
+| border | `#333333` |
+| text | `#e0e0e0` |
+| text_muted | `#666666` |
+| accent | `#5de4c7` |
+| error | `#e06c75` |
+| priority_high | `#e06c75` |
+| priority_normal | `#e5c07b` |
+| priority_low | `#666666` |
+
+### nord
+
+| 要素 | カラーコード |
+|---|---|
+| background | `#2e3440` |
+| surface | `#3b4252` |
+| border | `#4c566a` |
+| text | `#eceff4` |
+| text_muted | `#d8dee9` |
+| accent | `#88c0d0` |
+| error | `#bf616a` |
+| priority_high | `#bf616a` |
+| priority_normal | `#ebcb8b` |
+| priority_low | `#4c566a` |
+
+### dracula
+
+| 要素 | カラーコード |
+|---|---|
+| background | `#282a36` |
+| surface | `#44475a` |
+| border | `#6272a4` |
+| text | `#f8f8f2` |
+| text_muted | `#6272a4` |
+| accent | `#bd93f9` |
+| error | `#ff5555` |
+| priority_high | `#ff5555` |
+| priority_normal | `#f1fa8c` |
+| priority_low | `#6272a4` |
+
+### solarized
+
+| 要素 | カラーコード |
+|---|---|
+| background | `#002b36` |
+| surface | `#073642` |
+| border | `#586e75` |
+| text | `#839496` |
+| text_muted | `#586e75` |
+| accent | `#2aa198` |
+| error | `#dc322f` |
+| priority_high | `#dc322f` |
+| priority_normal | `#b58900` |
+| priority_low | `#586e75` |
+
+## テーマの構造
+
+各テーマは以下のカラースロットで構成されます：
+
+| スロット | 説明 |
+|---|---|
+| `background` | アプリ全体の背景色 |
+| `surface` | パネルやカードの表面色 |
+| `border` | ボーダーカラー |
+| `text` | メインテキストカラー |
+| `text_muted` | 控えめなテキストカラー |
+| `accent` | アクセントカラー（ハイライト、フォーカス） |
+| `error` | エラー表示カラー |
+| `priority_high` | 高優先度タスクのカラー |
+| `priority_normal` | 通常優先度タスクのカラー |
+| `priority_low` | 低優先度タスクのカラー |
+
+<Aside type="tip">
+独自のテーマを作成したい場合は[カスタムテーマ](/ja/customization/custom-themes/)ページを参照してください。TOML ファイルでカスタムテーマを定義し、`~/.config/mutsumi/themes/` に配置できます。
+</Aside>

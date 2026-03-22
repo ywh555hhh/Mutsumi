@@ -1,0 +1,76 @@
+---
+title: Quick Start
+description: Get up and running with Mutsumi in 5 minutes.
+---
+
+import { Steps, Aside } from '@astrojs/starlight/components';
+
+<Steps>
+
+1. **Install Mutsumi**
+
+   ```bash
+   uv tool install git+https://github.com/ywh555hhh/Mutsumi.git
+   ```
+
+2. **Create your first tasks**
+
+   ```bash
+   cd ~/your-project
+   mutsumi add "Fix login bug" --priority high --scope day --tags "bugfix"
+   mutsumi add "Write weekly report" --priority normal --scope week --tags "life"
+   mutsumi add "Update docs" --priority low --scope month --tags "docs"
+   ```
+
+3. **Launch the TUI**
+
+   ```bash
+   mutsumi
+   ```
+
+4. **Navigate and interact**
+
+   | Key | Action |
+   |-----|--------|
+   | `↑` / `↓` | Move up / down |
+   | `Space` | Toggle done/pending |
+   | `n` | Create new task |
+   | `e` | Edit task |
+   | `Delete` | Delete task (confirm with `y`) |
+   | `Enter` | Show detail panel |
+   | `1` `2` `3` `4` | Switch tabs |
+   | `/` | Search tasks |
+   | `q` | Quit |
+
+   <Aside type="note">
+   The table above shows the default **arrows** preset. With the `vim` preset, navigation uses `j`/`k` and delete uses `dd`.
+   </Aside>
+
+5. **Initialize config (optional)**
+
+   ```bash
+   mutsumi init --defaults
+   ```
+
+</Steps>
+
+## What You Should See
+
+```
+[Today] Week  Month  Inbox              mutsumi
+─────────────────────────────────────────────────
+▼ HIGH ─────────────────────────────────────
+[ ] Fix login bug                  bugfix  ★★★
+
+▼ NORMAL ───────────────────────────────────
+[ ] Write weekly report            life    ★★
+
+▼ LOW ──────────────────────────────────────
+[ ] Update docs                    docs    ★
+─────────────────────────────────────────────────
+3 tasks · 0 done · 3 pending
+```
+
+<Aside>
+Mutsumi works without any config file. Run `mutsumi init` only when you want to customize.
+</Aside>

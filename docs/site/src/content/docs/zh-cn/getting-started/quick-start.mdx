@@ -1,0 +1,136 @@
+---
+title: 快速上手
+description: 5 分钟内完成 Mutsumi 的首次使用。
+---
+
+import { Steps, Tabs, TabItem, Aside } from '@astrojs/starlight/components';
+
+## 5 分钟入门
+
+<Steps>
+
+1. **安装 Mutsumi**
+
+   ```bash
+   uv tool install git+https://github.com/ywh555hhh/Mutsumi.git
+   ```
+
+2. **进入你的项目目录**
+
+   ```bash
+   cd ~/your-project
+   ```
+
+3. **创建任务**
+
+   <Tabs>
+     <TabItem label="CLI 方式（推荐）">
+
+     ```bash
+     mutsumi add "修复登录 Bug" --priority high --scope day --tags "bugfix"
+     mutsumi add "写周报" --priority normal --scope week --tags "life"
+     mutsumi add "更新文档" --priority low --scope month --tags "docs"
+     ```
+
+     验证：
+     ```bash
+     mutsumi list
+     # 应显示 3 个任务
+     ```
+
+     </TabItem>
+     <TabItem label="让 Agent 创建">
+
+     直接告诉你的 AI Agent：
+
+     > "在当前目录创建一个 mutsumi.json，包含几个示例任务。"
+
+     Agent 会直接写入 `mutsumi.json`。Mutsumi 会自动监视这个文件。
+
+     </TabItem>
+     <TabItem label="复制示例文件">
+
+     ```bash
+     # 如果你克隆了 Mutsumi 源码
+     cp examples/mutsumi.json ./mutsumi.json
+     ```
+
+     </TabItem>
+   </Tabs>
+
+4. **启动 TUI**
+
+   ```bash
+   mutsumi
+   ```
+
+   你应该看到类似这样的界面：
+
+   ```
+   [Today] Week  Month  Inbox              mutsumi
+   ─────────────────────────────────────────────────
+   ▼ HIGH ─────────────────────────────────────
+   [ ] 修复登录 Bug                  bugfix  ★★★
+
+   ▼ NORMAL ───────────────────────────────────
+   [ ] 写周报                        life    ★★
+
+   ▼ LOW ──────────────────────────────────────
+   [ ] 更新文档                      docs    ★
+
+   ─────────────────────────────────────────────────
+   3 tasks · 0 done · 3 pending
+   ```
+
+5. **试试基本操作**
+
+   | 按键 | 操作 |
+   |---|---|
+   | `↑` / `↓` | 上下移动光标 |
+   | `Space` | 切换任务完成状态 |
+   | `n` | 创建新任务 |
+   | `Enter` | 展开任务详情面板 |
+   | `1` `2` `3` `4` | 切换 Today / Week / Month / Inbox 标签 |
+   | `q` | 退出 |
+
+   <Aside type="note">
+   以上为默认 **arrows** 预设的快捷键。使用 `vim` 预设时，导航键为 `j`/`k`。
+   </Aside>
+
+</Steps>
+
+<Aside type="tip">
+鼠标也完全可用！点击复选框切换状态，点击标签页切换视图，点击任务行查看详情。
+</Aside>
+
+## 初始化配置（可选）
+
+```bash
+mutsumi init --defaults
+```
+
+这会在 `~/.mutsumi/config.toml` 创建默认配置：
+- 主题：`monochrome-zen`
+- 快捷键：`arrows`
+- 语言：`en`
+
+如需中文界面：
+```bash
+mutsumi init --lang zh
+```
+
+**完全可以跳过这一步** —— Mutsumi 不需要任何配置文件即可工作。
+
+## 监视指定文件
+
+默认监视当前目录的 `mutsumi.json`。你也可以指定路径：
+
+```bash
+mutsumi --path /path/to/mutsumi.json
+```
+
+## 下一步
+
+- [Agent 集成](/zh-cn/getting-started/agent-setup/) —— 让你的 AI Agent 自动管理任务
+- [终端集成](/zh-cn/getting-started/terminal-integration/) —— 用 tmux 实现分屏工作流
+- [快捷键](/zh-cn/features/keybindings/) —— 了解完整的键盘操作

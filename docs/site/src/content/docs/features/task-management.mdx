@@ -1,0 +1,95 @@
+---
+title: Task Management
+description: Create, edit, delete, and manage tasks in Mutsumi.
+---
+
+## CRUD Operations
+
+### Create Task
+
+Trigger: `n` key or click `[+New]` button.
+
+A dialog opens with fields:
+- **Title** (required)
+- **Scope**: Day / Week / Month / Inbox (defaults to current tab)
+- **Priority**: High / Normal / Low (defaults to Normal)
+- **Tags**: Comma-separated input
+
+UUIDv7 ID and `created_at` are auto-generated.
+
+### Edit Task
+
+- Press `e` to open the edit form for the selected task
+- Press `i` for inline title editing directly in the list row
+- Double-click a title to inline edit
+- Press `Enter` to confirm, `Escape` to cancel
+
+### Delete Task
+
+- Press `dd` (vim-style two-key sequence)
+- A confirmation bar appears: `"Delete 'xxx'? [y/N]"`
+- Press `y` to confirm, any other key to cancel
+- The task and all its children are removed
+
+### Toggle Status
+
+- Press `Space` or click the checkbox
+- `pending` → `done`: auto-fills `completed_at`
+- `done` → `pending`: clears `completed_at`
+- Immediate write-back, no confirmation needed
+
+## Subtasks
+
+Tasks can have nested subtasks via the `children` array:
+
+```
+[ ] Refactor Auth module          ★★★
+  └─ [x] Install PyJWT            (1/2)
+  └─ [ ] Write middleware
+```
+
+- Press `A` (Shift+A) to add a subtask to the selected task
+- Press `z` to toggle fold (show/hide subtasks)
+- Cascading completion: marking parent done marks all children done
+
+## Priority Cycling
+
+| Key | Action |
+|-----|--------|
+| `+` or `=` | Increase priority (low → normal → high) |
+| `-` or `_` | Decrease priority (high → normal → low) |
+
+Priority is clamped at boundaries — pressing `+` on a `high` task does nothing.
+
+## Copy / Paste
+
+| Key | Action |
+|-----|--------|
+| `y` | Copy selected task to internal clipboard |
+| `p` | Paste task below current selection |
+| `P` (Shift+P) | Paste task above current selection |
+
+## Reorder Tasks
+
+| Preset | Move Down | Move Up |
+|--------|-----------|---------|
+| vim | `J` (Shift+J) | `K` (Shift+K) |
+| emacs | `Ctrl+Shift+N` | `Ctrl+Shift+P` |
+| arrows | `Shift+↓` | `Shift+↑` |
+
+## Search
+
+Press `/` to open the search bar.
+
+- Real-time filtering as you type
+- Search scope: title + tags + description
+- Non-matching tasks are **dimmed** (not hidden) — preserves spatial context
+- `Escape` exits search and restores the full list
+
+## Sort
+
+Press `s` to open the sort overlay.
+
+Sort fields: `title`, `priority`, `status`, `due`
+
+Press `r` to toggle reverse order. Navigate with `h/l` or arrow keys.

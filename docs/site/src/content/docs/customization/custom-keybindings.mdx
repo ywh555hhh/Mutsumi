@@ -1,0 +1,151 @@
+---
+title: Custom Keybindings
+description: Override individual keybindings using key_overrides in config.toml. Action names and examples.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+## Overview
+
+Mutsumi offers three keybinding presets (vim, emacs, arrows). If you want to change individual keys without creating a full preset, use `key_overrides` in `config.toml`.
+
+## Configuration
+
+Add a `[key_overrides]` section to your `config.toml`:
+
+```toml
+keybindings = "vim"
+
+[key_overrides]
+quit = "ctrl+q"
+cursor_down = "ctrl+j"
+cursor_up = "ctrl+k"
+```
+
+Overrides are applied on top of the selected preset. Only the specified actions are reassigned; all other keys remain at their preset defaults.
+
+## Action Names
+
+These are all the action names you can override:
+
+### Navigation
+
+| Action | Description | vim default | emacs default | arrows default |
+|--------|-------------|-------------|---------------|----------------|
+| `cursor_down` | Move cursor down | `j` | `ctrl+n` | `down` |
+| `cursor_up` | Move cursor up | `k` | `ctrl+p` | `up` |
+| `cursor_top` | Jump to top | `gg` (multi-key) | `ctrl+a` | `home` |
+| `cursor_bottom` | Jump to bottom | `G` | `ctrl+e` | `end` |
+
+### Task Operations
+
+| Action | Description | Default (all presets) |
+|--------|-------------|----------------------|
+| `toggle_done` | Toggle done/pending | `space` |
+| `new_task` | Create new task | `n` |
+| `edit_task` | Edit selected task | `e` |
+| `inline_edit` | Inline edit title | `i` |
+| `show_detail` | Open detail panel | `enter` |
+| `close_detail` | Close detail panel | `escape` |
+| `copy_task` | Copy task | `y` |
+| `paste_task` | Paste below | `p` |
+| `paste_task_above` | Paste above | `P` (shift+p) |
+| `add_child` | Add subtask | `A` (shift+a) |
+| `search` | Open search | `/` |
+| `sort` | Open sort overlay | `s` |
+
+### Priority
+
+| Action | Description | Default |
+|--------|-------------|---------|
+| `priority_up` | Increase priority | `+` or `=` |
+| `priority_down` | Decrease priority | `-` or `_` |
+
+### View Controls
+
+| Action | Description | vim default | emacs default | arrows default |
+|--------|-------------|-------------|---------------|----------------|
+| `collapse_group` | Collapse priority group | `h` | `ctrl+b` | `left` |
+| `expand_group` | Expand priority group | `l` | `ctrl+f` | `right` |
+| `toggle_fold` | Toggle subtask fold | `z` | `z` | `z` |
+| `move_down` | Move task down | `J` | `ctrl+shift+n` | `shift+down` |
+| `move_up` | Move task up | `K` | `ctrl+shift+p` | `shift+up` |
+
+### Tab Management
+
+| Action | Description | Default |
+|--------|-------------|---------|
+| `next_tab` | Next scope tab | `tab` |
+| `prev_tab` | Previous scope tab | `shift+tab` |
+| `tab_1` | Switch to Today | `1` |
+| `tab_2` | Switch to Week | `2` |
+| `tab_3` | Switch to Month | `3` |
+| `tab_4` | Switch to Inbox | `4` |
+
+### Utility
+
+| Action | Description | vim/arrows default | emacs default |
+|--------|-------------|-------------------|---------------|
+| `quit` | Quit Mutsumi | `q` | `ctrl+q` |
+| `show_help` | Show help screen | `?` | `?` |
+
+## Key Syntax
+
+Key strings follow Textual's key notation:
+
+| Example | Meaning |
+|---------|---------|
+| `j` | Single character key |
+| `space` | Space bar |
+| `enter` | Enter key |
+| `escape` | Escape key |
+| `tab` | Tab key |
+| `ctrl+q` | Ctrl + Q |
+| `shift+tab` | Shift + Tab |
+| `ctrl+shift+n` | Ctrl + Shift + N |
+| `up` | Up arrow |
+| `down` | Down arrow |
+| `left` | Left arrow |
+| `right` | Right arrow |
+| `home` | Home key |
+| `end` | End key |
+| `slash` | `/` key |
+| `question_mark` | `?` key |
+
+## Example: Hybrid vim + Ctrl-Q quit
+
+```toml
+keybindings = "vim"
+
+[key_overrides]
+quit = "ctrl+q"
+```
+
+## Example: Arrow keys with vim-style J/K reorder
+
+```toml
+keybindings = "arrows"
+
+[key_overrides]
+move_down = "J"
+move_up = "K"
+```
+
+<Aside type="caution">
+Multi-key sequences (`dd`, `gg`) are handled by the KeyManager engine, not the Textual Binding system. Overriding `cursor_top` changes the single-key binding but does not affect the `gg` multi-key sequence in the vim preset.
+</Aside>
+
+## How Overrides Work
+
+Under the hood, `get_keybindings()` takes the preset bindings and replaces the key for any action listed in `key_overrides`:
+
+```python
+# config.toml
+[key_overrides]
+quit = "ctrl+q"
+
+# Result: the "q" binding for quit is replaced with "ctrl+q"
+# All other bindings remain unchanged
+```
+
+The override mechanism operates at the Textual `Binding` level. The action name, description, and show behavior are preserved; only the key string is swapped.

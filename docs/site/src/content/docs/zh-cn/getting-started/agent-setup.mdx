@@ -1,0 +1,160 @@
+---
+title: Agent 集成
+description: 三种方式将 Mutsumi 与你的 AI Agent 集成。
+---
+
+import { Tabs, TabItem, Steps, Aside } from '@astrojs/starlight/components';
+
+## 概述
+
+Mutsumi 是 Agent 无关的 —— 任何能读写 JSON 的程序都可以作为 Controller。集成有三种方式：
+
+## 方式一：自动注入（推荐）
+
+<Steps>
+
+1. 进入你的项目目录：
+
+   ```bash
+   cd ~/your-project
+   ```
+
+2. 选择你的 Agent 运行 setup 命令：
+
+   <Tabs>
+     <TabItem label="Claude Code">
+     ```bash
+     mutsumi setup --agent claude-code
+     # 自动追加规则到 CLAUDE.md
+     ```
+     </TabItem>
+     <TabItem label="Codex CLI">
+     ```bash
+     mutsumi setup --agent codex-cli
+     # 自动追加规则到 AGENTS.md
+     ```
+     </TabItem>
+     <TabItem label="Gemini CLI">
+     ```bash
+     mutsumi setup --agent gemini-cli
+     # 自动追加规则到 GEMINI.md
+     ```
+     </TabItem>
+   </Tabs>
+
+3. 验证：
+
+   ```bash
+   cat CLAUDE.md   # 末尾应包含 "## Mutsumi Task Integration"
+   ```
+
+</Steps>
+
+<Aside type="note">
+重复运行 setup 是安全的 —— 不会重复追加内容。
+</Aside>
+
+## 方式二：手动提示
+
+在开始会话时告诉你的 Agent：
+
+```
+这个项目使用 Mutsumi 管理任务。任务存放在 ./mutsumi.json。
+读取文件，修改 tasks 数组，然后写回整个文件。
+必填字段：id（唯一字符串）、title（字符串）、status（"pending" 或 "done"）。
+可选字段：scope（"day"/"week"/"month"/"inbox"）、priority（"high"/"normal"/"low"）、tags（字符串数组）、description（字符串）。
+```
+
+这种方式适用于任何 Agent —— 不需要特殊插件或 SDK。
+
+## 方式三：自定义脚本
+
+```bash
+mutsumi setup --agent custom
+# 将集成提示打印到 stdout
+```
+
+复制输出并粘贴到你 Agent 的系统提示或配置中。
+
+## Agent 推荐提示模板
+
+以下是嵌入 Agent 系统提示的推荐指令：
+
+```markdown
+## Task Management (Mutsumi Integration)
+
+You have access to a local task file at `./mutsumi.json`.
+When the user asks you to manage tasks, read and write this file.
+
+Schema:
+- Required fields: id (unique string), title (string), status ("pending" | "done")
+- Optional fields: scope ("day"|"week"|"month"|"inbox"), priority ("high"|"normal"|"low"),
+  tags (string[]), children (Task[]), due_date (ISO date), description (string)
+- Preserve any fields you don't recognize — do NOT delete them
+- Use atomic write (temp file + rename) when possible
+- Generate UUIDv7 for new task IDs
+
+Example task:
+{"id":"01JQ...","title":"Fix auth","status":"pending","scope":"day","priority":"high","tags":["dev"],"children":[]}
+```
+
+## 支持的 Agent
+
+| Agent | 类型 | 集成级别 |
+|---|---|---|
+| Claude Code | AI CLI | 原生（推荐） |
+| Codex CLI | AI CLI | 原生 |
+| Gemini CLI | AI CLI | 原生 |
+| OpenCode | AI CLI | 原生 |
+| Aider | AI CLI | 原生 |
+| Shell 脚本 | 自定义 | 原生 |
+| Cron 任务 | 系统 | 原生 |
+
+"原生"意味着只需要 JSON 文件读写 —— 无需安装 SDK 或插件。
+
+## 写入示例（Python）
+
+```python
+import json, uuid, datetime, tempfile, os
+
+# 1. 读取
+with open("mutsumi.json") as f:
+    data = json.load(f)
+
+# 2. 添加任务
+new_task = {
+    "id": str(uuid.uuid4()),  # 或使用 UUIDv7
+    "title": "修复登录 Bug",
+    "status": "pending",
+    "scope": "day",
+    "priority": "high",
+    "tags": ["bugfix"],
+    "created_at": datetime.datetime.now(datetime.UTC).isoformat(),
+    "children": []
+}
+data["tasks"].append(new_task)
+
+# 3. 原子写入
+tmp = tempfile.NamedTemporaryFile(mode='w', dir='.', suffix='.tmp', delete=False)
+json.dump(data, tmp, ensure_ascii=False, indent=2)
+tmp.close()
+os.rename(tmp.name, "mutsumi.json")
+```
+
+<Aside type="caution">
+**重要**：写入时必须保留你不认识的字段 —— 永远不要删除它们。写入后文件必须是有效的 JSON。
+</Aside>
+
+## 错误自愈
+
+建议在 Agent 提示中加入：
+
+```markdown
+写入 mutsumi.json 后，检查 ~/.local/share/mutsumi/error.log
+是否有 Schema 校验错误。如有错误，修复后重新写入。
+```
+
+## 下一步
+
+- [Agent 协议](/zh-cn/customization/agent-protocol/) —— 完整的 Agent 集成协议规范
+- [数据契约](/zh-cn/customization/data-contract/) —— mutsumi.json 的完整 Schema 定义

@@ -1,0 +1,145 @@
+---
+title: 自定义主题
+description: 如何创建和使用自定义 TOML 主题文件。
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+## 概述
+
+除了 4 款内置主题外，你可以通过创建 TOML 文件来定义自己的主题。
+
+## 创建主题文件
+
+在 `~/.config/mutsumi/themes/` 目录下创建 `.toml` 文件：
+
+```bash
+mkdir -p ~/.config/mutsumi/themes
+```
+
+### 主题文件格式
+
+```toml
+# ~/.config/mutsumi/themes/my-theme.toml
+
+[meta]
+name = "My Custom Theme"
+author = "your-name"
+
+[colors]
+background = "#1e1e2e"
+foreground = "#cdd6f4"
+accent = "#94e2d5"
+muted = "#6c7086"
+error = "#f38ba8"
+warning = "#fab387"
+success = "#a6e3a1"
+
+[priority_colors]
+high = "#f38ba8"
+normal = "#cdd6f4"
+low = "#6c7086"
+
+[tag_colors]
+dev = "#89b4fa"
+bugfix = "#f38ba8"
+life = "#a6e3a1"
+docs = "#fab387"
+# 未匹配的标签使用 accent 色
+```
+
+## 主题文件字段
+
+### `[meta]` 区段
+
+| 字段 | 类型 | 必填 | 说明 |
+|---|---|---|---|
+| `name` | string | 是 | 主题显示名称 |
+| `author` | string | 否 | 作者 |
+
+### `[colors]` 区段
+
+| 字段 | 说明 |
+|---|---|
+| `background` | 整体背景色 |
+| `foreground` | 主文字色 |
+| `accent` | 点缀/品牌色 |
+| `muted` | 次要/灰色文字 |
+| `error` | 错误色 |
+| `warning` | 警告色 |
+| `success` | 成功色 |
+
+### `[priority_colors]` 区段
+
+| 字段 | 说明 |
+|---|---|
+| `high` | 高优先级颜色 |
+| `normal` | 普通优先级颜色 |
+| `low` | 低优先级颜色 |
+
+### `[tag_colors]` 区段
+
+为特定标签指定颜色。键名即标签名，值为十六进制颜色。未列出的标签使用 `accent` 色。
+
+## 使用自定义主题
+
+在 `config.toml` 中将 `theme` 设为主题文件名（不含 `.toml` 后缀）：
+
+```toml
+theme = "my-theme"
+```
+
+Mutsumi 会按以下顺序查找主题：
+
+1. 内置主题（`monochrome-zen`、`nord`、`dracula`、`solarized`）
+2. `~/.config/mutsumi/themes/` 下的自定义主题文件
+
+## 示例：Catppuccin Mocha
+
+```toml
+# ~/.config/mutsumi/themes/catppuccin-mocha.toml
+
+[meta]
+name = "Catppuccin Mocha"
+author = "community"
+
+[colors]
+background = "#1e1e2e"
+foreground = "#cdd6f4"
+accent = "#89b4fa"
+muted = "#585b70"
+error = "#f38ba8"
+warning = "#fab387"
+success = "#a6e3a1"
+
+[priority_colors]
+high = "#f38ba8"
+normal = "#a6adc8"
+low = "#585b70"
+
+[tag_colors]
+dev = "#89b4fa"
+bugfix = "#f38ba8"
+life = "#a6e3a1"
+docs = "#f9e2af"
+urgent = "#eba0ac"
+```
+
+然后在 config.toml 中使用：
+
+```toml
+theme = "catppuccin-mocha"
+```
+
+<Aside type="note">
+主题颜色遵循 Textual CSS 变量映射。自定义主题中未指定的字段会回退到 `monochrome-zen` 默认值。
+</Aside>
+
+## 仅覆盖点缀色
+
+如果只想改变内置主题的点缀色，无需创建完整主题文件。未来版本将支持：
+
+```toml
+theme = "monochrome-zen"
+# accent_color = "#ff79c6"   # 覆盖点缀色（规划中）
+```

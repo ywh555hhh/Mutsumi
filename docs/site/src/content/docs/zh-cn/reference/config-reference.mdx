@@ -1,0 +1,137 @@
+---
+title: 配置参考
+description: config.toml 所有配置项的完整参考。
+---
+
+## 文件位置
+
+| 平台 | 路径（推荐） | 旧版回退 |
+|------|-------------|---------|
+| Linux | `~/.mutsumi/config.toml` | `~/.config/mutsumi/config.toml` |
+| macOS | `~/.mutsumi/config.toml` | `~/.config/mutsumi/config.toml` 或 `~/Library/Application Support/mutsumi/config.toml` |
+| Windows | `%APPDATA%\mutsumi\config.toml` | — |
+
+Mutsumi 优先查找推荐路径，然后回退到旧版位置。运行 `mutsumi migrate --config` 可将配置迁移到新位置。
+
+## 完整配置模板
+
+```toml
+# ── Mutsumi Configuration ──────────────────────────
+
+# 主题：内置名称或自定义主题文件名
+theme = "monochrome-zen"
+
+# 快捷键预设
+keybindings = "arrows"
+
+# UI 语言
+language = "zh"
+
+# 新任务的默认 scope 和启动时的活动标签页
+default_scope = "day"
+
+# 通知模式
+notification_mode = "quiet"
+
+# 默认任务文件路径（可选）
+# default_path = "/path/to/mutsumi.json"
+
+# 事件日志路径（可选 — 未设置则禁用）
+# event_log_path = "~/.local/share/mutsumi/events.jsonl"
+
+# 自定义 Textual CSS 路径（可选）
+# custom_css_path = "~/.mutsumi/custom.tcss"
+
+# 任务列表显示的列
+columns = ["checkbox", "title", "tags", "priority"]
+
+# 启动时的默认标签页（多源模式："main"；单源模式：scope 名称）
+default_tab = "main"
+
+# 仪表板：每个来源卡片显示的最大待办任务数
+dashboard_max_tasks = 3
+
+# 仪表板：是否在来源卡片中显示已完成的任务
+dashboard_show_completed = true
+
+# 注册的项目来源
+# [[projects]]
+# name = "saas-app"
+# path = "/Users/you/projects/saas-app"
+
+# 单键覆盖
+[key_overrides]
+# quit = "ctrl+q"
+# cursor_down = "ctrl+j"
+```
+
+## 配置项
+
+| 字段 | 类型 | 默认值 | 说明 |
+|------|------|--------|------|
+| `theme` | string | `"monochrome-zen"` | 主题名称 |
+| `keybindings` | string | `"arrows"` | 预设：`"vim"`, `"emacs"`, `"arrows"` |
+| `language` | string | `"en"` | 语言：`"en"`, `"zh"`, `"ja"` |
+| `default_scope` | string | `"day"` | 新任务的默认 scope |
+| `notification_mode` | string | `"quiet"` | `"quiet"`, `"badge"`, `"bell"`, `"system"` |
+| `columns` | string[] | `["checkbox","title","tags","priority"]` | 显示的列 |
+| `default_path` | path | — | 默认 mutsumi.json 路径 |
+| `event_log_path` | path | — | 事件日志路径 |
+| `custom_css_path` | path | — | 自定义 Textual CSS |
+| `default_tab` | string | `"main"` | 启动时的默认标签页 |
+| `dashboard_max_tasks` | int | `3` | 仪表板每个来源卡片显示的最大待办任务数 |
+| `dashboard_show_completed` | bool | `true` | 仪表板是否显示已完成任务 |
+
+## key_overrides
+
+覆盖单个快捷键：
+
+```toml
+[key_overrides]
+quit = "ctrl+q"
+cursor_down = "ctrl+j"
+```
+
+## `[[projects]]`
+
+注册的项目来源。每个条目包含 `name`（显示名称）和 `path`（包含 `mutsumi.json` 的目录的绝对路径）。通过 `mutsumi project add/remove` 管理。
+
+```toml
+[[projects]]
+name = "saas-app"
+path = "/Users/you/projects/saas-app"
+
+[[projects]]
+name = "oshigrid"
+path = "/Users/you/projects/oshigrid"
+```
+
+## 通知模式
+
+| 模式 | 行为 |
+|------|------|
+| `quiet` | 完全静默（默认） |
+| `badge` | 过期任务在 TUI 中高亮 |
+| `bell` | 发送终端响铃 |
+| `system` | 系统通知 |
+
+## 配置命令
+
+```bash
+mutsumi config --edit     # 用 $EDITOR 编辑
+mutsumi config --show     # 打印当前配置
+mutsumi config --reset    # 重置为默认值
+mutsumi config --path     # 打印配置文件路径
+```
+
+## 目录结构
+
+```
+~/.mutsumi/                          （推荐位置）
+├── config.toml          # 主配置
+├── mutsumi.json         # 个人任务
+├── themes/
+│   └── my-theme.toml    # 自定义主题
+└── keys/
+    └── my-keys.toml     # 自定义快捷键（预留）
+```

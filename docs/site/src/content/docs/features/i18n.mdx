@@ -1,0 +1,50 @@
+---
+title: Internationalization
+description: Multi-language support in Mutsumi.
+---
+
+## Supported Languages
+
+| Language | Code | Status |
+|----------|------|--------|
+| English | `en` | Default |
+| 简体中文 | `zh` | Full |
+| 日本語 | `ja` | Full |
+
+## Language Detection
+
+Priority order:
+
+1. `config.toml` setting: `language = "zh"`
+2. `$LANG` environment variable (e.g., `zh_CN.UTF-8`)
+3. Fallback: `en`
+
+## Set Language
+
+### Via config
+
+```toml
+# ~/.config/mutsumi/config.toml
+language = "ja"
+```
+
+### Via init
+
+```bash
+mutsumi init --lang zh
+```
+
+## What Gets Translated
+
+- Tab labels (Today/Week/Month/Inbox)
+- Status text ("tasks", "done", "pending")
+- Action labels ("New Task", "Delete this task?")
+- Help screen text
+- Error messages
+
+## What Stays English
+
+- CLI commands and flags
+- Config field names
+- JSON field names in `tasks.json`
+- Technical terms

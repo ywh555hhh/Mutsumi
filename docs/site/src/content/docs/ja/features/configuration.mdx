@@ -1,0 +1,143 @@
+---
+title: "設定"
+description: "config.toml による Mutsumi のカスタマイズ。全設定項目の解説。"
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+## 概要
+
+Mutsumi の設定は TOML フォーマットで管理されます。設定ファイルがなくてもデフォルト値で動作します。
+
+## 設定ファイルの場所
+
+Mutsumi は以下の順序で設定ファイルを検索します：
+
+```
+1. ~/.mutsumi/config.toml          （推奨パス）
+2. ~/.config/mutsumi/config.toml   （レガシーフォールバック）
+```
+
+```
+~/.mutsumi/
+├── config.toml          # メイン設定
+├── mutsumi.json         # 個人タスク
+├── themes/
+│   └── my-theme.toml    # カスタムテーマ
+└── keys/
+    └── my-keys.toml     # カスタムキーバインド
+```
+
+プラットフォーム固有のパス：
+
+| プラットフォーム | パス |
+|---|---|
+| Linux | `~/.mutsumi/` |
+| macOS | `~/.mutsumi/` または `~/Library/Application Support/mutsumi/` または `~/.config/mutsumi/` |
+| Windows | `%APPDATA%\mutsumi\` |
+
+## 設定の管理コマンド
+
+```bash
+mutsumi init --defaults     # デフォルト設定で config.toml を作成
+mutsumi init --lang ja      # 日本語で初期化
+mutsumi config --edit       # $EDITOR で設定ファイルを開く
+mutsumi config --show       # 現在の設定を表示
+mutsumi config --reset      # デフォルトにリセット
+mutsumi config --path       # 設定ファイルのパスを表示
+```
+
+## config.toml の構造
+
+```toml
+# テーマ — "monochrome-zen"（デフォルト）, "solarized", "nord", "dracula"
+theme = "monochrome-zen"
+
+# キーバインド — "arrows"（デフォルト）, "vim", "emacs"
+keybindings = "arrows"
+
+# 言語 — "en"（デフォルト）, "zh", "ja"
+language = "en"
+
+# デフォルトのタスクファイルパス（オプション）
+# default_path = "/path/to/mutsumi.json"
+
+# 起動時のデフォルトスコープ
+default_scope = "day"
+
+# 通知モード — "quiet"（デフォルト）, "badge", "bell", "system"
+notification_mode = "quiet"
+
+# タスクリストに表示するカラム
+columns = ["checkbox", "title", "tags", "priority"]
+
+# イベントログ（オプション — JSONL 形式）
+# event_log_path = "~/.local/share/mutsumi/events.jsonl"
+
+# カスタム CSS オーバーライド（オプション）
+# custom_css_path = "~/.config/mutsumi/custom.tcss"
+
+# キーバインドのオーバーライド（オプション）
+# [key_overrides]
+# quit = "ctrl+q"
+# cursor_down = "ctrl+j"
+```
+
+## 設定項目の詳細
+
+### theme
+
+内蔵テーマ名またはカスタムテーマファイル名を指定します。
+
+- 型: `string`
+- デフォルト: `"monochrome-zen"`
+- 有効値: `"monochrome-zen"`, `"nord"`, `"dracula"`, `"solarized"`, またはカスタムテーマ名
+
+### keybindings
+
+キーバインドプリセットを指定します。
+
+- 型: `string`
+- デフォルト: `"arrows"`
+- 有効値: `"arrows"`, `"vim"`, `"emacs"`
+
+### language
+
+UI の表示言語を指定します。
+
+- 型: `string`
+- デフォルト: `"en"`
+- 有効値: `"en"`, `"zh"`, `"ja"`
+
+### default_scope
+
+TUI 起動時にアクティブになるタブを指定します。
+
+- 型: `string`
+- デフォルト: `"day"`
+- 有効値: `"day"`, `"week"`, `"month"`, `"inbox"`
+
+### notification_mode
+
+通知モードを指定します。
+
+- 型: `string`
+- デフォルト: `"quiet"`
+
+| モード | 動作 |
+|---|---|
+| `quiet` | 完全に無音。ステータスバーにカウントのみ表示 |
+| `badge` | 期限切れタスクが TUI 内でフラッシュ/ハイライト |
+| `bell` | ターミナルベル (`\a`) を送信 |
+| `system` | OS のシステム通知 API を呼び出し |
+
+### columns
+
+タスクリストに表示するカラムを指定します。
+
+- 型: `list[string]`
+- デフォルト: `["checkbox", "title", "tags", "priority"]`
+
+<Aside type="note">
+設定ファイルが存在しない場合、Mutsumi はすべてデフォルト値で動作します。設定は完全にオプションです。
+</Aside>

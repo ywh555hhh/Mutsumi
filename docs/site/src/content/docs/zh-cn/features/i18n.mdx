@@ -1,0 +1,104 @@
+---
+title: 多语言支持
+description: Mutsumi 的 i18n 国际化系统，支持英语、中文和日语。
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+## 支持的语言
+
+| 语言 | 代码 | 文件 |
+|---|---|---|
+| English | `en` | `locales/en.toml` |
+| 中文 (简体) | `zh` | `locales/zh.toml` |
+| 日本語 | `ja` | `locales/ja.toml` |
+
+## 语言检测优先级
+
+```
+config.toml 设置 > $LANG 环境变量 > 回退到 en
+```
+
+具体逻辑：
+1. 如果 `config.toml` 中设置了 `language = "zh"`，使用 `zh`
+2. 如果设置了 `language = "auto"`，从 `$LANG` / `$LC_ALL` 环境变量检测
+3. 环境变量示例：`zh_CN.UTF-8` → `zh`，`ja_JP` → `ja`，`C` → `en`
+4. 无法检测时回退到 `en`
+
+## 设置语言
+
+### 方式一：配置文件
+
+```toml
+# ~/.config/mutsumi/config.toml
+language = "zh"     # "en" | "zh" | "ja" | "auto"
+```
+
+### 方式二：初始化时指定
+
+```bash
+mutsumi init --lang zh
+```
+
+### 方式三：自动检测
+
+```toml
+language = "auto"
+```
+
+Mutsumi 会从系统环境变量自动检测语言。
+
+## 翻译覆盖范围
+
+i18n 系统覆盖所有 TUI 界面文本：
+
+| 区域 | 示例键 |
+|---|---|
+| 标签页 | `tabs.today`、`tabs.week`、`tabs.month`、`tabs.inbox` |
+| 状态栏 | `status.tasks`、`status.done`、`status.pending` |
+| 操作提示 | `actions.new_task`、`actions.confirm_delete` |
+| 优先级 | `priority.high`、`priority.normal`、`priority.low` |
+
+## 语言文件格式
+
+语言文件使用 TOML 格式，按区域分组：
+
+```toml
+# locales/zh.toml
+
+[tabs]
+today = "今日"
+week = "本周"
+month = "本月"
+inbox = "收件箱"
+
+[status]
+tasks = "{count} 个任务"
+done = "{count} 已完成"
+pending = "{count} 待处理"
+
+[actions]
+new_task = "新建任务"
+confirm_delete = "确定删除这个任务吗？"
+```
+
+<Aside type="note">
+支持 `{count}` 等格式化占位符，通过 `I18n.t("status.tasks", count=5)` 调用时自动替换。
+</Aside>
+
+## 回退机制
+
+i18n 系统使用三级回退链：
+
+```
+当前语言翻译 → 英语翻译 → 原始键名
+```
+
+这意味着即使某个翻译缺失，也不会导致界面出错 —— 最差情况显示英语文本或键名。
+
+## 技术实现
+
+- 使用 Python 标准库 `tomllib` 解析 TOML
+- 全局单例模式，`init_i18n()` 初始化
+- 点号语法查找：`t("tabs.today")` → 在 `[tabs]` 分区下查找 `today`
+- 零外部依赖 —— 不使用 gettext 或其他 i18n 库

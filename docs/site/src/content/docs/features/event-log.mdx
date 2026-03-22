@@ -1,0 +1,51 @@
+---
+title: Event Log
+description: The events.jsonl reverse-notification system.
+---
+
+## Overview
+
+When users operate in the TUI, Mutsumi appends events to `events.jsonl` (JSONL format, one event per line). Agents can tail this file to react to user actions.
+
+## Format
+
+```jsonl
+{"ts":"2026-03-21T10:00:00Z","event":"task_completed","task_id":"01JQ...","title":"Fix cache bug","source":"tui"}
+{"ts":"2026-03-21T10:01:22Z","event":"task_created","task_id":"01JQ...","title":"Write tests","source":"tui"}
+{"ts":"2026-03-21T10:05:00Z","event":"task_deleted","task_id":"01JQ...","title":"Old task","source":"tui"}
+```
+
+## Event Types
+
+| Event | Fields | Description |
+|-------|--------|-------------|
+| `task_created` | task_id, title | New task created |
+| `task_completed` | task_id, title | Task marked done |
+| `task_deleted` | task_id, title | Task deleted |
+| `task_updated` | task_id, changes | Task fields modified |
+| `schema_error` | file, message | JSON validation failed |
+
+## Agent Consumption
+
+```bash
+# Real-time monitoring
+tail -f events.jsonl | jq .
+
+# In agent prompt
+"Check events.jsonl for recent user actions on tasks"
+```
+
+## Rotation
+
+- Retains the most recent 1000 events by default
+- Older events are automatically truncated
+- Configurable via `events.max_lines` in `config.toml`
+
+## Configuration
+
+```toml
+# ~/.config/mutsumi/config.toml
+event_log_path = "./events.jsonl"
+```
+
+Set to empty to disable event logging.

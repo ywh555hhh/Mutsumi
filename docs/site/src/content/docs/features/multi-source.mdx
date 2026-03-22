@@ -1,0 +1,156 @@
+---
+title: Multi-Source Hub
+description: Manage personal tasks and multiple project sources from a single Mutsumi instance.
+---
+
+## Overview
+
+Mutsumi can aggregate tasks from multiple sources into a single TUI — a global personal todo list plus any number of per-project `mutsumi.json` files written by AI agents.
+
+```
+┌─────────────────────────────────────────────────────┐
+│  [★ Main] [Personal] [saas-app] [oshigrid]          │  ← Source tabs
+├─────────────────────────────────────────────────────┤
+│  ┌─ saas-app ─────────────────────────────── 3/5 ─┐ │
+│  │  ████████████░░░░░░░░  60%                      │ │  ← Dashboard
+│  │  · Fix auth bug                                 │ │
+│  │  · Add rate limiting                            │ │
+│  └─────────────────────────────────────────────────┘ │
+│  ┌─ oshigrid ─────────────────────────────── 1/4 ─┐ │
+│  │  ████░░░░░░░░░░░░░░░░  25%                      │ │
+│  │  · Update card layout                           │ │
+│  │  · Optimize image loading                       │ │
+│  └─────────────────────────────────────────────────┘ │
+├─────────────────────────────────────────────────────┤
+│  8 tasks · 4 done · 4 pending                       │
+└─────────────────────────────────────────────────────┘
+```
+
+## Architecture
+
+```
+~/.mutsumi/
+├── config.toml           # Global config + [[projects]] registry
+└── mutsumi.json          # Personal tasks (global todo)
+
+~/projects/saas-app/
+└── mutsumi.json          # Project tasks (written by Agent)
+
+~/projects/oshigrid/
+└── mutsumi.json          # Project tasks (written by Agent)
+```
+
+Each source is independent — its own `mutsumi.json` file, its own file watcher. The TUI aggregates them into a unified view.
+
+## Setting Up
+
+### 1. Initialize Personal Tasks
+
+```bash
+mutsumi init --personal
+```
+
+Creates `~/.mutsumi/mutsumi.json` as your global personal task file.
+
+### 2. Register Projects
+
+```bash
+mutsumi project add ~/projects/saas-app
+mutsumi project add ~/projects/oshigrid
+```
+
+Each project's `mutsumi.json` becomes a source in the TUI.
+
+### 3. Launch
+
+```bash
+mutsumi
+```
+
+Mutsumi auto-discovers all registered sources and shows them as tabs.
+
+## Tab Layout
+
+### Single-Source Mode
+
+When no projects are registered, Mutsumi shows the classic scope tabs:
+
+```
+[Today] [Week] [Month] [Inbox]
+```
+
+### Multi-Source Mode
+
+With registered projects, the header shows source tabs:
+
+```
+[★ Main] [Personal] [saas-app] [oshigrid]
+```
+
+- **★ Main** — Aggregated dashboard showing progress across all sources
+- **Personal** — Your global personal tasks (`~/.mutsumi/mutsumi.json`)
+- **Project tabs** — One tab per registered project
+
+### Scope Sub-Filter
+
+When viewing a specific source tab (not Main), a scope filter appears below the header:
+
+```
+[Today] [Week] [Month] [Inbox] [All]
+```
+
+Press `f` to cycle through scopes, or click a filter button.
+
+## Project Management CLI
+
+```bash
+# Register a project
+mutsumi project add ~/projects/my-app
+
+# List registered projects
+mutsumi project list
+
+# Remove a project
+mutsumi project remove my-app
+```
+
+Projects are stored in `~/.mutsumi/config.toml`:
+
+```toml
+[[projects]]
+name = "saas-app"
+path = "/Users/you/projects/saas-app"
+
+[[projects]]
+name = "oshigrid"
+path = "/Users/you/projects/oshigrid"
+```
+
+## Config Migration
+
+If you're upgrading from an older version:
+
+```bash
+# Migrate tasks.json → mutsumi.json (in current directory)
+mutsumi migrate
+
+# Migrate config directory (~/.config/mutsumi/ → ~/.mutsumi/)
+mutsumi migrate --config
+
+# Migrate everything
+mutsumi migrate --all
+```
+
+## Keyboard Shortcuts
+
+| Key | Action |
+|-----|--------|
+| `1`–`9` | Jump to source tab (multi-source) or scope tab (single-source) |
+| `f` | Cycle scope filter (Today → Week → Month → Inbox → All) |
+| `Enter` | Open selected source from dashboard |
+
+## Backward Compatibility
+
+- **File naming**: `mutsumi.json` is preferred, but Mutsumi auto-falls back to `tasks.json` if found
+- **Single-source**: Without registered projects, Mutsumi behaves identically to the classic single-file mode
+- **Config**: Both `~/.mutsumi/config.toml` and `~/.config/mutsumi/config.toml` are supported (new path takes priority)

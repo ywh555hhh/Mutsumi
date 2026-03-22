@@ -1,0 +1,100 @@
+---
+title: "多言語対応"
+description: "Mutsumi の多言語対応（i18n）。英語、中国語、日本語の 3 言語をサポート。"
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+## 概要
+
+Mutsumi は 3 つの言語をサポートしています：
+
+| 言語 | コード | ステータス |
+|---|---|---|
+| English | `en` | デフォルト |
+| 中文（简体） | `zh` | サポート済み |
+| 日本語 | `ja` | サポート済み |
+
+## 言語の設定
+
+### config.toml で設定
+
+```toml
+language = "ja"
+```
+
+### 初期化時に設定
+
+```bash
+mutsumi init --lang ja
+```
+
+### 環境変数で設定
+
+`config.toml` で `language = "auto"` と設定すると、`$LANG` 環境変数から自動検出します。
+
+## 言語の優先順位
+
+```
+config.toml の設定 > $LANG 環境変数 > フォールバック "en"
+```
+
+## ロケールファイルの構造
+
+ロケールファイルは TOML 形式で、`mutsumi/i18n/` ディレクトリに配置されます。
+
+```toml
+# locales/ja.toml
+
+[tabs]
+today = "今日"
+week = "今週"
+month = "今月"
+inbox = "受信箱"
+
+[status]
+tasks = "{count} タスク"
+done = "{count} 完了"
+pending = "{count} 未完了"
+
+[actions]
+new_task = "新しいタスク"
+confirm_delete = "このタスクを削除しますか？"
+```
+
+## 翻訳される要素
+
+以下の UI 要素が翻訳されます：
+
+| 要素 | 例（日本語） |
+|---|---|
+| タブラベル | 今日 / 今週 / 今月 / 受信箱 |
+| ステータスバー | `6 タスク · 2 完了 · 4 未完了` |
+| ダイアログタイトル | 新しいタスク / タスクを編集 |
+| 確認メッセージ | このタスクを削除しますか？ |
+| 空の状態メッセージ | まだ何もありません |
+| エラーメッセージ | tasks.json にエラーがあります |
+
+## 翻訳されない要素
+
+以下の要素は言語設定に関係なく英語のままです：
+
+- タスクのタイトルと説明（ユーザーのデータ）
+- タグ名（ユーザー定義）
+- フィールド名（`status`, `priority` 等）
+- コマンド名（`mutsumi add`, `mutsumi list` 等）
+- ヘルプ画面のキー表示（`j/k`, `Space` 等）
+
+<Aside type="note">
+現在の i18n 実装はシンプルな辞書ベースです。gettext や ICU のような重い依存は使用しません。これは「軽量依存」の原則に基づいています。
+</Aside>
+
+## 言語の追加
+
+新しい言語を追加したい場合は、既存のロケールファイルをコピーして翻訳し、プルリクエストを送ってください。
+
+```bash
+# 例: 韓国語を追加
+cp mutsumi/i18n/en.toml mutsumi/i18n/ko.toml
+# ko.toml を編集して翻訳
+```

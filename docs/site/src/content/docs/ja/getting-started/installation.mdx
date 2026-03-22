@@ -1,0 +1,204 @@
+---
+title: "インストール"
+description: "Mutsumi のインストール方法。uv、pip、pipx、git clone の 4 つの方法。"
+---
+
+import { Tabs, TabItem, Steps, Aside } from '@astrojs/starlight/components';
+
+## 前提条件
+
+- Python 3.12+
+- macOS / Linux / Windows（PowerShell、CMD、Windows Terminal いずれも対応）
+
+## インストール方法
+
+<Tabs>
+  <TabItem label="uv（推奨）">
+
+`uv` は最速かつ最もモダンな Python パッケージマネージャです。
+
+<Steps>
+
+1. **uv をインストール**（既にある場合はスキップ）
+
+   <Tabs>
+     <TabItem label="Linux / macOS">
+       ```bash
+       curl -LsSf https://astral.sh/uv/install.sh | sh
+       ```
+     </TabItem>
+     <TabItem label="Windows">
+       ```powershell
+       powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
+       ```
+     </TabItem>
+   </Tabs>
+
+2. **Mutsumi をインストール**
+
+   ```bash
+   uv tool install git+https://github.com/ywh555hhh/Mutsumi.git
+   ```
+
+3. **インストール確認**
+
+   ```bash
+   mutsumi --version
+   # Expected: mutsumi, version 0.4.0b1
+   ```
+
+</Steps>
+
+`uv tool install` は Python 環境を自動的に分離管理します。Python の事前インストールは不要です。
+
+  </TabItem>
+  <TabItem label="pip">
+
+Python 3.12+ がインストール済みであれば、最もシンプルな方法です：
+
+```bash
+pip install mutsumi
+```
+
+確認：
+
+```bash
+mutsumi --version
+```
+
+  </TabItem>
+  <TabItem label="pipx">
+
+<Steps>
+
+1. **pipx をインストール**（既にある場合はスキップ）
+
+   ```bash
+   pip install pipx
+   pipx ensurepath
+   ```
+
+2. **Mutsumi をインストール**
+
+   ```bash
+   pipx install git+https://github.com/ywh555hhh/Mutsumi.git
+   ```
+
+3. **インストール確認**
+
+   ```bash
+   mutsumi --version
+   ```
+
+</Steps>
+
+  </TabItem>
+  <TabItem label="git clone（開発者向け）">
+
+ソースコードを直接触りたい場合：
+
+<Steps>
+
+1. **リポジトリをクローン**
+
+   ```bash
+   git clone https://github.com/ywh555hhh/Mutsumi.git
+   cd Mutsumi
+   ```
+
+2. **インストールして実行**
+
+   ```bash
+   pip install .
+   mutsumi --version
+   ```
+
+   または uv を使う場合：
+
+   ```bash
+   uv sync && uv run mutsumi --version
+   ```
+
+</Steps>
+
+  </TabItem>
+</Tabs>
+
+## PATH の設定
+
+`mutsumi` コマンドが見つからない場合：
+
+<Tabs>
+  <TabItem label="Linux / macOS">
+    `~/.local/bin` を PATH に追加してください：
+
+    ```bash
+    export PATH="$HOME/.local/bin:$PATH"
+    ```
+
+    永続化するには、`~/.bashrc` / `~/.zshrc` / `~/.config/fish/config.fish` に追記してください。
+  </TabItem>
+  <TabItem label="Windows">
+    `pip install --user` の場合は、Python Scripts ディレクトリを PATH に追加：
+
+    ```powershell
+    # PowerShell — Scripts パスを確認:
+    python -m site --user-site
+    # 対応する Scripts\ ディレクトリを PATH に追加
+    ```
+
+    `uv tool install` や `pipx` でインストールした場合は自動的に PATH が設定されます。
+  </TabItem>
+</Tabs>
+
+## 初期設定（オプション）
+
+Mutsumi は設定ファイルなしでも動作しますが、カスタマイズしたい場合：
+
+```bash
+mutsumi init --defaults
+```
+
+日本語に設定する場合：
+
+```bash
+mutsumi init --lang ja
+```
+
+<Aside type="tip">
+設定ファイルの詳細は[設定](/ja/features/configuration/)ページを参照してください。
+</Aside>
+
+## アンインストール
+
+<Tabs>
+  <TabItem label="pip">
+    ```bash
+    pip uninstall mutsumi
+    ```
+  </TabItem>
+  <TabItem label="uv">
+    ```bash
+    uv tool uninstall mutsumi
+    ```
+  </TabItem>
+</Tabs>
+
+設定・ログファイルの削除（オプション）：
+
+<Tabs>
+  <TabItem label="Linux / macOS">
+    ```bash
+    rm -rf ~/.config/mutsumi/           # 設定
+    rm -rf ~/.local/share/mutsumi/      # ログ
+    ```
+  </TabItem>
+  <TabItem label="Windows">
+    ```powershell
+    Remove-Item -Recurse "$env:APPDATA\mutsumi"       # 設定
+    Remove-Item -Recurse "$env:LOCALAPPDATA\mutsumi"   # ログ
+    ```
+  </TabItem>
+</Tabs>
+
+`tasks.json` はユーザーのデータです — 手動で判断してください。

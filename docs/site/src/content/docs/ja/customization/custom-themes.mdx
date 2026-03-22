@@ -1,0 +1,162 @@
+---
+title: "カスタムテーマ"
+description: "TOML ファイルで Mutsumi のカスタムテーマを作成する方法。"
+---
+
+import { Aside, Steps } from '@astrojs/starlight/components';
+
+## 概要
+
+Mutsumi の内蔵テーマ以外に、TOML ファイルでカスタムテーマを作成できます。
+
+## テーマファイルの作成
+
+<Steps>
+
+1. **テーマディレクトリを作成**
+
+   ```bash
+   mkdir -p ~/.config/mutsumi/themes/
+   ```
+
+2. **テーマファイルを作成**
+
+   ```bash
+   touch ~/.config/mutsumi/themes/my-theme.toml
+   ```
+
+3. **テーマを定義**
+
+   以下の形式でカラーを定義します：
+
+   ```toml
+   [meta]
+   name = "My Custom Theme"
+   author = "your-name"
+
+   [colors]
+   background = "#1e1e2e"
+   foreground = "#cdd6f4"
+   accent = "#94e2d5"
+   muted = "#6c7086"
+   error = "#f38ba8"
+   warning = "#fab387"
+   success = "#a6e3a1"
+
+   [priority_colors]
+   high = "#f38ba8"
+   normal = "#cdd6f4"
+   low = "#6c7086"
+
+   [tag_colors]
+   dev = "#89b4fa"
+   bugfix = "#f38ba8"
+   life = "#a6e3a1"
+   docs = "#fab387"
+   # マッチしないタグは accent カラーを使用
+   ```
+
+4. **config.toml で有効化**
+
+   ```toml
+   theme = "my-theme"
+   ```
+
+</Steps>
+
+## テーマファイルの構造
+
+### [meta] セクション
+
+| フィールド | 型 | 説明 |
+|---|---|---|
+| `name` | string | テーマの表示名 |
+| `author` | string | 作者名 |
+
+### [colors] セクション
+
+| フィールド | 型 | 説明 |
+|---|---|---|
+| `background` | string | アプリ全体の背景色 |
+| `foreground` | string | メインテキストカラー |
+| `accent` | string | アクセントカラー（ハイライト、フォーカス） |
+| `muted` | string | 控えめなテキストカラー |
+| `error` | string | エラー表示カラー |
+| `warning` | string | 警告表示カラー |
+| `success` | string | 成功表示カラー |
+
+### [priority_colors] セクション
+
+| フィールド | 型 | 説明 |
+|---|---|---|
+| `high` | string | 高優先度タスクのカラー |
+| `normal` | string | 通常優先度タスクのカラー |
+| `low` | string | 低優先度タスクのカラー |
+
+### [tag_colors] セクション
+
+タグ名をキー、カラーコードを値とする辞書です。定義されていないタグには `accent` カラーが使用されます。
+
+## 内蔵テーマのカラー値
+
+カスタムテーマの参考として、内蔵テーマのカラー値を示します。
+
+### monochrome-zen
+
+```toml
+[colors]
+background = "#0f0f0f"
+foreground = "#e0e0e0"
+accent = "#5de4c7"
+muted = "#666666"
+error = "#e06c75"
+
+[priority_colors]
+high = "#e06c75"
+normal = "#e5c07b"
+low = "#666666"
+```
+
+### Catppuccin 風カスタムテーマの例
+
+```toml
+[meta]
+name = "Catppuccin Mocha"
+author = "community"
+
+[colors]
+background = "#1e1e2e"
+foreground = "#cdd6f4"
+accent = "#cba6f7"
+muted = "#6c7086"
+error = "#f38ba8"
+warning = "#fab387"
+success = "#a6e3a1"
+
+[priority_colors]
+high = "#f38ba8"
+normal = "#89b4fa"
+low = "#6c7086"
+
+[tag_colors]
+dev = "#89b4fa"
+bugfix = "#f38ba8"
+life = "#a6e3a1"
+docs = "#fab387"
+ml = "#cba6f7"
+```
+
+## アクセントカラーのみオーバーライド
+
+テーマ全体を変更せず、アクセントカラーだけをオーバーライドすることもできます：
+
+```toml
+# config.toml
+theme = "monochrome-zen"
+# 以下は将来対応予定
+# accent_color = "#94e2d5"
+```
+
+<Aside type="caution">
+カラーコードは `#RRGGBB` 形式の 6 桁 16 進数で指定してください。短縮形（`#RGB`）やカラー名（`red`）はサポートしていません。
+</Aside>
