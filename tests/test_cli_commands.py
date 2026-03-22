@@ -10,14 +10,14 @@ from mutsumi.cli import main
 
 
 def _write_tasks(tasks: list[dict[str, str | list[str]]]) -> None:
-    """Write a tasks.json with given tasks."""
+    """Write a mutsumi.json with given tasks."""
     data = {"version": 1, "tasks": tasks}
-    with open("tasks.json", "w") as f:
+    with open("mutsumi.json", "w") as f:
         json.dump(data, f)
 
 
 def _read_tasks() -> list[dict[str, str | list[str]]]:
-    with open("tasks.json") as f:
+    with open("mutsumi.json") as f:
         return json.load(f)["tasks"]  # type: ignore[no-any-return]
 
 

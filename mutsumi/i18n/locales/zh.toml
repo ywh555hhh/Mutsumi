@@ -3,6 +3,9 @@ today = "今天"
 week = "本周"
 month = "本月"
 inbox = "收件箱"
+main = "总览"
+personal = "个人"
+all = "全部"
 
 [status]
 tasks = "{count} 个任务"
@@ -28,10 +31,10 @@ deleted = "已删除"
 
 [empty]
 title = "这里还什么都没有。"
-hint = "按 [n] 新建任务，或让你的 Agent 写入 tasks.json"
+hint = "按 [n] 新建任务，或让你的 Agent 写入 mutsumi.json"
 
 [errors]
-json_invalid = "tasks.json 格式错误，显示上次有效状态。"
+json_invalid = "任务文件格式错误，显示上次有效状态。"
 task_skipped = "{count} 个任务因校验错误被跳过"
 terminal_narrow = "终端宽度不足"
 
@@ -74,3 +77,25 @@ edit_success = "已更新：{title}"
 id_not_found = "找不到匹配 '{prefix}' 的任务"
 id_ambiguous = "前缀 '{prefix}' 匹配多个任务"
 list_header = "{path} 中的任务"
+
+[migrate]
+task_file_done = "已迁移：tasks.json → mutsumi.json"
+task_file_not_found = "当前目录下没有 tasks.json"
+task_file_exists = "mutsumi.json 已存在，跳过任务文件迁移。"
+config_done = "已迁移配置：{old} → {new}"
+config_not_found = "未找到旧配置目录：{path}"
+nothing = "没有需要迁移的内容。"
+
+[project]
+added = "已添加项目：{name} → {path}"
+removed = "已移除项目：{name}"
+not_found = "未找到项目 '{name}'。"
+already_registered = "项目 '{name}' 已注册。"
+no_projects = "尚未注册任何项目。"
+list_header = "已注册的项目："
+
+[dashboard]
+title = "仪表盘"
+no_tasks = "没有任务"
+pending = "{count} 待办"
+progress = "{done}/{total} 已完成"

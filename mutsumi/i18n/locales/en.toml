@@ -3,6 +3,9 @@ today = "Today"
 week = "Week"
 month = "Month"
 inbox = "Inbox"
+main = "Main"
+personal = "Personal"
+all = "All"
 
 [status]
 tasks = "{count} tasks"
@@ -28,10 +31,10 @@ deleted = "Deleted"
 
 [empty]
 title = "Nothing here yet."
-hint = "Press [n] to create a task or let your Agent write tasks.json"
+hint = "Press [n] to create a task or let your Agent write mutsumi.json"
 
 [errors]
-json_invalid = "tasks.json has errors. Showing last valid state."
+json_invalid = "Task file has errors. Showing last valid state."
 task_skipped = "{count} task(s) skipped due to validation errors"
 terminal_narrow = "Terminal too narrow"
 
@@ -74,3 +77,25 @@ edit_success = "Updated: {title}"
 id_not_found = "No task matching '{prefix}'"
 id_ambiguous = "Ambiguous prefix '{prefix}' — multiple tasks match"
 list_header = "Tasks in {path}"
+
+[migrate]
+task_file_done = "Migrated: tasks.json → mutsumi.json"
+task_file_not_found = "No tasks.json found in current directory."
+task_file_exists = "mutsumi.json already exists. Skipping task file migration."
+config_done = "Migrated config: {old} → {new}"
+config_not_found = "No legacy config directory found at {path}"
+nothing = "Nothing to migrate."
+
+[project]
+added = "Added project: {name} → {path}"
+removed = "Removed project: {name}"
+not_found = "Project '{name}' not found."
+already_registered = "Project '{name}' already registered."
+no_projects = "No projects registered."
+list_header = "Registered projects:"
+
+[dashboard]
+title = "Dashboard"
+no_tasks = "No tasks"
+pending = "{count} pending"
+progress = "{done}/{total} completed"

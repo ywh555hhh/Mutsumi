@@ -2,11 +2,9 @@
 
 from __future__ import annotations
 
-from pathlib import Path
-
 import click
 
-from mutsumi.core.loader import load_task_file
+from mutsumi.core.loader import load_task_file, resolve_tasks_path
 from mutsumi.core.writer import find_task, resolve_partial_id, save_task_file, update_task
 
 
@@ -28,7 +26,7 @@ def edit(
     description: str | None,
 ) -> None:
     """Edit an existing task (supports ID prefix matching)."""
-    path = Path(ctx.obj.get("path") or "tasks.json")
+    path = resolve_tasks_path(ctx.obj.get("path"))
 
     if not path.exists():
         click.echo(f"File not found: {path}", err=True)

@@ -1,4 +1,9 @@
-"""Header bar widget with scope tabs."""
+"""Header bar widget with dynamic source tabs.
+
+In single-source mode (no projects registered), shows scope tabs
+like before for backward compat. In multi-source mode, shows source
+tabs with the Main tab first.
+"""
 
 from __future__ import annotations
 
@@ -16,6 +21,7 @@ if TYPE_CHECKING:
     from textual.app import ComposeResult
     from textual.events import Resize
 
+# Legacy scope tab support (single-source mode)
 TAB_LABELS: dict[TaskScope, str] = {
     TaskScope.DAY: "Today",
     TaskScope.WEEK: "Week",
@@ -39,11 +45,11 @@ class TabButton(Static, can_focus=True):
         width: auto;
         height: 1;
         padding: 0 1;
-        color: #666666;
+        color: #999999;
     }
 
     TabButton:hover {
-        color: #999999;
+        color: #cccccc;
         background: #222222;
     }
 
@@ -68,41 +74,51 @@ class TabButton(Static, can_focus=True):
     }
     """
 
-    def __init__(self, scope: TaskScope, **kwargs: Any) -> None:
+    def __init__(self, scope: TaskScope | None = None, *, source_name: str = "", display_name: str = "", **kwargs: Any) -> None:
         self.scope = scope
-        super().__init__(self._label_for(active=False), **kwargs)
+        self.source_name = source_name
+        self.display_name = display_name or source_name
+        if scope is not None:
+            super().__init__(self._scope_label(scope, active=False), **kwargs)
+        else:
+            super().__init__(self._source_label(self.display_name, active=False), **kwargs)
 
     @staticmethod
-    def _label_for(scope: TaskScope | None = None, active: bool = False) -> str:
-        """Return bracketed label when active, plain when inactive.
+    def _scope_label(scope: TaskScope, active: bool = False) -> str:
+        name = TAB_LABELS.get(scope, "")
+        return f"\\[{name}]" if active else f" {name} "
 
-        Brackets are escaped (``\\[``) so Rich does not swallow them as markup.
-        """
-        name = TAB_LABELS[scope] if scope else ""
+    @staticmethod
+    def _source_label(name: str, active: bool = False) -> str:
         return f"\\[{name}]" if active else f" {name} "
 
     def set_active(self, active: bool) -> None:
-        """Update label text to reflect active/inactive state."""
-        self.update(self._label_for(self.scope, active))
+        if self.scope is not None:
+            self.update(self._scope_label(self.scope, active))
+        else:
+            self.update(self._source_label(self.display_name, active))
         self.set_class(active, "active")
 
     def on_click(self) -> None:
         parent = self.parent
         while parent is not None:
             if isinstance(parent, HeaderBar):
-                parent.active_scope = self.scope
+                if self.scope is not None:
+                    parent.active_scope = self.scope
+                elif self.source_name:
+                    parent.active_source = self.source_name
                 break
             parent = parent.parent
 
 
 class HeaderBar(Widget):
-    """Top bar with scope tabs and app title."""
+    """Top bar with scope tabs (single-source) or source tabs (multi-source)."""
 
     DEFAULT_CSS = """
     HeaderBar {
         dock: top;
         height: 1;
-        background: #1a1a1a;
+        background: #0e0e0e;
     }
 
     HeaderBar > Horizontal {
@@ -119,40 +135,106 @@ class HeaderBar(Widget):
     """
 
     class TabChanged(Message):
-        """Posted when the active tab changes."""
+        """Posted when the active scope tab changes (single-source mode)."""
 
         def __init__(self, scope: TaskScope) -> None:
             self.scope = scope
             super().__init__()
 
+    class SourceTabChanged(Message):
+        """Posted when the active source tab changes (multi-source mode)."""
+
+        def __init__(self, source_name: str) -> None:
+            self.source_name = source_name
+            super().__init__()
+
     active_scope: reactive[TaskScope] = reactive(TaskScope.DAY)
+    active_source: reactive[str] = reactive("")
+
+    def __init__(self, *, source_names: list[str] | None = None, **kwargs: Any) -> None:
+        super().__init__(**kwargs)
+        self._source_names = source_names or []
+        self._multi_source = len(self._source_names) > 1
+
+    @property
+    def is_multi_source(self) -> bool:
+        return self._multi_source
+
+    def set_sources(self, source_names: list[str]) -> None:
+        """Update the source tab list dynamically."""
+        self._source_names = source_names
+        self._multi_source = len(source_names) > 1
+        # Re-compose would be ideal but for now this is called before mount
 
     def compose(self) -> ComposeResult:
         with Horizontal():
-            for scope in TAB_ORDER:
-                is_active = scope == self.active_scope
-                btn = TabButton(scope, classes="active" if is_active else "")
-                btn.update(TabButton._label_for(scope, is_active))
-                yield btn
+            if self._multi_source:
+                # Multi-source: show source tabs
+                for name in self._source_names:
+                    is_active = name == self.active_source
+                    display_name = f"\u2605 Main" if name == "main" else name
+                    btn = TabButton(
+                        source_name=name,
+                        display_name=display_name,
+                        classes="active" if is_active else "",
+                    )
+                    yield btn
+            else:
+                # Single-source: show scope tabs (backward compat)
+                for scope in TAB_ORDER:
+                    is_active = scope == self.active_scope
+                    btn = TabButton(scope, classes="active" if is_active else "")
+                    btn.update(TabButton._scope_label(scope, is_active))
+                    yield btn
             yield Static("mutsumi", classes="title")
 
     def watch_active_scope(self, new_scope: TaskScope) -> None:
-        """Update tab styling and post message when active scope changes."""
+        """Update tab styling when scope changes (single-source mode)."""
+        if self._multi_source:
+            return
         for btn in self.query(TabButton):
-            btn.set_active(btn.scope == new_scope)
+            if btn.scope is not None:
+                btn.set_active(btn.scope == new_scope)
         self.post_message(self.TabChanged(new_scope))
 
+    def watch_active_source(self, new_source: str) -> None:
+        """Update tab styling when source changes (multi-source mode)."""
+        if not self._multi_source or not new_source:
+            return
+        for btn in self.query(TabButton):
+            if btn.source_name:
+                btn.set_active(btn.source_name == new_source)
+        self.post_message(self.SourceTabChanged(new_source))
+
     def next_tab(self) -> None:
-        idx = TAB_ORDER.index(self.active_scope)
-        self.active_scope = TAB_ORDER[(idx + 1) % len(TAB_ORDER)]
+        if self._multi_source:
+            names = self._source_names
+            if not names:
+                return
+            idx = names.index(self.active_source) if self.active_source in names else 0
+            self.active_source = names[(idx + 1) % len(names)]
+        else:
+            idx = TAB_ORDER.index(self.active_scope)
+            self.active_scope = TAB_ORDER[(idx + 1) % len(TAB_ORDER)]
 
     def prev_tab(self) -> None:
-        idx = TAB_ORDER.index(self.active_scope)
-        self.active_scope = TAB_ORDER[(idx - 1) % len(TAB_ORDER)]
+        if self._multi_source:
+            names = self._source_names
+            if not names:
+                return
+            idx = names.index(self.active_source) if self.active_source in names else 0
+            self.active_source = names[(idx - 1) % len(names)]
+        else:
+            idx = TAB_ORDER.index(self.active_scope)
+            self.active_scope = TAB_ORDER[(idx - 1) % len(TAB_ORDER)]
 
     def set_tab(self, index: int) -> None:
-        if 0 <= index < len(TAB_ORDER):
-            self.active_scope = TAB_ORDER[index]
+        if self._multi_source:
+            if 0 <= index < len(self._source_names):
+                self.active_source = self._source_names[index]
+        else:
+            if 0 <= index < len(TAB_ORDER):
+                self.active_scope = TAB_ORDER[index]
 
     def on_resize(self, event: Resize) -> None:
         """Hide title at narrow widths to give tabs more room."""

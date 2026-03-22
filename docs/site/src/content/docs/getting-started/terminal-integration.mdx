@@ -32,7 +32,9 @@ The recommended workflow: your agent or shell on the left, Mutsumi on the right.
   </TabItem>
 </Tabs>
 
-In the left pane, use your agent normally. Every time the agent writes to `tasks.json`, the right pane updates instantly.
+In the left pane, use your agent normally. Every time the agent writes to `mutsumi.json`, the right pane updates instantly.
+
+For a complete end-to-end setup guide (including one-click launch scripts), see [Workflow SOP](../workflow-sop/).
 
 ## iTerm2
 
@@ -54,7 +56,7 @@ zellij action new-pane -d right -- mutsumi
 │  Your shell /        │   Mutsumi    │
 │  AI Agent            │   TUI        │
 │                      │              │
-│  (writes tasks.json) │  (watches)   │
+│  (writes mutsumi.json) │  (watches)   │
 │                      │              │
 └──────────────────────┴──────────────┘
 ```

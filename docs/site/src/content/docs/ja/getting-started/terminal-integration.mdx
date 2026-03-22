@@ -63,7 +63,9 @@ tmux new-session -d -s dev && tmux split-window -h -p 30 "mutsumi" && tmux selec
   </TabItem>
 </Tabs>
 
-これで左ペインで Agent を通常通り使用できます。Agent が `tasks.json` を書き込むたびに、右ペインの Mutsumi が即座に更新されます。
+これで左ペインで Agent を通常通り使用できます。Agent が `mutsumi.json` を書き込むたびに、右ペインの Mutsumi が即座に更新されます。
+
+エンドツーエンドのセットアップガイド（ワンクリック起動スクリプト付き）は [ワークフロー SOP](../workflow-sop/) を参照してください。
 
 ### tmux のレイアウト例
 
@@ -105,10 +107,10 @@ zellij run -- mutsumi
 
 ## 複数プロジェクトの監視
 
-複数の `tasks.json` を同時に監視することも可能です：
+複数の `mutsumi.json` を同時に監視することも可能です：
 
 ```bash
-mutsumi --path ~/project-a/tasks.json --path ~/project-b/tasks.json
+mutsumi --path ~/project-a/mutsumi.json --path ~/project-b/mutsumi.json
 ```
 
 TUI にプロジェクトディメンションが追加されます。

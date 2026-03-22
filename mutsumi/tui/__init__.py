@@ -7,7 +7,9 @@ from mutsumi.tui.footer_bar import BarMode, FooterBar
 from mutsumi.tui.header_bar import HeaderBar
 from mutsumi.tui.help_screen import HelpScreen
 from mutsumi.tui.key_manager import KeyManager, KeySequence, MatchResult
+from mutsumi.tui.main_dashboard import MainDashboard, SourceCard
 from mutsumi.tui.priority_group import PriorityGroup
+from mutsumi.tui.scope_filter import ScopeFilter
 from mutsumi.tui.search_bar import SearchBar
 from mutsumi.tui.sort_bar import SortBar
 from mutsumi.tui.task_form import TaskForm
@@ -25,7 +27,9 @@ __all__ = [
     "KeyManager",
     "KeySequence",
     "MatchResult",
+    "MainDashboard",
     "PriorityGroup",
+    "ScopeFilter",
     "SearchBar",
     "SortBar",
     "TaskForm",

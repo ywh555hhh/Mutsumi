@@ -42,7 +42,9 @@ tmux attach -t dev
   </TabItem>
 </Tabs>
 
-现在在左侧面板正常使用你的 Agent。每次 Agent 写入 `tasks.json`，右侧面板的 Mutsumi 都会即时更新。
+现在在左侧面板正常使用你的 Agent。每次 Agent 写入 `mutsumi.json`，右侧面板的 Mutsumi 都会即时更新。
+
+完整的端到端搭建指南（含一键启动脚本），请查看 [工作流 SOP](../workflow-sop/)。
 
 ### tmux 常用操作
 
@@ -92,7 +94,7 @@ zellij action new-pane --direction right -- mutsumi
 
 ```bash
 # 终端窗口 1（副屏）
-mutsumi --path ~/project/tasks.json
+mutsumi --path ~/project/mutsumi.json
 
 # 终端窗口 2（主屏）
 # 你的正常工作流...

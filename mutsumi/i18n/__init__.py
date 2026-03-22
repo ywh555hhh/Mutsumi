@@ -6,12 +6,46 @@ with fallback chain: locale → en → raw key.
 
 from __future__ import annotations
 
+import os
 import tomllib
 from pathlib import Path
 
 _LOCALES_DIR = Path(__file__).parent / "locales"
 
 _i18n: I18n | None = None
+
+# Locales we ship (filename stems under locales/)
+_SUPPORTED_LOCALES = {"en", "ja", "zh"}
+
+
+def _detect_locale_from_env() -> str:
+    """Detect locale from environment or system settings.
+
+    Checks $LC_ALL / $LANG (Unix), then falls back to locale.getdefaultlocale()
+    for Windows compatibility. Returns the best matching supported locale,
+    or "en" as fallback.
+    """
+    import locale as _locale
+
+    raw = os.environ.get("LC_ALL") or os.environ.get("LANG") or ""
+    if not raw or raw in ("C", "POSIX"):
+        # Fallback: use Python's locale detection (works on Windows too)
+        try:
+            system_locale = _locale.getdefaultlocale()[0] or ""
+        except (ValueError, AttributeError):
+            system_locale = ""
+        raw = system_locale
+        return "en"
+    # Strip encoding (e.g. ".UTF-8")
+    lang = raw.split(".")[0]  # "zh_CN"
+    # Try exact match first (unlikely but safe)
+    if lang in _SUPPORTED_LOCALES:
+        return lang
+    # Try language prefix (e.g. "zh" from "zh_CN")
+    prefix = lang.split("_")[0]
+    if prefix in _SUPPORTED_LOCALES:
+        return prefix
+    return "en"
 
 
 class I18n:
@@ -81,8 +115,13 @@ class I18n:
 
 
 def init_i18n(locale: str = "en") -> I18n:
-    """Initialize the global i18n instance."""
+    """Initialize the global i18n instance.
+
+    Pass ``"auto"`` to detect from ``$LANG`` / ``$LC_ALL``.
+    """
     global _i18n  # noqa: PLW0603
+    if locale == "auto":
+        locale = _detect_locale_from_env()
     _i18n = I18n(locale)
     return _i18n
 

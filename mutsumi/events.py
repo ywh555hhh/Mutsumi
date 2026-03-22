@@ -2,28 +2,21 @@
 
 Appends structured events to a JSONL file for audit trail.
 Thread-safe via threading.Lock.
-Default path: ~/.local/share/mutsumi/events.jsonl (XDG_DATA_HOME).
+Default path: platform data dir / mutsumi / events.jsonl.
 """
 
 from __future__ import annotations
 
 import json
-import os
 import threading
 from datetime import UTC, datetime
 from pathlib import Path
 
 
-def _xdg_data_home() -> Path:
-    """Return XDG_DATA_HOME or default (~/.local/share)."""
-    xdg = os.environ.get("XDG_DATA_HOME")
-    if xdg:
-        return Path(xdg)
-    return Path.home() / ".local" / "share"
-
-
 def _default_event_log_path() -> Path:
-    return _xdg_data_home() / "mutsumi" / "events.jsonl"
+    from mutsumi.core.paths import mutsumi_data_dir
+
+    return mutsumi_data_dir() / "events.jsonl"
 
 
 class EventLogger:

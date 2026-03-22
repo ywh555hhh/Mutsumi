@@ -29,6 +29,11 @@ _COMMON_BINDINGS: list[Binding] = [
     Binding("2", "tab_2", "Week", show=False),
     Binding("3", "tab_3", "Month", show=False),
     Binding("4", "tab_4", "Inbox", show=False),
+    Binding("5", "tab_5", "Tab 5", show=False),
+    Binding("6", "tab_6", "Tab 6", show=False),
+    Binding("7", "tab_7", "Tab 7", show=False),
+    Binding("8", "tab_8", "Tab 8", show=False),
+    Binding("9", "tab_9", "Tab 9", show=False),
     Binding("n", "new_task", "New", show=False),
     Binding("e", "edit_task", "Edit", show=False),
     Binding("slash", "search", "Search", show=False),
@@ -45,6 +50,7 @@ _COMMON_BINDINGS: list[Binding] = [
     Binding("s", "sort", "Sort", show=False),
     Binding("A", "add_child", "Add Child", show=False, key_display="shift+a"),
     Binding("P", "paste_task_above", "Paste Above", show=False, key_display="shift+p"),
+    Binding("f", "cycle_scope", "Cycle Scope", show=False),
 ]
 
 # ── Vim preset ───────────────────────────────────────────────────────
@@ -102,6 +108,29 @@ PRESET_MAP: dict[str, list[Binding]] = {
 }
 
 
-def get_keybindings(preset: str) -> list[Binding]:
-    """Get keybindings for a preset name. Falls back to vim."""
-    return PRESET_MAP.get(preset, VIM_BINDINGS)
+def get_keybindings(
+    preset: str,
+    overrides: dict[str, str] | None = None,
+) -> list[Binding]:
+    """Get keybindings for a preset name with optional user overrides.
+
+    *overrides* maps action names to new key strings.
+    Example: ``{"quit": "ctrl+q", "cursor_down": "ctrl+j"}``
+    Falls back to vim if preset is unknown.
+    """
+    bindings = list(PRESET_MAP.get(preset, ARROW_BINDINGS))
+    if not overrides:
+        return bindings
+
+    # Apply overrides: replace the key for matching actions
+    result: list[Binding] = []
+    for b in bindings:
+        action = b.action.replace("app.", "")
+        if action in overrides:
+            new_key = overrides[action]
+            result.append(
+                Binding(new_key, b.action, b.description, show=b.show, key_display=new_key)
+            )
+        else:
+            result.append(b)
+    return result

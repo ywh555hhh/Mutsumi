@@ -18,7 +18,8 @@ if TYPE_CHECKING:
 def save_task_file(task_file: TaskFile, path: Path) -> None:
     """Atomically write a TaskFile to disk.
 
-    Uses temp file + os.rename to ensure no partial writes.
+    Uses temp file + os.replace to ensure no partial writes.
+    Works on both Unix and Windows.
     """
     data = json.loads(task_file.model_dump_json())
     content = json.dumps(data, indent=2, ensure_ascii=False) + "\n"
@@ -31,7 +32,7 @@ def save_task_file(task_file: TaskFile, path: Path) -> None:
     try:
         with os.fdopen(fd, "w", encoding="utf-8") as f:
             f.write(content)
-        os.rename(tmp_path, path)
+        os.replace(tmp_path, path)
     except BaseException:
         # Clean up temp file on failure
         with contextlib.suppress(OSError):

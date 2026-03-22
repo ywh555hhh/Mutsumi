@@ -11,7 +11,7 @@ _MARKER = "## Mutsumi Task Integration"
 _PROMPT_TEMPLATE = """\
 ## Mutsumi Task Integration
 
-This project uses Mutsumi for task management. Tasks live in `./tasks.json`.
+This project uses Mutsumi for task management. Tasks live in `./mutsumi.json` (fallback: `./tasks.json`).
 
 ### Schema
 - Required: `id` (unique string), `title` (string), `status` ("pending"|"done")
@@ -25,7 +25,7 @@ This project uses Mutsumi for task management. Tasks live in `./tasks.json`.
 - `mutsumi rm <id-prefix>` / `mutsumi list`
 
 ### Direct JSON
-1. Read `./tasks.json`  2. Modify tasks array  3. Write ENTIRE file back
+1. Read `./mutsumi.json`  2. Modify tasks array  3. Write ENTIRE file back
 4. Atomic write: temp file + `os.rename()`  5. Generate unique ID for new tasks
 
 The Mutsumi TUI watches this file and re-renders automatically on every save.

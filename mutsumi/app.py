@@ -7,7 +7,6 @@ import json
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from pydantic import ValidationError
 from textual.app import App, ComposeResult
 from textual.binding import Binding
 from textual.widgets import Input, Static
@@ -17,8 +16,10 @@ if TYPE_CHECKING:
 
 from mutsumi.config import load_config
 from mutsumi.config.keybindings import get_keybindings
-from mutsumi.core.loader import filter_tasks_by_scope, load_task_file
-from mutsumi.core.models import Task, TaskFile, TaskStatus
+from mutsumi.core.loader import filter_tasks_by_scope, load_task_file, resolve_tasks_path, setup_logging
+from mutsumi.core.models import Task, TaskFile, TaskScope, TaskStatus
+from mutsumi.core.paths import personal_tasks_path
+from mutsumi.core.sources import Source, SourceRegistry
 from mutsumi.core.watcher import TaskFileWatcher
 from mutsumi.core.writer import (
     add_child_task,
@@ -43,10 +44,12 @@ from mutsumi.tui.footer_bar import BarMode, FooterBar
 from mutsumi.tui.header_bar import HeaderBar, TabButton
 from mutsumi.tui.key_manager import KeyManager, MatchResult, get_key_sequences
 from mutsumi.tui.priority_group import PriorityGroup, PriorityGroupHeader
+from mutsumi.tui.scope_filter import ScopeFilter
 from mutsumi.tui.search_bar import SearchBar
 from mutsumi.tui.task_form import TaskForm
 from mutsumi.tui.task_list import TaskListPanel
-from mutsumi.tui.task_row import TaskRow
+from mutsumi.tui.main_dashboard import MainDashboard
+from mutsumi.tui.task_row import TaskRow, _due_status
 
 
 class MutsumiApp(App[None]):
@@ -112,6 +115,12 @@ class MutsumiApp(App[None]):
         Binding("K", "move_up", "Move Up", show=False, key_display="shift+k"),
         Binding("A", "add_child", "Add Child", show=False, key_display="shift+a"),
         Binding("P", "paste_task_above", "Paste Above", show=False, key_display="shift+p"),
+        Binding("f", "cycle_scope", "Cycle Scope", show=False),
+        Binding("5", "tab_5", "Tab 5", show=False),
+        Binding("6", "tab_6", "Tab 6", show=False),
+        Binding("7", "tab_7", "Tab 7", show=False),
+        Binding("8", "tab_8", "Tab 8", show=False),
+        Binding("9", "tab_9", "Tab 9", show=False),
     ]
 
     def __init__(
@@ -122,10 +131,11 @@ class MutsumiApp(App[None]):
     ) -> None:
         # Load config before super().__init__ so theme CSS is ready
         config = load_config(config_path)
+        setup_logging()
         init_i18n(config.language)
 
-        # Apply keybindings from config
-        self._bindings_list = get_keybindings(config.keybindings)
+        # Apply keybindings from config (with optional user overrides)
+        self._bindings_list = get_keybindings(config.keybindings, config.key_overrides or None)
 
         # Apply theme
         theme = load_theme(config.theme)
@@ -137,6 +147,7 @@ class MutsumiApp(App[None]):
 
         # Config for columns and custom CSS
         self._config = config
+        self._default_scope = config.default_scope
         self._columns: list[str] = getattr(
             config, "columns", ["checkbox", "title", "tags", "priority"],
         )
@@ -144,15 +155,19 @@ class MutsumiApp(App[None]):
 
         super().__init__()
 
-        # Multi-project support
+        # Multi-source registry
+        self._source_registry = SourceRegistry()
         if watch_paths:
-            self._all_paths = watch_paths
+            for i, wp in enumerate(watch_paths):
+                name = wp.stem if wp.stem != "mutsumi" else wp.parent.name or "default"
+                if i == 0:
+                    name = "default"
+                self._source_registry.add_source(name, wp)
         else:
-            self._all_paths = [tasks_path or (Path.cwd() / "tasks.json")]
+            # Build sources from config projects + personal tasks + cwd
+            self._build_sources_from_config(config, tasks_path)
 
-        self.tasks_path = self._all_paths[0]
-        self.task_file: TaskFile | None = None
-        self._watchers: list[TaskFileWatcher] = []
+        self._active_source = self._source_registry.source_names[0]
         self._self_writing = False
 
         # Search state
@@ -163,6 +178,73 @@ class MutsumiApp(App[None]):
 
         # Event logger
         self._event_logger = self._init_event_logger(config)
+
+    # --- Source registry accessors (backward compat) ---
+
+    def _build_sources_from_config(self, config: object, tasks_path: Path | None) -> None:
+        """Build multi-source registry from config projects, personal tasks, and cwd."""
+        from mutsumi.config.settings import MutsumiConfig
+
+        # If an explicit tasks_path was passed (CLI --path or tests), skip project discovery
+        if tasks_path is not None:
+            self._source_registry.add_source("default", tasks_path)
+            return
+
+        has_projects = False
+        if isinstance(config, MutsumiConfig) and config.projects:
+            has_projects = True
+            # Personal tasks
+            personal_path = personal_tasks_path()
+            if personal_path.exists():
+                self._source_registry.add_source("personal", personal_path, is_personal=True)
+
+            # Registered projects — prefer mutsumi.json, fallback to tasks.json
+            for proj in config.projects:
+                proj_dir = Path(proj.path)
+                proj_file = proj_dir / "mutsumi.json"
+                if not proj_file.exists():
+                    fallback = proj_dir / "tasks.json"
+                    if fallback.exists():
+                        proj_file = fallback
+                self._source_registry.add_source(proj.name, proj_file)
+
+            # Add "main" as a virtual aggregation source (first in order)
+            # We re-order: main should be first tab
+            from collections import OrderedDict
+
+            reordered: OrderedDict[str, Source] = OrderedDict()
+            # Create a synthetic "main" source — it aggregates all tasks
+            main_source = Source(name="main", path=personal_path)
+            reordered["main"] = main_source
+            for k, v in self._source_registry._sources.items():
+                reordered[k] = v
+            self._source_registry._sources = reordered
+
+        if not has_projects:
+            # Single-source fallback: just the cwd's mutsumi.json
+            default_path = resolve_tasks_path()
+            self._source_registry.add_source("default", default_path)
+
+    @property
+    def tasks_path(self) -> Path:
+        """Path to the active source's task file."""
+        src = self._source_registry.get_source(self._active_source)
+        if src is not None:
+            return src.path
+        return Path.cwd() / "mutsumi.json"
+
+    @property
+    def task_file(self) -> TaskFile | None:
+        """TaskFile of the active source."""
+        src = self._source_registry.get_source(self._active_source)
+        return src.task_file if src is not None else None
+
+    @task_file.setter
+    def task_file(self, value: TaskFile | None) -> None:
+        """Set the TaskFile on the active source."""
+        src = self._source_registry.get_source(self._active_source)
+        if src is not None:
+            src.task_file = value
 
     def _init_event_logger(self, config: object) -> object | None:
         """Initialize event logger if configured."""
@@ -198,8 +280,13 @@ class MutsumiApp(App[None]):
         return self.DEFAULT_CSS + self._theme_css + self._custom_css
 
     def compose(self) -> ComposeResult:
-        yield HeaderBar()
+        source_names = self._source_registry.source_names
+        multi_source = len(source_names) > 1
+        header = HeaderBar(source_names=source_names)
+        yield header
+        yield ScopeFilter(show_main_button=multi_source, id="scope-filter")
         yield SearchBar(id="search-bar")
+        yield MainDashboard(id="main-dashboard")
         yield TaskListPanel(id="task-list")
         yield DetailPanel(id="detail-panel")
         yield ConfirmBar(id="confirm-bar")
@@ -207,6 +294,39 @@ class MutsumiApp(App[None]):
 
     async def on_mount(self) -> None:
         """Load tasks and start file watcher."""
+        header = self.query_one(HeaderBar)
+        scope_filter = self.query_one(ScopeFilter)
+        dashboard = self.query_one(MainDashboard)
+
+        if header.is_multi_source:
+            # Multi-source: set initial source tab, show scope filter
+            header.active_source = self._active_source
+            scope_filter.active_scope = self._default_scope
+            # Main tab starts with dashboard visible
+            if self._active_source == "main":
+                dashboard.display = True
+                self.query_one(TaskListPanel).display = False
+                scope_filter.display = False
+            else:
+                dashboard.display = False
+                scope_filter.display = True
+        else:
+            # Single-source: set initial scope tab, hide scope filter and dashboard
+            scope_map = {
+                "day": TaskScope.DAY,
+                "week": TaskScope.WEEK,
+                "month": TaskScope.MONTH,
+                "inbox": TaskScope.INBOX,
+            }
+            initial = scope_map.get(self._default_scope, TaskScope.DAY)
+            header.active_scope = initial
+            scope_filter.display = False
+            dashboard.display = False
+
+        # Set notification mode on footer
+        footer = self.query_one(FooterBar)
+        footer._notification_mode = self._config.notification_mode
+
         await self._load_and_render()
         self._start_watchers()
 
@@ -229,19 +349,20 @@ class MutsumiApp(App[None]):
         self._update_narrow_warning(w)
 
     def _start_watchers(self) -> None:
-        """Start watching all task files for external changes."""
-        for path in self._all_paths:
-            if path.exists():
-                watcher = TaskFileWatcher(path, self._on_file_changed)
-                watcher.start()
-                self._watchers.append(watcher)
+        """Start watching all registered sources for external changes."""
+        for name in self._source_registry.source_names:
+            self._source_registry.start_watching(name, self._on_source_changed)
 
-    def _on_file_changed(self) -> None:
-        """Called from watcher thread when any tasks.json changes."""
+    def _on_source_changed(self, source_name: str) -> None:
+        """Called from watcher thread when a source file changes."""
         if self._self_writing:
             return
         with contextlib.suppress(RuntimeError):
             self.call_from_thread(self._reload_from_disk)  # type: ignore[arg-type]
+
+    def _on_file_changed(self) -> None:
+        """Legacy callback — delegates to _on_source_changed."""
+        self._on_source_changed(self._active_source)
 
     async def _reload_from_disk(self) -> None:
         """Reload tasks.json and re-render (called on main thread)."""
@@ -250,11 +371,20 @@ class MutsumiApp(App[None]):
 
     async def _load_and_render(self) -> None:
         """Load task file and render the current tab."""
+        header = self.query_one(HeaderBar)
+
+        # In multi-source mode, load all sources for dashboard
+        if header.is_multi_source:
+            self._source_registry.load_all()
+            if self._active_source == "main":
+                await self._render_dashboard()
+                return
+
         try:
             self.task_file = load_task_file(self.tasks_path)
         except FileNotFoundError:
             self.task_file = None
-        except (json.JSONDecodeError, ValidationError) as e:
+        except json.JSONDecodeError as e:
             self.task_file = None
             self._show_error_banner(f"Invalid tasks.json: {e}")
             await self._render_current_tab()
@@ -264,6 +394,12 @@ class MutsumiApp(App[None]):
             self._show_error_banner(str(e))
             await self._render_current_tab()
             return
+
+        # Show skipped tasks warning in footer
+        if self.task_file is not None and self.task_file.skipped_count > 0:
+            n = self.task_file.skipped_count
+            footer = self.query_one(FooterBar)
+            footer.show_notification(f"{n} task(s) skipped — see error log")
 
         await self._render_current_tab()
 
@@ -308,8 +444,24 @@ class MutsumiApp(App[None]):
             footer.update_stats(0, 0, 0)
             return
 
-        scope = header.active_scope
-        tasks = filter_tasks_by_scope(self.task_file.tasks, scope)
+        # Determine active scope
+        if header.is_multi_source:
+            scope_filter = self.query_one(ScopeFilter)
+            scope_key = scope_filter.active_scope
+            if scope_key == "all":
+                tasks = list(self.task_file.tasks)
+            else:
+                scope_map = {
+                    "day": TaskScope.DAY,
+                    "week": TaskScope.WEEK,
+                    "month": TaskScope.MONTH,
+                    "inbox": TaskScope.INBOX,
+                }
+                scope = scope_map.get(scope_key, TaskScope.DAY)
+                tasks = filter_tasks_by_scope(self.task_file.tasks, scope)
+        else:
+            scope = header.active_scope
+            tasks = filter_tasks_by_scope(self.task_file.tasks, scope)
 
         await panel.update_tasks(tasks, columns=self._columns)
 
@@ -327,6 +479,28 @@ class MutsumiApp(App[None]):
 
         total = len(tasks)
         done = sum(1 for t in tasks if t.status == TaskStatus.DONE)
+        overdue = sum(
+            1 for t in tasks
+            if not t.is_done and t.due_date and _due_status(t.due_date) == "overdue"
+        )
+        footer.update_stats(total, done, total - done, overdue)
+
+    async def _render_dashboard(self) -> None:
+        """Render the Main dashboard with all sources' progress."""
+        dashboard = self.query_one(MainDashboard)
+        footer = self.query_one(FooterBar)
+
+        # Collect sources (skip "main" — it's the virtual aggregation tab)
+        sources = [
+            src for name, src in self._source_registry._sources.items()
+            if name != "main"
+        ]
+        dashboard.set_sources(sources)
+
+        # Aggregate stats across all sources
+        all_tasks = self._source_registry.all_tasks()
+        total = len(all_tasks)
+        done = sum(1 for _, t in all_tasks if t.status == TaskStatus.DONE)
         footer.update_stats(total, done, total - done)
 
     def _focus_active_tab(self) -> None:
@@ -428,11 +602,51 @@ class MutsumiApp(App[None]):
     # --- Tab events ---
 
     async def on_header_bar_tab_changed(self, event: HeaderBar.TabChanged) -> None:
-        """Re-render when tab changes."""
+        """Re-render when scope tab changes (single-source mode)."""
         detail = self.query_one(DetailPanel)
         if detail.is_visible:
             detail.hide()
         await self._render_current_tab()
+
+    async def on_header_bar_source_tab_changed(self, event: HeaderBar.SourceTabChanged) -> None:
+        """Switch active source and re-render (multi-source mode)."""
+        self._active_source = event.source_name
+        detail = self.query_one(DetailPanel)
+        if detail.is_visible:
+            detail.hide()
+
+        dashboard = self.query_one(MainDashboard)
+        panel = self.query_one(TaskListPanel)
+        scope_filter = self.query_one(ScopeFilter)
+
+        if event.source_name == "main":
+            # Show dashboard, hide task list and scope filter
+            dashboard.display = True
+            panel.display = False
+            scope_filter.display = False
+        else:
+            # Show task list and scope filter, hide dashboard
+            dashboard.display = False
+            panel.display = True
+            scope_filter.display = True
+            # Reload active source
+            self._source_registry.load_source(self._active_source)
+
+        await self._load_and_render()
+
+    async def on_scope_filter_scope_changed(self, event: ScopeFilter.ScopeChanged) -> None:
+        """Re-render when scope filter changes."""
+        await self._render_current_tab()
+
+    async def on_scope_filter_main_requested(self, event: ScopeFilter.MainRequested) -> None:
+        """Return to Main dashboard when user clicks the Main button in scope filter."""
+        header = self.query_one(HeaderBar)
+        header.active_source = "main"
+
+    async def on_main_dashboard_source_clicked(self, event: MainDashboard.SourceClicked) -> None:
+        """Jump to clicked source from dashboard."""
+        header = self.query_one(HeaderBar)
+        header.active_source = event.source_name
 
     # --- Search events ---
 
@@ -541,6 +755,8 @@ class MutsumiApp(App[None]):
             self.action_new_task()
         elif event.action == "search":
             self.action_search()
+        elif event.action == "sort":
+            self.action_sort()
 
     def on_empty_state_new_task_requested(self, event: object) -> None:
         """Handle [+ New Task] button in empty state."""
@@ -705,7 +921,11 @@ class MutsumiApp(App[None]):
         tasks = filter_tasks_by_scope(self.task_file.tasks, header.active_scope)
         total = len(tasks)
         done = sum(1 for t in tasks if t.status == TaskStatus.DONE)
-        footer.update_stats(total, done, total - done)
+        overdue = sum(
+            1 for t in tasks
+            if not t.is_done and t.due_date and _due_status(t.due_date) == "overdue"
+        )
+        footer.update_stats(total, done, total - done, overdue)
 
     def action_show_detail(self) -> None:
         """Show detail panel for the focused task."""
@@ -748,9 +968,38 @@ class MutsumiApp(App[None]):
     def action_tab_4(self) -> None:
         self.query_one(HeaderBar).set_tab(3)
 
+    def action_tab_5(self) -> None:
+        self.query_one(HeaderBar).set_tab(4)
+
+    def action_tab_6(self) -> None:
+        self.query_one(HeaderBar).set_tab(5)
+
+    def action_tab_7(self) -> None:
+        self.query_one(HeaderBar).set_tab(6)
+
+    def action_tab_8(self) -> None:
+        self.query_one(HeaderBar).set_tab(7)
+
+    def action_tab_9(self) -> None:
+        self.query_one(HeaderBar).set_tab(8)
+
+    def action_cycle_scope(self) -> None:
+        """Cycle through scope filters (f key)."""
+        if self._input_focused():
+            return
+        header = self.query_one(HeaderBar)
+        if header.is_multi_source:
+            scope_filter = self.query_one(ScopeFilter)
+            scope_filter.next_scope()
+
     def _current_scope_value(self) -> str:
-        """Return the active tab's scope as a string for TaskForm defaults."""
-        return self.query_one(HeaderBar).active_scope.value
+        """Return the active scope as a string for TaskForm defaults."""
+        header = self.query_one(HeaderBar)
+        if header.is_multi_source:
+            scope_filter = self.query_one(ScopeFilter)
+            scope_key = scope_filter.active_scope
+            return scope_key if scope_key != "all" else "inbox"
+        return header.active_scope.value
 
     def action_new_task(self) -> None:
         """Open new task form."""
@@ -1005,9 +1254,7 @@ class MutsumiApp(App[None]):
         self._stop_watchers()
 
     def _stop_watchers(self) -> None:
-        for watcher in self._watchers:
-            watcher.stop()
-        self._watchers.clear()
+        self._source_registry.stop_all_watchers()
 
 
 def run(path: Path | None = None, watch_paths: list[Path] | None = None) -> None:

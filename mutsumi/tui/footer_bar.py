@@ -126,6 +126,8 @@ class FooterBar(Widget):
         self._total = total
         self._done = done
         self._pending = pending
+        self._overdue = 0
+        self._notification_mode = "quiet"
 
     def compose(self) -> ComposeResult:
         yield Static(
@@ -137,16 +139,23 @@ class FooterBar(Widget):
             yield Static(self._format_stats(), classes="stats", id="stats-text")
             yield _ClickableAction("\\[+New]", "new_task", id="btn-new")
             yield _ClickableAction("\\[/Search]", "search", id="btn-search")
+            yield _ClickableAction("\\[Sort]", "sort", id="btn-sort")
             yield Static("NORMAL", classes="mode-badge", id="mode-badge")
 
     def _format_stats(self) -> str:
-        return f"{self._total} tasks \u00b7 {self._done} done \u00b7 {self._pending} pending"
+        base = f"{self._total} tasks \u00b7 {self._done} done \u00b7 {self._pending} pending"
+        if self._notification_mode == "badge" and self._overdue > 0:
+            base += f" \u00b7 \\[{self._overdue} overdue]"
+        return base
 
-    def update_stats(self, total: int, done: int, pending: int) -> None:
+    def update_stats(
+        self, total: int, done: int, pending: int, overdue: int = 0
+    ) -> None:
         """Update the displayed statistics."""
         self._total = total
         self._done = done
         self._pending = pending
+        self._overdue = overdue
         try:
             stats_widget = self.query_one("#stats-text", Static)
             stats_widget.update(self._format_stats())

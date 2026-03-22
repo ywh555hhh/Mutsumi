@@ -85,7 +85,7 @@ class EmptyState(Widget):
             yield Static(
                 "Nothing here yet.\n\n"
                 "Press [bold #5de4c7]n[/] to create a task\n"
-                "or let your Agent write tasks.json",
+                "or let your Agent write mutsumi.json",
                 classes="hint",
             )
             yield _NewTaskButton(id="empty-new-btn")

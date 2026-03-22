@@ -8,6 +8,7 @@ from mutsumi.core.loader import (
     resolve_tasks_path,
 )
 from mutsumi.core.models import Task, TaskFile, TaskPriority, TaskScope, TaskStatus
+from mutsumi.core.sources import Source, SourceRegistry
 from mutsumi.core.watcher import TaskFileWatcher
 from mutsumi.core.writer import (
     add_child_task,
@@ -27,6 +28,8 @@ from mutsumi.core.writer import (
 )
 
 __all__ = [
+    "Source",
+    "SourceRegistry",
     "Task",
     "TaskFile",
     "TaskFileWatcher",

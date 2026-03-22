@@ -20,7 +20,7 @@ class TestCliVersion:
         runner = CliRunner()
         result = runner.invoke(main, ["--help"])
         assert result.exit_code == 0
-        assert "tasks.json" in result.output
+        assert "mutsumi" in result.output.lower()
 
 
 class TestCliInit:
@@ -31,7 +31,7 @@ class TestCliInit:
             assert result.exit_code == 0
             assert "Created" in result.output
 
-            with open("tasks.json") as f:
+            with open("mutsumi.json") as f:
                 data = json.load(f)
             assert data["version"] == 1
             assert len(data["tasks"]) == 1
@@ -39,7 +39,7 @@ class TestCliInit:
     def test_init_no_overwrite(self) -> None:
         runner = CliRunner()
         with runner.isolated_filesystem():
-            with open("tasks.json", "w") as f:
+            with open("mutsumi.json", "w") as f:
                 f.write("{}")
             result = runner.invoke(main, ["init"])
             assert result.exit_code != 0
@@ -48,7 +48,7 @@ class TestCliInit:
     def test_init_force(self) -> None:
         runner = CliRunner()
         with runner.isolated_filesystem():
-            with open("tasks.json", "w") as f:
+            with open("mutsumi.json", "w") as f:
                 f.write("{}")
             result = runner.invoke(main, ["init", "--force"])
             assert result.exit_code == 0
@@ -59,7 +59,7 @@ class TestCliValidate:
         runner = CliRunner()
         with runner.isolated_filesystem():
             data = {"version": 1, "tasks": [{"id": "t1", "title": "Test"}]}
-            with open("tasks.json", "w") as f:
+            with open("mutsumi.json", "w") as f:
                 json.dump(data, f)
             result = runner.invoke(main, ["validate"])
             assert result.exit_code == 0
@@ -74,7 +74,7 @@ class TestCliValidate:
     def test_validate_invalid_json(self) -> None:
         runner = CliRunner()
         with runner.isolated_filesystem():
-            with open("tasks.json", "w") as f:
+            with open("mutsumi.json", "w") as f:
                 f.write("not json")
             result = runner.invoke(main, ["validate"])
             assert result.exit_code != 0

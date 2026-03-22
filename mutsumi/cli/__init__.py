@@ -15,13 +15,13 @@ from mutsumi import __version__
     "--path", "-p",
     type=click.Path(),
     default=None,
-    help="Path to tasks.json (default: ./tasks.json)",
+    help="Path to task file (default: ./mutsumi.json, fallback: ./tasks.json)",
 )
 @click.option(
     "--watch", "-w",
     type=click.Path(),
     multiple=True,
-    help="Additional tasks.json paths to watch (multi-project)",
+    help="Additional task file paths to watch (multi-project)",
 )
 @click.pass_context
 def main(ctx: click.Context, path: str | None, watch: tuple[str, ...]) -> None:
@@ -46,6 +46,8 @@ from mutsumi.cli.done import done  # noqa: E402
 from mutsumi.cli.edit import edit  # noqa: E402
 from mutsumi.cli.init_cmd import init  # noqa: E402
 from mutsumi.cli.list_cmd import list_tasks  # noqa: E402
+from mutsumi.cli.migrate import migrate  # noqa: E402
+from mutsumi.cli.project import project  # noqa: E402
 from mutsumi.cli.rm import rm  # noqa: E402
 from mutsumi.cli.schema import schema  # noqa: E402
 from mutsumi.cli.setup import setup  # noqa: E402
@@ -60,6 +62,8 @@ main.add_command(done)
 main.add_command(rm)
 main.add_command(edit)
 main.add_command(setup)
+main.add_command(migrate)
+main.add_command(project)
 
 
 if __name__ == "__main__":

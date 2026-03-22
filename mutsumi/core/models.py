@@ -72,3 +72,4 @@ class TaskFile(BaseModel):
 
     version: int = 1
     tasks: list[Task] = []
+    skipped_count: int = 0

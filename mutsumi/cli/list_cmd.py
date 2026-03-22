@@ -2,12 +2,10 @@
 
 from __future__ import annotations
 
-from pathlib import Path
-
 import click
 
-from mutsumi.core.loader import load_task_file
-from mutsumi.core.models import TaskStatus
+from mutsumi.core.loader import get_task_scope, load_task_file, resolve_tasks_path
+from mutsumi.core.models import TaskScope, TaskStatus
 
 
 @click.command("list")
@@ -15,8 +13,8 @@ from mutsumi.core.models import TaskStatus
 @click.option("--done/--no-done", default=None, help="Filter by done status")
 @click.pass_context
 def list_tasks(ctx: click.Context, scope: str | None, done: bool | None) -> None:
-    """List tasks from tasks.json."""
-    path = Path(ctx.obj.get("path") or "tasks.json")
+    """List tasks."""
+    path = resolve_tasks_path(ctx.obj.get("path"))
 
     if not path.exists():
         click.echo(f"File not found: {path}", err=True)
@@ -26,9 +24,10 @@ def list_tasks(ctx: click.Context, scope: str | None, done: bool | None) -> None
     task_file = load_task_file(path)
     tasks = task_file.tasks
 
-    # Filter by scope
+    # Filter by scope using due_date inference
     if scope is not None:
-        tasks = [t for t in tasks if t.scope.value == scope]
+        scope_enum = TaskScope(scope)
+        tasks = [t for t in tasks if get_task_scope(t) == scope_enum]
 
     # Filter by done status
     if done is True:

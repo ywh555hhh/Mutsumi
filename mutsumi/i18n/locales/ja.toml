@@ -3,6 +3,9 @@ today = "今日"
 week = "今週"
 month = "今月"
 inbox = "受信箱"
+main = "メイン"
+personal = "個人"
+all = "すべて"
 
 [status]
 tasks = "{count} 件のタスク"
@@ -28,10 +31,10 @@ deleted = "削除しました"
 
 [empty]
 title = "まだ何もありません。"
-hint = "[n] を押してタスクを作成するか、Agent に tasks.json を書かせてください"
+hint = "[n] を押してタスクを作成するか、Agent に mutsumi.json を書かせてください"
 
 [errors]
-json_invalid = "tasks.json にエラーがあります。最後の有効な状態を表示しています。"
+json_invalid = "タスクファイルにエラーがあります。最後の有効な状態を表示しています。"
 task_skipped = "{count} 件のタスクが検証エラーによりスキップされました"
 terminal_narrow = "ターミナルの幅が不足しています"
 
@@ -74,3 +77,25 @@ edit_success = "更新：{title}"
 id_not_found = "'{prefix}' に一致するタスクがありません"
 id_ambiguous = "プレフィックス '{prefix}' が複数のタスクに一致します"
 list_header = "{path} のタスク"
+
+[migrate]
+task_file_done = "移行完了：tasks.json → mutsumi.json"
+task_file_not_found = "現在のディレクトリに tasks.json がありません"
+task_file_exists = "mutsumi.json は既に存在します。タスクファイルの移行をスキップします。"
+config_done = "設定を移行しました：{old} → {new}"
+config_not_found = "レガシー設定ディレクトリが見つかりません：{path}"
+nothing = "移行するものがありません。"
+
+[project]
+added = "プロジェクトを追加しました：{name} → {path}"
+removed = "プロジェクトを削除しました：{name}"
+not_found = "プロジェクト '{name}' が見つかりません。"
+already_registered = "プロジェクト '{name}' は既に登録されています。"
+no_projects = "登録されたプロジェクトはありません。"
+list_header = "登録済みプロジェクト："
+
+[dashboard]
+title = "ダッシュボード"
+no_tasks = "タスクなし"
+pending = "{count} 件未完了"
+progress = "{done}/{total} 完了"

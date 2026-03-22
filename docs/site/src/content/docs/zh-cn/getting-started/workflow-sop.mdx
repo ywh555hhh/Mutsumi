@@ -1,0 +1,332 @@
+---
+title: "工作流 SOP"
+description: "端到端搭建：终端 + tmux + AI Agent + Mutsumi，一条命令拉起整个开发环境。"
+---
+
+import { Tabs, TabItem, Aside, Steps, Badge } from '@astrojs/starlight/components';
+
+## 最终效果
+
+一个快捷键呼出你的指挥中心。左边是 AI Agent，右边是实时任务看板。Agent 写任务，看板秒更新。零切换、零打断。
+
+```
+ Win+`  /  Ctrl+`  (下拉终端)
+┌──────────────────────────────┬──────────────────┐
+│                              │                  │
+│  AI Agent (opencode/claude)  │   Mutsumi TUI    │
+│                              │                  │
+│  > "给 auth 重构加 3 个任务" │  ┌─────────────┐ │
+│                              │  │ [★ Main]     │ │
+│  正在写入 mutsumi.json...    │  │ ● 修复登录   │ │
+│                              │  │ ● 加 OAuth   │ │
+│                              │  │ ● 写测试     │ │
+│                              │  └─────────────┘ │
+└──────────────────────────────┴──────────────────┘
+```
+
+## 前置依赖
+
+| 工具 | 用途 | 安装 |
+|------|------|------|
+| **终端模拟器** | 下拉（雷神）模式 | Windows Terminal / iTerm2 / Yakuake |
+| **tmux** | 分屏、会话持久化 | `apt install tmux` / `brew install tmux` |
+| **uv** | Python 包管理 | `curl -LsSf https://astral.sh/uv/install.sh \| sh` |
+| **Mutsumi** | 任务看板 TUI | `uv tool install mutsumi` |
+| **AI Agent** | 向 `mutsumi.json` 写任务 | opencode / Claude Code / aider / Codex CLI |
+
+## 各平台搭建
+
+<Tabs>
+  <TabItem label="Windows">
+    ### 第 1 步：Windows Terminal + 雷神模式
+
+    Windows Terminal 内置「雷神模式」（Quake Mode）—— 按全局快捷键，终端从屏幕顶部滑下，按 Quake 游戏经典方式呈现。
+
+    1. 从 Microsoft Store 安装 [Windows Terminal](https://aka.ms/terminal)
+    2. 打开设置 → 操作 → 添加：
+
+    ```json
+    { "command": { "action": "quakeMode" }, "keys": "win+`" }
+    ```
+
+    现在 `Win+`` 可以全局切换下拉终端。
+
+    ### 第 2 步：WSL2 + tmux
+
+    ```powershell
+    # 安装 WSL2（如果未安装）
+    wsl --install -d Ubuntu
+
+    # 在 WSL 内：
+    sudo apt update && sudo apt install -y tmux
+    ```
+
+    将 Windows Terminal 的默认配置文件设为 **Ubuntu (WSL)**。
+
+    ### 第 3 步：在 WSL 内安装工具
+
+    ```bash
+    # uv（Python 管理器）
+    curl -LsSf https://astral.sh/uv/install.sh | sh
+
+    # Mutsumi
+    uv tool install mutsumi
+
+    # AI Agent（选一个）
+    uv tool install opencode    # 或：npm install -g @anthropic-ai/claude-code
+    ```
+
+    ### 第 4 步：初始化项目
+
+    ```bash
+    cd ~/your-project
+    mutsumi init                           # 创建 mutsumi.json
+    mutsumi setup --agent claude-code      # 注入提示到 CLAUDE.md
+    ```
+  </TabItem>
+
+  <TabItem label="macOS">
+    ### 第 1 步：iTerm2 热键窗口
+
+    1. 安装 [iTerm2](https://iterm2.com/)
+    2. Preferences → Keys → Hotkey → 勾选 **"Show/hide all windows with a system-wide hotkey"**
+    3. 设置热键为 `` Ctrl+` ``
+
+    替代方案：[Ghostty](https://ghostty.org/) 配置 `quick-terminal-hotkey`。
+
+    ### 第 2 步：tmux
+
+    ```bash
+    brew install tmux
+    ```
+
+    ### 第 3 步：安装工具
+
+    ```bash
+    # uv
+    curl -LsSf https://astral.sh/uv/install.sh | sh
+
+    # Mutsumi
+    uv tool install mutsumi
+
+    # AI Agent
+    uv tool install opencode    # 或：npm install -g @anthropic-ai/claude-code
+    ```
+
+    ### 第 4 步：初始化
+
+    ```bash
+    cd ~/your-project
+    mutsumi init
+    mutsumi setup --agent claude-code
+    ```
+  </TabItem>
+
+  <TabItem label="Linux">
+    ### 第 1 步：下拉终端
+
+    主流 Linux 桌面都有下拉终端方案：
+
+    | 桌面环境 | 工具 | 快捷键 |
+    |---------|------|--------|
+    | KDE | Yakuake | `F12` |
+    | GNOME | [ddterm](https://github.com/ddterm/gnome-shell-extension-ddterm) | `F12` |
+    | 通用 | Guake | `F12` |
+    | 通用 | Tilix（Quake 模式） | 可配置 |
+
+    ### 第 2 步：tmux
+
+    ```bash
+    sudo apt install tmux    # Debian/Ubuntu
+    sudo pacman -S tmux      # Arch
+    sudo dnf install tmux    # Fedora
+    ```
+
+    ### 第 3 步：安装工具
+
+    ```bash
+    curl -LsSf https://astral.sh/uv/install.sh | sh
+    uv tool install mutsumi
+    uv tool install opencode
+    ```
+
+    ### 第 4 步：初始化
+
+    ```bash
+    cd ~/your-project
+    mutsumi init
+    mutsumi setup --agent claude-code
+    ```
+  </TabItem>
+</Tabs>
+
+## 一键启动脚本
+
+保存为 `~/.local/bin/mu`（或 `$PATH` 中的任意位置）：
+
+<Tabs>
+  <TabItem label="bash / zsh">
+    ```bash
+    #!/usr/bin/env bash
+    # mu — 启动 Mutsumi 开发环境
+    # 用法：mu [项目目录] [agent 命令]
+    #   mu                          → 当前目录，默认 agent
+    #   mu ~/projects/saas-app      → 指定项目
+    #   mu . claude                 → 当前目录，Claude Code
+
+    set -euo pipefail
+
+    PROJECT_DIR="${1:-.}"
+    AGENT_CMD="${2:-opencode}"
+    SESSION="mu-$(basename "$PROJECT_DIR")"
+    MUTSUMI_WIDTH="${MUTSUMI_WIDTH:-35}"
+
+    cd "$PROJECT_DIR"
+
+    # 如果没有 mutsumi.json，自动创建
+    if [ ! -f mutsumi.json ] && [ ! -f tasks.json ]; then
+      mutsumi init --quiet 2>/dev/null || true
+    fi
+
+    # 如果会话已存在，直接 attach
+    if tmux has-session -t "$SESSION" 2>/dev/null; then
+      tmux attach -t "$SESSION"
+      exit 0
+    fi
+
+    # 新会话：左边 agent，右边 mutsumi
+    tmux new-session -d -s "$SESSION" -c "$PROJECT_DIR"
+    tmux split-window -h -p "$MUTSUMI_WIDTH" -t "$SESSION" "mutsumi"
+    tmux select-pane -t "$SESSION:0.0"
+
+    # 在左 pane 启动 agent
+    if [ "$AGENT_CMD" != "shell" ]; then
+      tmux send-keys -t "$SESSION:0.0" "$AGENT_CMD" Enter
+    fi
+
+    tmux attach -t "$SESSION"
+    ```
+  </TabItem>
+
+  <TabItem label="fish">
+    ```fish
+    #!/usr/bin/env fish
+    # mu — 启动 Mutsumi 开发环境
+
+    set PROJECT_DIR (realpath (test -n "$argv[1]"; and echo $argv[1]; or echo .))
+    set AGENT_CMD (test -n "$argv[2]"; and echo $argv[2]; or echo opencode)
+    set SESSION "mu-"(basename $PROJECT_DIR)
+    set MUTSUMI_WIDTH (test -n "$MUTSUMI_WIDTH"; and echo $MUTSUMI_WIDTH; or echo 35)
+
+    cd $PROJECT_DIR
+
+    if not test -f mutsumi.json; and not test -f tasks.json
+      mutsumi init --quiet 2>/dev/null; or true
+    end
+
+    if tmux has-session -t $SESSION 2>/dev/null
+      tmux attach -t $SESSION
+      exit 0
+    end
+
+    tmux new-session -d -s $SESSION -c $PROJECT_DIR
+    tmux split-window -h -p $MUTSUMI_WIDTH -t $SESSION "mutsumi"
+    tmux select-pane -t "$SESSION:0.0"
+
+    if test "$AGENT_CMD" != shell
+      tmux send-keys -t "$SESSION:0.0" $AGENT_CMD Enter
+    end
+
+    tmux attach -t $SESSION
+    ```
+  </TabItem>
+
+  <TabItem label="PowerShell (WSL)">
+    ```powershell
+    # mu.ps1 — Windows 快捷方式，调用 WSL
+    # 放到 PATH 中或固定到开始菜单
+
+    param(
+      [string]$ProjectDir = ".",
+      [string]$Agent = "opencode"
+    )
+
+    # Windows 路径转 WSL 路径
+    $wslPath = wsl wslpath -u (Resolve-Path $ProjectDir).Path
+
+    # 在 WSL 中启动
+    wsl bash -lc "~/.local/bin/mu '$wslPath' '$Agent'"
+    ```
+  </TabItem>
+</Tabs>
+
+添加执行权限：
+
+```bash
+chmod +x ~/.local/bin/mu
+```
+
+## 日常使用
+
+<Steps>
+1. **按快捷键** — `Win+`` / `Ctrl+`` / `F12` — 终端从顶部滑下
+
+2. **启动** — 在项目目录输入 `mu`（或 `mu ~/projects/my-app`）
+
+3. **工作** — 在左侧和 AI Agent 对话，右侧看板实时更新任务
+
+4. **完成任务** — 在 Mutsumi 中点击复选框或按 `x` 标记完成
+
+5. **切换项目** — `mu ~/projects/other-app` 打开新的 tmux 会话；用 `Ctrl-b s` 在会话间切换
+
+6. **分离** — `Ctrl-b d` 分离会话，后台保持运行。随时用 `mu` 回来
+
+7. **收起** — 再按快捷键隐藏终端
+</Steps>
+
+## 多项目布局
+
+进阶用户可以同时管理多个项目：
+
+```
+ tmux 会话：
+  mu-saas-app     →  opencode  |  mutsumi (saas-app/mutsumi.json)
+  mu-oshigrid     →  claude    |  mutsumi (oshigrid/mutsumi.json)
+  mu-personal     →  shell     |  mutsumi (~/.mutsumi/mutsumi.json)
+
+ Ctrl-b s → 会话选择器 → 秒切
+```
+
+配合 Multi-Source Hub，Main 仪表盘可以聚合所有项目一览。
+
+## Agent 兼容性
+
+启动脚本兼容所有终端 AI Agent：
+
+```bash
+mu . opencode     # OpenCode
+mu . claude       # Claude Code
+mu . aider        # Aider
+mu . codex        # Codex CLI
+mu . shell        # 不启动 agent，纯 shell
+```
+
+所有 Agent 使用同一套协议：读 `mutsumi.json` → 修改任务 → 写回。详见 [Agent 集成](../agent-setup/)。
+
+<Aside type="tip">
+**进阶技巧**：把 `mu` 加到 shell 启动脚本，或绑定到 tmux 快捷键：
+```bash
+# ~/.tmux.conf — Ctrl-b M 打开项目选择
+bind M command-prompt -p "Project:" "run-shell '~/.local/bin/mu %1'"
+```
+</Aside>
+
+## 常见问题
+
+| 问题 | 解决方法 |
+|------|---------|
+| `mu: command not found` | 把 `~/.local/bin` 加到 `$PATH` |
+| tmux 分屏太窄 | `export MUTSUMI_WIDTH=40` 或用 `Ctrl-b →` 调整 |
+| Agent 没写 `mutsumi.json` | 运行 `mutsumi setup --agent <name>` 注入提示 |
+| 雷神模式不工作 | 检查终端快捷键设置；某些桌面环境会抢占按键 |
+| WSL 路径问题 | 用 `wslpath` 转换路径；PowerShell 脚本已自动处理 |

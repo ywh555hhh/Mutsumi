@@ -2,11 +2,9 @@
 
 from __future__ import annotations
 
-from pathlib import Path
-
 import click
 
-from mutsumi.core.loader import load_task_file
+from mutsumi.core.loader import load_task_file, resolve_tasks_path
 from mutsumi.core.writer import add_task, create_task_from_args, save_task_file
 
 
@@ -33,8 +31,8 @@ def add(
     tags: str,
     description: str | None,
 ) -> None:
-    """Add a new task to tasks.json."""
-    path = Path(ctx.obj.get("path") or "tasks.json")
+    """Add a new task."""
+    path = resolve_tasks_path(ctx.obj.get("path"))
 
     if not path.exists():
         from mutsumi.core.models import TaskFile

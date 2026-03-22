@@ -11,13 +11,22 @@
 ## Phase Overview
 
 ```
-Phase 0          Phase 1          Phase 2          Phase 3          Phase 3.5        Phase 4
-Foundations      Skeleton         Reactivity       CLI & Polish     Friend Beta      Launch
-────────────     ────────────     ────────────     ────────────     ────────────     ────────────
-docs & specs     static TUI       hot-reload       CLI CRUD         AGENT.md         README
-project setup    tab switching    file watcher     i18n             setup command    GIF demo
-data model       task list        click → JSON     themes           tmux scripts     Product Hunt
-                 detail panel     JSON → re-draw   config system    beta packaging   community
+Phase 0          Phase 1          Phase 2          Phase 3          Phase 3.5
+Foundations      Skeleton         Reactivity       CLI & Polish     Friend Beta
+────────────     ────────────     ────────────     ────────────     ────────────
+docs & specs     static TUI       hot-reload       CLI CRUD         AGENT.md
+project setup    tab switching    file watcher     i18n             setup command
+data model       task list        click → JSON     themes           tmux scripts
+                 detail panel     JSON → re-draw   config system    beta packaging
+
+Phase 5          Phase 4
+Multi-Source     Launch
+────────────     ────────────
+file rename      README
+multi-source     GIF demo
+project CLI      Product Hunt
+tab redesign     community
+dashboard
 ```
 
 ---
@@ -102,7 +111,7 @@ data model       task list        click → JSON     themes           tmux scrip
 
 ---
 
-## Phase 3.5: Friend Beta ✅ (Current)
+## Phase 3.5: Friend Beta ✅
 
 **Goal**: Prepare for small-scale friend beta — any agent can learn to control Mutsumi in 2 minutes.
 
@@ -116,6 +125,21 @@ data model       task list        click → JSON     themes           tmux scrip
 - [x] `pyproject.toml`: Beta classifier
 
 **Exit Criteria**: A friend can `uv tool install git+...`, run `mutsumi setup --agent claude-code`, and start using Mutsumi within 2 minutes.
+
+---
+
+## Phase 5: Multi-Source Hub ✅ (Current)
+
+**Goal**: Upgrade Mutsumi from a single-file task viewer to a personal command center — global personal todo + multi-project Agent dashboard + aggregated Main tab.
+
+- [x] **5a** — File rename: `tasks.json` → `mutsumi.json` with backward-compatible fallback
+- [x] **5f** — Config migration: `~/.config/mutsumi/` → `~/.mutsumi/` unified home
+- [x] **5b** — Multi-Source data layer: `SourceRegistry` managing N data sources
+- [x] **5c** — Project Registry CLI: `mutsumi project add/remove/list`
+- [x] **5d** — Tab redesign: dynamic source tabs + scope sub-filter
+- [x] **5e** — Main Dashboard: aggregated progress view across all sources
+
+**Exit Criteria**: `uv run mutsumi` with multiple registered projects shows a dashboard on the Main tab, individual source tabs with scope filtering, and all 239 tests pass.
 
 ---
 
@@ -166,5 +190,6 @@ The following features are outside the MVP scope. Listed here for reference only
 | 0.2.0   | Phase 2 complete — hot-reload + interaction        |
 | 0.3.0   | Phase 3 complete — CLI + config complete           |
 | 0.4.0b1 | Phase 3.5 complete — Friend Beta                   |
+| 0.6.0   | Phase 5 complete — Multi-Source Hub                |
 | 0.5.0   | Phase 4 complete — Product Hunt launch build       |
 | 1.0.0   | Stable release after community feedback            |

@@ -11,13 +11,22 @@
 ## 阶段概览
 
 ```
-Phase 0          Phase 1          Phase 2          Phase 3          Phase 3.5        Phase 4
-Foundations      Skeleton         Reactivity       CLI & Polish     Friend Beta      Launch
-────────────     ────────────     ────────────     ────────────     ────────────     ────────────
-docs & specs     static TUI       hot-reload       CLI CRUD         AGENT.md         README
-project setup    tab switching    file watcher     i18n             setup command    GIF demo
-data model       task list        click → JSON     themes           tmux scripts     Product Hunt
-                 detail panel     JSON → re-draw   config system    beta packaging   community
+Phase 0          Phase 1          Phase 2          Phase 3          Phase 3.5
+Foundations      Skeleton         Reactivity       CLI & Polish     Friend Beta
+────────────     ────────────     ────────────     ────────────     ────────────
+docs & specs     static TUI       hot-reload       CLI CRUD         AGENT.md
+project setup    tab switching    file watcher     i18n             setup command
+data model       task list        click → JSON     themes           tmux scripts
+                 detail panel     JSON → re-draw   config system    beta packaging
+
+Phase 5          Phase 4
+Multi-Source     Launch
+────────────     ────────────
+file rename      README
+multi-source     GIF demo
+project CLI      Product Hunt
+tab redesign     community
+dashboard
 ```
 
 ---
@@ -102,7 +111,7 @@ data model       task list        click → JSON     themes           tmux scrip
 
 ---
 
-## Phase 3.5：朋友内测 ✅（当前）
+## Phase 3.5：朋友内测 ✅
 
 **目标**：准备小规模朋友内测 — 任何 Agent 都能 2 分钟内学会操控 Mutsumi。
 
@@ -116,6 +125,21 @@ data model       task list        click → JSON     themes           tmux scrip
 - [x] `pyproject.toml`：Beta classifier
 
 **退出标准**：朋友 `uv tool install git+...` 后，运行 `mutsumi setup --agent claude-code`，2 分钟内开始使用。
+
+---
+
+## Phase 5：多源指挥中心 ✅（当前）
+
+**目标**：将 Mutsumi 从单文件任务查看器升级为个人指挥中心 — 全局个人待办 + 多项目 Agent 仪表盘 + 聚合 Main tab。
+
+- [x] **5a** — 文件重命名：`tasks.json` → `mutsumi.json`，保留向后兼容 fallback
+- [x] **5f** — 配置迁移：`~/.config/mutsumi/` → `~/.mutsumi/` 统一目录
+- [x] **5b** — 多源数据层：`SourceRegistry` 管理 N 个数据源
+- [x] **5c** — 项目注册 CLI：`mutsumi project add/remove/list`
+- [x] **5d** — Tab 重设计：动态 source tab + scope 子过滤器
+- [x] **5e** — Main 仪表盘：跨所有源的聚合进度视图
+
+**退出标准**：`uv run mutsumi` 注册多个项目后，Main tab 显示仪表盘，各源 tab 支持 scope 过滤，全部 239 个测试通过。
 
 ---
 
@@ -166,5 +190,6 @@ data model       task list        click → JSON     themes           tmux scrip
 | 0.2.0   | Phase 2 完成 — 热重载 + 交互可用                |
 | 0.3.0   | Phase 3 完成 — CLI + 配置完整                   |
 | 0.4.0b1 | Phase 3.5 完成 — 朋友内测                        |
+| 0.6.0   | Phase 5 完成 — 多源指挥中心                       |
 | 0.5.0   | Phase 4 完成 — Product Hunt 发布版本            |
 | 1.0.0   | 社区反馈后的稳定版                               |

@@ -43,12 +43,12 @@ class TestKeybindings:
             assert "expand_group" in actions
 
     def test_get_keybindings_valid(self) -> None:
-        assert get_keybindings("vim") is VIM_BINDINGS
-        assert get_keybindings("emacs") is EMACS_BINDINGS
-        assert get_keybindings("arrows") is ARROW_BINDINGS
+        assert get_keybindings("vim") == VIM_BINDINGS
+        assert get_keybindings("emacs") == EMACS_BINDINGS
+        assert get_keybindings("arrows") == ARROW_BINDINGS
 
     def test_get_keybindings_fallback(self) -> None:
-        assert get_keybindings("unknown") is VIM_BINDINGS
+        assert get_keybindings("unknown") == ARROW_BINDINGS
 
     def test_new_crud_bindings(self) -> None:
         keys = {b.key for b in VIM_BINDINGS}

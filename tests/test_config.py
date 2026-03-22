@@ -15,7 +15,7 @@ class TestMutsumiConfig:
     def test_defaults(self) -> None:
         config = MutsumiConfig()
         assert config.theme == "monochrome-zen"
-        assert config.keybindings == "vim"
+        assert config.keybindings == "arrows"
         assert config.language == "en"
         assert config.event_log_path is None
         assert config.default_path is None

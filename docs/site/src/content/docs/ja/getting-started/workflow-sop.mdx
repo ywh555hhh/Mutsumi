@@ -1,0 +1,332 @@
+---
+title: "ワークフロー SOP"
+description: "エンドツーエンドのセットアップ：ターミナル + tmux + AI Agent + Mutsumi を一つのコマンドで起動。"
+---
+
+import { Tabs, TabItem, Aside, Steps, Badge } from '@astrojs/starlight/components';
+
+## ゴール
+
+ホットキーひとつでコマンドセンターを起動。左ペインは AI Agent、右ペインはリアルタイムタスクボード。Agent がタスクを書き込み、ボードが即座に更新される。コンテキストスイッチなし。
+
+```
+ Win+`  /  Ctrl+`  (ドロップダウンターミナル)
+┌──────────────────────────────┬──────────────────┐
+│                              │                  │
+│  AI Agent (opencode/claude)  │   Mutsumi TUI    │
+│                              │                  │
+│  > "auth リファクタリングの  │  ┌─────────────┐ │
+│     タスクを3つ追加して"     │  │ [★ Main]     │ │
+│                              │  │ ● ログイン修正│ │
+│  mutsumi.json に書き込み中...│  │ ● OAuth 追加 │ │
+│                              │  │ ● テスト作成 │ │
+│                              │  └─────────────┘ │
+└──────────────────────────────┴──────────────────┘
+```
+
+## 前提条件
+
+| ツール | 用途 | インストール |
+|--------|------|-------------|
+| **ターミナルエミュレータ** | ドロップダウン（Quake）モード | Windows Terminal / iTerm2 / Yakuake |
+| **tmux** | ペイン分割、セッション永続化 | `apt install tmux` / `brew install tmux` |
+| **uv** | Python パッケージマネージャ | `curl -LsSf https://astral.sh/uv/install.sh \| sh` |
+| **Mutsumi** | タスクボード TUI | `uv tool install mutsumi` |
+| **AI Agent** | `mutsumi.json` にタスクを書き込む | opencode / Claude Code / aider / Codex CLI |
+
+## プラットフォーム別セットアップ
+
+<Tabs>
+  <TabItem label="Windows">
+    ### ステップ 1：Windows Terminal + Quake モード
+
+    Windows Terminal には「Quake モード」が内蔵されています。グローバルホットキーを押すと、ゲーム Quake のように画面上部からターミナルがドロップダウンします。
+
+    1. Microsoft Store から [Windows Terminal](https://aka.ms/terminal) をインストール
+    2. 設定 → アクション → 追加：
+
+    ```json
+    { "command": { "action": "quakeMode" }, "keys": "win+`" }
+    ```
+
+    これで `Win+`` でドロップダウンターミナルをグローバルに切り替えられます。
+
+    ### ステップ 2：WSL2 + tmux
+
+    ```powershell
+    # WSL2 のインストール（未インストールの場合）
+    wsl --install -d Ubuntu
+
+    # WSL 内で：
+    sudo apt update && sudo apt install -y tmux
+    ```
+
+    Windows Terminal のデフォルトプロファイルを **Ubuntu (WSL)** に設定してください。
+
+    ### ステップ 3：WSL 内にツールをインストール
+
+    ```bash
+    # uv（Python マネージャ）
+    curl -LsSf https://astral.sh/uv/install.sh | sh
+
+    # Mutsumi
+    uv tool install mutsumi
+
+    # AI Agent（いずれかを選択）
+    uv tool install opencode    # または：npm install -g @anthropic-ai/claude-code
+    ```
+
+    ### ステップ 4：プロジェクトの初期化
+
+    ```bash
+    cd ~/your-project
+    mutsumi init                           # mutsumi.json を作成
+    mutsumi setup --agent claude-code      # CLAUDE.md にプロンプトを注入
+    ```
+  </TabItem>
+
+  <TabItem label="macOS">
+    ### ステップ 1：iTerm2 ホットキーウィンドウ
+
+    1. [iTerm2](https://iterm2.com/) をインストール
+    2. Preferences → Keys → Hotkey → **"Show/hide all windows with a system-wide hotkey"** をチェック
+    3. ホットキーを `` Ctrl+` `` に設定
+
+    代替案：[Ghostty](https://ghostty.org/) の `quick-terminal-hotkey` 設定。
+
+    ### ステップ 2：tmux
+
+    ```bash
+    brew install tmux
+    ```
+
+    ### ステップ 3：ツールのインストール
+
+    ```bash
+    # uv
+    curl -LsSf https://astral.sh/uv/install.sh | sh
+
+    # Mutsumi
+    uv tool install mutsumi
+
+    # AI Agent
+    uv tool install opencode    # または：npm install -g @anthropic-ai/claude-code
+    ```
+
+    ### ステップ 4：初期化
+
+    ```bash
+    cd ~/your-project
+    mutsumi init
+    mutsumi setup --agent claude-code
+    ```
+  </TabItem>
+
+  <TabItem label="Linux">
+    ### ステップ 1：ドロップダウンターミナル
+
+    主要な Linux デスクトップにはドロップダウンターミナルのオプションがあります：
+
+    | デスクトップ | ツール | ホットキー |
+    |-------------|--------|-----------|
+    | KDE | Yakuake | `F12` |
+    | GNOME | [ddterm](https://github.com/ddterm/gnome-shell-extension-ddterm) | `F12` |
+    | 汎用 | Guake | `F12` |
+    | 汎用 | Tilix（Quake モード） | 設定可能 |
+
+    ### ステップ 2：tmux
+
+    ```bash
+    sudo apt install tmux    # Debian/Ubuntu
+    sudo pacman -S tmux      # Arch
+    sudo dnf install tmux    # Fedora
+    ```
+
+    ### ステップ 3：ツールのインストール
+
+    ```bash
+    curl -LsSf https://astral.sh/uv/install.sh | sh
+    uv tool install mutsumi
+    uv tool install opencode
+    ```
+
+    ### ステップ 4：初期化
+
+    ```bash
+    cd ~/your-project
+    mutsumi init
+    mutsumi setup --agent claude-code
+    ```
+  </TabItem>
+</Tabs>
+
+## ワンクリック起動スクリプト
+
+`~/.local/bin/mu`（または `$PATH` 上の任意の場所）に保存：
+
+<Tabs>
+  <TabItem label="bash / zsh">
+    ```bash
+    #!/usr/bin/env bash
+    # mu — Mutsumi 開発環境を起動
+    # 使い方：mu [プロジェクトディレクトリ] [agent コマンド]
+    #   mu                          → カレントディレクトリ、デフォルト agent
+    #   mu ~/projects/saas-app      → 指定プロジェクト
+    #   mu . claude                 → カレントディレクトリ、Claude Code
+
+    set -euo pipefail
+
+    PROJECT_DIR="${1:-.}"
+    AGENT_CMD="${2:-opencode}"
+    SESSION="mu-$(basename "$PROJECT_DIR")"
+    MUTSUMI_WIDTH="${MUTSUMI_WIDTH:-35}"
+
+    cd "$PROJECT_DIR"
+
+    # mutsumi.json がなければ自動作成
+    if [ ! -f mutsumi.json ] && [ ! -f tasks.json ]; then
+      mutsumi init --quiet 2>/dev/null || true
+    fi
+
+    # セッションが既にあればアタッチ
+    if tmux has-session -t "$SESSION" 2>/dev/null; then
+      tmux attach -t "$SESSION"
+      exit 0
+    fi
+
+    # 新セッション：左に agent、右に mutsumi
+    tmux new-session -d -s "$SESSION" -c "$PROJECT_DIR"
+    tmux split-window -h -p "$MUTSUMI_WIDTH" -t "$SESSION" "mutsumi"
+    tmux select-pane -t "$SESSION:0.0"
+
+    # 左ペインで agent を起動
+    if [ "$AGENT_CMD" != "shell" ]; then
+      tmux send-keys -t "$SESSION:0.0" "$AGENT_CMD" Enter
+    fi
+
+    tmux attach -t "$SESSION"
+    ```
+  </TabItem>
+
+  <TabItem label="fish">
+    ```fish
+    #!/usr/bin/env fish
+    # mu — Mutsumi 開発環境を起動
+
+    set PROJECT_DIR (realpath (test -n "$argv[1]"; and echo $argv[1]; or echo .))
+    set AGENT_CMD (test -n "$argv[2]"; and echo $argv[2]; or echo opencode)
+    set SESSION "mu-"(basename $PROJECT_DIR)
+    set MUTSUMI_WIDTH (test -n "$MUTSUMI_WIDTH"; and echo $MUTSUMI_WIDTH; or echo 35)
+
+    cd $PROJECT_DIR
+
+    if not test -f mutsumi.json; and not test -f tasks.json
+      mutsumi init --quiet 2>/dev/null; or true
+    end
+
+    if tmux has-session -t $SESSION 2>/dev/null
+      tmux attach -t $SESSION
+      exit 0
+    end
+
+    tmux new-session -d -s $SESSION -c $PROJECT_DIR
+    tmux split-window -h -p $MUTSUMI_WIDTH -t $SESSION "mutsumi"
+    tmux select-pane -t "$SESSION:0.0"
+
+    if test "$AGENT_CMD" != shell
+      tmux send-keys -t "$SESSION:0.0" $AGENT_CMD Enter
+    end
+
+    tmux attach -t $SESSION
+    ```
+  </TabItem>
+
+  <TabItem label="PowerShell (WSL)">
+    ```powershell
+    # mu.ps1 — WSL を呼び出す Windows ショートカット
+    # PATH に配置するかスタートメニューにピン留め
+
+    param(
+      [string]$ProjectDir = ".",
+      [string]$Agent = "opencode"
+    )
+
+    # Windows パスを WSL パスに変換
+    $wslPath = wsl wslpath -u (Resolve-Path $ProjectDir).Path
+
+    # WSL 内で起動
+    wsl bash -lc "~/.local/bin/mu '$wslPath' '$Agent'"
+    ```
+  </TabItem>
+</Tabs>
+
+実行権限を付与：
+
+```bash
+chmod +x ~/.local/bin/mu
+```
+
+## 日常の使い方
+
+<Steps>
+1. **ホットキーを押す** — `Win+`` / `Ctrl+`` / `F12` — ターミナルがドロップダウン
+
+2. **起動** — プロジェクトディレクトリで `mu` と入力（または `mu ~/projects/my-app`）
+
+3. **作業** — 左ペインで AI Agent と会話、右ペインでタスクがリアルタイム更新
+
+4. **タスク完了** — Mutsumi でチェックボックスをクリックするか `x` キーで完了マーク
+
+5. **プロジェクト切替** — `mu ~/projects/other-app` で新しい tmux セッションを開き、`Ctrl-b s` でセッション間を切り替え
+
+6. **デタッチ** — `Ctrl-b d` でセッションをデタッチ。バックグラウンドで動き続けます。`mu` でいつでも復帰
+
+7. **非表示** — ホットキーをもう一度押してターミナルを非表示
+</Steps>
+
+## マルチプロジェクトレイアウト
+
+パワーユーザー向け — 複数プロジェクトの同時管理：
+
+```
+ tmux セッション：
+  mu-saas-app     →  opencode  |  mutsumi (saas-app/mutsumi.json)
+  mu-oshigrid     →  claude    |  mutsumi (oshigrid/mutsumi.json)
+  mu-personal     →  shell     |  mutsumi (~/.mutsumi/mutsumi.json)
+
+ Ctrl-b s → セッションピッカー → 瞬時切替
+```
+
+Multi-Source Hub を使えば、Main ダッシュボードで全プロジェクトを一覧できます。
+
+## Agent 互換性
+
+起動スクリプトはすべてのターミナル AI Agent と互換：
+
+```bash
+mu . opencode     # OpenCode
+mu . claude       # Claude Code
+mu . aider        # Aider
+mu . codex        # Codex CLI
+mu . shell        # Agent なし、シェルのみ
+```
+
+すべての Agent は同じプロトコルを使用：`mutsumi.json` を読み込み → タスクを変更 → 書き戻し。プロンプトテンプレートは [Agent セットアップ](../agent-setup/) を参照。
+
+<Aside type="tip">
+**上級テクニック**：`mu` をシェルの起動スクリプトに追加するか、tmux キーバインドに割り当て：
+```bash
+# ~/.tmux.conf — Ctrl-b M でプロジェクトピッカーを開く
+bind M command-prompt -p "Project:" "run-shell '~/.local/bin/mu %1'"
+```
+</Aside>
+
+## トラブルシューティング
+
+| 問題 | 解決方法 |
+|------|---------|
+| `mu: command not found` | `~/.local/bin` を `$PATH` に追加 |
+| tmux ペインが狭すぎる | `export MUTSUMI_WIDTH=40` または `Ctrl-b →` でリサイズ |
+| Agent が `mutsumi.json` に書き込まない | `mutsumi setup --agent <name>` でプロンプトを注入 |
+| Quake モードが動作しない | ターミナルのホットキー設定を確認。DE がキーを横取りしている可能性 |
+| WSL パスの問題 | `wslpath` でパス変換。PowerShell スクリプトは自動処理済み |

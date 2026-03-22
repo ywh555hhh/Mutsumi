@@ -8,6 +8,11 @@ Mutsumi is a minimal TUI task board that watches `tasks.json` and provides a zer
 - **Layout Agnostic**: Mutsumi does NOT manage window splitting. She is an independent terminal process.
 - **Agent Agnostic**: No LLM or agent dependency. Any program that writes JSON is a valid controller.
 
+## Interaction Principles
+- **Keyboard + Mouse full coverage**: Every action MUST be reachable by BOTH keyboard AND mouse click. No keyboard-only features, no mouse-only features.
+- **Default preset is `arrows`** (not vim): Arrow keys + Home/End + Shift+arrows. Normal people don't know vim. Vim and emacs are opt-in presets for power users.
+- **Mouse is a first-class citizen**: Clickable buttons, clickable tabs, clickable checkboxes, clickable list items. Mouse users should never feel like second-class.
+
 ## Tech Stack
 - Python 3.12+, managed by `uv`
 - TUI: Textual
@@ -20,7 +25,8 @@ Mutsumi is a minimal TUI task board that watches `tasks.json` and provides a zer
 - Use type hints everywhere. Never use `Any`.
 - Prefer composition over inheritance for Textual widgets.
 - All file I/O through the `core/` module — TUI components never touch the filesystem directly.
-- Atomic file writes: always write to temp file + `os.rename()`.
+- Atomic file writes: always write to temp file + `os.replace()` (cross-platform).
+- Platform paths: use `core/paths.py` helpers — never hardcode `~/.config` or `~/.local/share`.
 - Keep TUI components stateless where possible — state lives in the data layer.
 
 ## File Structure
@@ -50,8 +56,18 @@ mutsumi/
 - TUI tests via Textual's built-in testing framework (`app.run_test()`)
 - Fixture files in `tests/fixtures/`
 
+## Development Workflow
+**大功能无 RFC 不写。** 所有非 trivial 的功能必须遵循以下流程：
+
+1. **RFC** — 先写 RFC 文档，设计讨论达成共识
+2. **doc + code** — 同步写代码和更新文档
+3. **test + 人工体验测试** — 自动化测试 + 手动在终端里跑一遍
+4. **bug fix** — 修复测试和体验中发现的问题
+5. **doc + push** — 最终文档更新 + 推送
+
 ## Specs & Docs
 - RFC: `docs/rfc/RFC-001-mutsumi-core.md`
+- RFC: `docs/rfc/RFC-007-multi-source-hub.md`
 - Data Contract: `docs/specs/DATA_CONTRACT.md`
 - Agent Protocol: `docs/specs/AGENT_PROTOCOL.md`
 - TUI Spec: `docs/specs/TUI_SPEC.md`

@@ -1,0 +1,332 @@
+---
+title: "Workflow SOP"
+description: "End-to-end setup: terminal + tmux + AI agent + Mutsumi, one command to launch."
+---
+
+import { Tabs, TabItem, Aside, Steps, Badge } from '@astrojs/starlight/components';
+
+## The Goal
+
+One hotkey opens your command center. Two panes: left is your AI agent, right is your live task board. The agent writes tasks, the board updates instantly. No context switching, no alt-tabbing.
+
+```
+ Win+`  /  Ctrl+`  (drop-down terminal)
+┌──────────────────────────────┬──────────────────┐
+│                              │                  │
+│  AI Agent (opencode/claude)  │   Mutsumi TUI    │
+│                              │                  │
+│  > "Add 3 tasks for the     │  ┌─────────────┐ │
+│     auth refactor"           │  │ [★ Main]     │ │
+│                              │  │ ● Fix login  │ │
+│  Writing mutsumi.json...     │  │ ● Add OAuth  │ │
+│                              │  │ ● Write test │ │
+│                              │  └─────────────┘ │
+└──────────────────────────────┴──────────────────┘
+```
+
+## Prerequisites
+
+| Tool | Purpose | Install |
+|------|---------|---------|
+| **Terminal emulator** | Drop-down (Quake) mode | Windows Terminal / iTerm2 / Yakuake |
+| **tmux** | Split panes, persist sessions | `apt install tmux` / `brew install tmux` |
+| **uv** | Python package manager | `curl -LsSf https://astral.sh/uv/install.sh \| sh` |
+| **Mutsumi** | Task board TUI | `uv tool install mutsumi` |
+| **AI Agent** | Writes tasks to `mutsumi.json` | opencode / Claude Code / aider / Codex CLI |
+
+## Platform Setup
+
+<Tabs>
+  <TabItem label="Windows">
+    ### Step 1: Windows Terminal + Quake Mode
+
+    Windows Terminal has a built-in "Quake mode" — press a global hotkey and a terminal drops down from the top of your screen, just like in the game Quake.
+
+    1. Install [Windows Terminal](https://aka.ms/terminal) from Microsoft Store
+    2. Open Settings → Actions → add:
+
+    ```json
+    { "command": { "action": "quakeMode" }, "keys": "win+`" }
+    ```
+
+    Now `Win+`` toggles the drop-down terminal globally.
+
+    ### Step 2: WSL2 + tmux
+
+    ```powershell
+    # Install WSL2 (if not installed)
+    wsl --install -d Ubuntu
+
+    # Inside WSL:
+    sudo apt update && sudo apt install -y tmux
+    ```
+
+    Set your Windows Terminal default profile to **Ubuntu (WSL)**.
+
+    ### Step 3: Install tools inside WSL
+
+    ```bash
+    # uv (Python manager)
+    curl -LsSf https://astral.sh/uv/install.sh | sh
+
+    # Mutsumi
+    uv tool install mutsumi
+
+    # Your AI agent (pick one)
+    uv tool install opencode    # or: npm install -g @anthropic-ai/claude-code
+    ```
+
+    ### Step 4: Initialize your project
+
+    ```bash
+    cd ~/your-project
+    mutsumi init                           # Creates mutsumi.json
+    mutsumi setup --agent claude-code      # Injects prompt into CLAUDE.md
+    ```
+  </TabItem>
+
+  <TabItem label="macOS">
+    ### Step 1: iTerm2 Hotkey Window
+
+    1. Install [iTerm2](https://iterm2.com/)
+    2. Preferences → Keys → Hotkey → check **"Show/hide all windows with a system-wide hotkey"**
+    3. Set hotkey to `` Ctrl+` ``
+
+    Alternative: [Ghostty](https://ghostty.org/) with `quick-terminal-hotkey` config.
+
+    ### Step 2: tmux
+
+    ```bash
+    brew install tmux
+    ```
+
+    ### Step 3: Install tools
+
+    ```bash
+    # uv
+    curl -LsSf https://astral.sh/uv/install.sh | sh
+
+    # Mutsumi
+    uv tool install mutsumi
+
+    # AI agent
+    uv tool install opencode    # or: npm install -g @anthropic-ai/claude-code
+    ```
+
+    ### Step 4: Initialize
+
+    ```bash
+    cd ~/your-project
+    mutsumi init
+    mutsumi setup --agent claude-code
+    ```
+  </TabItem>
+
+  <TabItem label="Linux">
+    ### Step 1: Drop-down terminal
+
+    Most Linux desktops have a drop-down terminal option:
+
+    | Desktop | Tool | Hotkey |
+    |---------|------|--------|
+    | KDE | Yakuake | `F12` |
+    | GNOME | [ddterm](https://github.com/ddterm/gnome-shell-extension-ddterm) | `F12` |
+    | Any | Guake | `F12` |
+    | Any | Tilix (Quake mode) | configurable |
+
+    ### Step 2: tmux
+
+    ```bash
+    sudo apt install tmux    # Debian/Ubuntu
+    sudo pacman -S tmux      # Arch
+    sudo dnf install tmux    # Fedora
+    ```
+
+    ### Step 3: Install tools
+
+    ```bash
+    curl -LsSf https://astral.sh/uv/install.sh | sh
+    uv tool install mutsumi
+    uv tool install opencode
+    ```
+
+    ### Step 4: Initialize
+
+    ```bash
+    cd ~/your-project
+    mutsumi init
+    mutsumi setup --agent claude-code
+    ```
+  </TabItem>
+</Tabs>
+
+## One-Click Launch Script
+
+Save this as `~/.local/bin/mu` (or anywhere on your `$PATH`):
+
+<Tabs>
+  <TabItem label="bash / zsh">
+    ```bash
+    #!/usr/bin/env bash
+    # mu — launch Mutsumi dev environment
+    # Usage: mu [project-dir] [agent-command]
+    #   mu                          → current dir, default agent
+    #   mu ~/projects/saas-app      → specific project
+    #   mu . claude                 → current dir, Claude Code
+
+    set -euo pipefail
+
+    PROJECT_DIR="${1:-.}"
+    AGENT_CMD="${2:-opencode}"
+    SESSION="mu-$(basename "$PROJECT_DIR")"
+    MUTSUMI_WIDTH="${MUTSUMI_WIDTH:-35}"
+
+    cd "$PROJECT_DIR"
+
+    # Create mutsumi.json if missing
+    if [ ! -f mutsumi.json ] && [ ! -f tasks.json ]; then
+      mutsumi init --quiet 2>/dev/null || true
+    fi
+
+    # Attach if session exists
+    if tmux has-session -t "$SESSION" 2>/dev/null; then
+      tmux attach -t "$SESSION"
+      exit 0
+    fi
+
+    # New session: agent on the left, mutsumi on the right
+    tmux new-session -d -s "$SESSION" -c "$PROJECT_DIR"
+    tmux split-window -h -p "$MUTSUMI_WIDTH" -t "$SESSION" "mutsumi"
+    tmux select-pane -t "$SESSION:0.0"
+
+    # Optional: send agent command to left pane
+    if [ "$AGENT_CMD" != "shell" ]; then
+      tmux send-keys -t "$SESSION:0.0" "$AGENT_CMD" Enter
+    fi
+
+    tmux attach -t "$SESSION"
+    ```
+  </TabItem>
+
+  <TabItem label="fish">
+    ```fish
+    #!/usr/bin/env fish
+    # mu — launch Mutsumi dev environment
+
+    set PROJECT_DIR (realpath (test -n "$argv[1]"; and echo $argv[1]; or echo .))
+    set AGENT_CMD (test -n "$argv[2]"; and echo $argv[2]; or echo opencode)
+    set SESSION "mu-"(basename $PROJECT_DIR)
+    set MUTSUMI_WIDTH (test -n "$MUTSUMI_WIDTH"; and echo $MUTSUMI_WIDTH; or echo 35)
+
+    cd $PROJECT_DIR
+
+    if not test -f mutsumi.json; and not test -f tasks.json
+      mutsumi init --quiet 2>/dev/null; or true
+    end
+
+    if tmux has-session -t $SESSION 2>/dev/null
+      tmux attach -t $SESSION
+      exit 0
+    end
+
+    tmux new-session -d -s $SESSION -c $PROJECT_DIR
+    tmux split-window -h -p $MUTSUMI_WIDTH -t $SESSION "mutsumi"
+    tmux select-pane -t "$SESSION:0.0"
+
+    if test "$AGENT_CMD" != shell
+      tmux send-keys -t "$SESSION:0.0" $AGENT_CMD Enter
+    end
+
+    tmux attach -t $SESSION
+    ```
+  </TabItem>
+
+  <TabItem label="PowerShell (WSL)">
+    ```powershell
+    # mu.ps1 — Windows shortcut that calls WSL
+    # Put this in your PATH or pin to Start Menu
+
+    param(
+      [string]$ProjectDir = ".",
+      [string]$Agent = "opencode"
+    )
+
+    # Convert Windows path to WSL path
+    $wslPath = wsl wslpath -u (Resolve-Path $ProjectDir).Path
+
+    # Launch in WSL
+    wsl bash -lc "~/.local/bin/mu '$wslPath' '$Agent'"
+    ```
+  </TabItem>
+</Tabs>
+
+Make it executable:
+
+```bash
+chmod +x ~/.local/bin/mu
+```
+
+## Daily Usage
+
+<Steps>
+1. **Press your hotkey** — `Win+`` / `Ctrl+`` / `F12` — terminal drops down
+
+2. **Launch** — type `mu` in your project directory (or `mu ~/projects/my-app`)
+
+3. **Work** — talk to your AI agent in the left pane, watch tasks appear in the right pane
+
+4. **Toggle tasks** — click checkboxes or press `x` in Mutsumi to mark done
+
+5. **Switch projects** — `mu ~/projects/other-app` opens a new tmux session; switch between them with `Ctrl-b s`
+
+6. **Detach** — `Ctrl-b d` to detach; the session keeps running. Come back anytime with `mu`
+
+7. **Dismiss** — press the hotkey again to hide the terminal
+</Steps>
+
+## Multi-Project Layout
+
+For power users managing multiple projects:
+
+```
+ tmux sessions:
+  mu-saas-app     →  opencode  |  mutsumi (saas-app/mutsumi.json)
+  mu-oshigrid     →  claude    |  mutsumi (oshigrid/mutsumi.json)
+  mu-personal     →  shell     |  mutsumi (~/.mutsumi/mutsumi.json)
+
+ Ctrl-b s → session picker → instant switch
+```
+
+With Multi-Source Hub, your Main dashboard aggregates all projects in one view.
+
+## Agent Compatibility
+
+The launch script works with any terminal-based AI agent:
+
+```bash
+mu . opencode     # OpenCode
+mu . claude       # Claude Code
+mu . aider        # Aider
+mu . codex        # Codex CLI
+mu . shell        # No agent, just your shell
+```
+
+All agents use the same protocol: read `mutsumi.json` → modify tasks → write back. See [Agent Setup](../agent-setup/) for prompt templates.
+
+<Aside type="tip">
+**Pro tip**: Add `mu` to your shell's startup or bind it to a tmux keybinding for even faster access:
+```bash
+# ~/.tmux.conf — press Ctrl-b M to open project picker
+bind M command-prompt -p "Project:" "run-shell '~/.local/bin/mu %1'"
+```
+</Aside>
+
+## Troubleshooting
+
+| Problem | Fix |
+|---------|-----|
+| `mu: command not found` | Add `~/.local/bin` to your `$PATH` |
+| tmux pane too narrow for Mutsumi | `export MUTSUMI_WIDTH=40` or resize with `Ctrl-b →` |
+| Agent doesn't write `mutsumi.json` | Run `mutsumi setup --agent <name>` to inject the prompt |
+| Quake mode not working | Check your terminal's hotkey settings; some DEs grab the key first |
+| WSL path issues | Use `wslpath` to convert paths; the PowerShell script handles this |

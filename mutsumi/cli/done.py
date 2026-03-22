@@ -2,11 +2,9 @@
 
 from __future__ import annotations
 
-from pathlib import Path
-
 import click
 
-from mutsumi.core.loader import load_task_file
+from mutsumi.core.loader import load_task_file, resolve_tasks_path
 from mutsumi.core.writer import find_task, resolve_partial_id, save_task_file, toggle_task_status
 
 
@@ -15,7 +13,7 @@ from mutsumi.core.writer import find_task, resolve_partial_id, save_task_file, t
 @click.pass_context
 def done(ctx: click.Context, task_id: str) -> None:
     """Mark a task as done (supports ID prefix matching)."""
-    path = Path(ctx.obj.get("path") or "tasks.json")
+    path = resolve_tasks_path(ctx.obj.get("path"))
 
     if not path.exists():
         click.echo(f"File not found: {path}", err=True)
