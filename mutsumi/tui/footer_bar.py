@@ -129,7 +129,7 @@ class FooterBar(Widget):
 
     def compose(self) -> ComposeResult:
         yield Static(
-            "[x]=toggle done \u2502 click title=detail/edit \u2502 ?=help",
+            "\\[x]=toggle done \u2502 click title=detail/edit \u2502 ?=help",
             classes="hint-bar",
             id="hint-bar",
         )
