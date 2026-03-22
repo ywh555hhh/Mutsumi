@@ -4,9 +4,11 @@ import starlightLinksValidator from 'starlight-links-validator';
 import starlightViewModes from 'starlight-view-modes';
 import starlightImageZoom from 'starlight-image-zoom';
 
+const isProd = process.env.NODE_ENV === 'production' || process.argv.includes('build');
+
 export default defineConfig({
   site: 'https://ywh555hhh.github.io',
-  base: '/Mutsumi',
+  base: isProd ? '/Mutsumi' : '/',
   integrations: [
     starlight({
       title: 'Mutsumi',
