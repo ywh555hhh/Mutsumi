@@ -39,7 +39,7 @@ class _NewTaskButton(Static, can_focus=True):
         """Posted when the button is clicked or activated."""
 
     def __init__(self, **kwargs: Any) -> None:
-        super().__init__("[+ New Task]", **kwargs)
+        super().__init__("\\[+ New Task]", **kwargs)
 
     def on_click(self) -> None:
         self.post_message(self.Pressed())

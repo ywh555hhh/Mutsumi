@@ -174,7 +174,7 @@ class FooterBar(Widget):
         """
         try:
             stats_widget = self.query_one("#stats-text", Static)
-            stats_widget.update(message)
+            stats_widget.update(message.replace("[", "\\["))
             self.set_mode(BarMode.NOTIFICATION)
             self.set_timer(duration, self._restore_stats)
         except Exception:

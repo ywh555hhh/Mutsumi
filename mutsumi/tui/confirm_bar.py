@@ -58,7 +58,8 @@ class ConfirmBar(Widget, can_focus=True):
         """Display the confirmation prompt."""
         self._task_id = task_id
         self._task_title = task_title
-        prompt = f'Delete "{task_title}"? [y/N]'
+        safe_title = task_title.replace("[", "\\[")
+        prompt = f'Delete "{safe_title}"? \\[y/N]'
         with contextlib.suppress(Exception):
             self.query_one("#confirm-prompt", Static).update(prompt)
         self.display = True

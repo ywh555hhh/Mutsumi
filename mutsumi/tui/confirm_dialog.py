@@ -62,9 +62,10 @@ class ConfirmDialog(ModalScreen[bool]):
         self._task_title = task_title
 
     def compose(self) -> ComposeResult:
+        safe_title = self._task_title.replace("[", "\\[")
         with Vertical():
             yield Static(
-                f"Delete \"{self._task_title}\"?",
+                f'Delete "{safe_title}"?',
                 classes="confirm-message",
             )
             with Horizontal(classes="confirm-buttons"):

@@ -67,7 +67,7 @@ class SortBar(ModalScreen[None]):
         for i, field in enumerate(_SORT_FIELDS):
             if i == self._selected:
                 arrow = "\u25bc" if self._reverse else "\u25b2"
-                parts.append(f"[{field} {arrow}]")
+                parts.append(f"\\[{field} {arrow}]")
             else:
                 parts.append(f" {field} ")
         return "Sort by:  " + "  ".join(parts) + "   (Enter=confirm, r=reverse, Esc=cancel)"

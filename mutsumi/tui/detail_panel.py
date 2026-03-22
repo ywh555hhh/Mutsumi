@@ -12,6 +12,11 @@ from textual.widgets import Static
 
 from mutsumi.core.models import Task, TaskPriority, TaskStatus
 
+
+def _esc(text: str) -> str:
+    """Escape Rich markup brackets in user-supplied text."""
+    return text.replace("[", "\\[")
+
 if TYPE_CHECKING:
     from textual.app import ComposeResult
 
@@ -214,9 +219,9 @@ class DetailPanel(Widget):
         content.remove_children()
 
         # Title
-        status_icon = "[x]" if task.status == TaskStatus.DONE else "[ ]"
+        status_icon = "\\[x]" if task.status == TaskStatus.DONE else "\\[ ]"
         content.mount(
-            Static(f"{status_icon} {task.title}", classes="detail-label")
+            Static(f"{status_icon} {_esc(task.title)}", classes="detail-label")
         )
 
         content.mount(_ResponsiveSeparator())
@@ -241,7 +246,7 @@ class DetailPanel(Widget):
         if task.tags:
             content.mount(Static("Tags", classes="detail-label"))
             content.mount(
-                Static(f"  {', '.join(task.tags)}", classes="detail-field")
+                Static(f"  {_esc(', '.join(task.tags))}", classes="detail-field")
             )
 
         # Due date
@@ -254,7 +259,7 @@ class DetailPanel(Widget):
             content.mount(_ResponsiveSeparator())
             content.mount(Static("Description", classes="detail-label"))
             content.mount(
-                Static(f"  {task.description}", classes="detail-field")
+                Static(f"  {_esc(task.description)}", classes="detail-field")
             )
 
         # Children summary
@@ -266,9 +271,9 @@ class DetailPanel(Widget):
                 Static(f"  {done}/{total} completed", classes="detail-field")
             )
             for child in task.children:
-                icon = "[x]" if child.is_done else "[ ]"
+                icon = "\\[x]" if child.is_done else "\\[ ]"
                 content.mount(
-                    Static(f"  {icon} {child.title}", classes="detail-field")
+                    Static(f"  {icon} {_esc(child.title)}", classes="detail-field")
                 )
 
         # Created / completed timestamps

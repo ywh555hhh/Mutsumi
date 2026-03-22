@@ -270,7 +270,8 @@ class MutsumiApp(App[None]):
     def _show_error_banner(self, message: str) -> None:
         """Show or update the error banner."""
         self._clear_error_banner()
-        banner = Static(f"\u26a0 {message}", classes="error-banner", id="error-banner")
+        safe_msg = message.replace("[", "\\[")
+        banner = Static(f"\u26a0 {safe_msg}", classes="error-banner", id="error-banner")
         self.mount(banner, before=self.query_one(TaskListPanel))
 
     def _clear_error_banner(self) -> None:
