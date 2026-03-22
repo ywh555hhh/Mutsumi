@@ -89,10 +89,16 @@ class TaskForm(ModalScreen[None]):
 
     BINDINGS = [("escape", "cancel", "Cancel")]
 
-    def __init__(self, task: Task | None = None, parent_id: str | None = None) -> None:
+    def __init__(
+        self,
+        task: Task | None = None,
+        parent_id: str | None = None,
+        default_scope: str = "inbox",
+    ) -> None:
         super().__init__()
         self._editing_task = task
         self._parent_id = parent_id
+        self._default_scope = default_scope
 
     def compose(self) -> ComposeResult:
         task = self._editing_task
@@ -124,7 +130,7 @@ class TaskForm(ModalScreen[None]):
             yield Label("Scope")
             yield Select(
                 [(s, s) for s in ("day", "week", "month", "inbox")],
-                value=task.scope.value if task else "inbox",
+                value=task.scope.value if task else self._default_scope,
                 id="form-scope",
             )
 

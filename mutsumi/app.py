@@ -562,8 +562,9 @@ class MutsumiApp(App[None]):
 
     def on_detail_panel_add_child_requested(self, event: DetailPanel.AddChildRequested) -> None:
         """Handle +Subtask button click in detail panel."""
-        self.push_screen(TaskForm(parent_id=event.task_id))
-
+        self.push_screen(
+            TaskForm(parent_id=event.task_id, default_scope=self._current_scope_value())
+        )
     # --- TaskRow click-to-detail events ---
 
     def on_task_row_detail_clicked(self, event: TaskRow.DetailClicked) -> None:
@@ -747,11 +748,15 @@ class MutsumiApp(App[None]):
     def action_tab_4(self) -> None:
         self.query_one(HeaderBar).set_tab(3)
 
+    def _current_scope_value(self) -> str:
+        """Return the active tab's scope as a string for TaskForm defaults."""
+        return self.query_one(HeaderBar).active_scope.value
+
     def action_new_task(self) -> None:
         """Open new task form."""
         if isinstance(self.focused, Input):
             return
-        self.push_screen(TaskForm())
+        self.push_screen(TaskForm(default_scope=self._current_scope_value()))
 
     def action_edit_task(self) -> None:
         """Open edit form for focused task."""
@@ -914,7 +919,12 @@ class MutsumiApp(App[None]):
             return
         focused = self.focused
         if isinstance(focused, TaskRow):
-            self.push_screen(TaskForm(parent_id=focused.task_data.id))
+            self.push_screen(
+                TaskForm(
+                    parent_id=focused.task_data.id,
+                    default_scope=self._current_scope_value(),
+                )
+            )
 
     async def action_paste_task_above(self) -> None:
         """Paste task from clipboard BEFORE the focused task (P key)."""
