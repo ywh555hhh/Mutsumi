@@ -39,6 +39,16 @@ def _config_path() -> Path:
     return candidates[0]  # preferred location (for error messages)
 
 
+def config_exists() -> bool:
+    """Return True if any supported config file exists."""
+    return any(path.exists() for path in _config_search_chain())
+
+
+def get_config_path() -> Path:
+    """Return the active or preferred config file path."""
+    return _config_path()
+
+
 def load_config(path: Path | None = None) -> MutsumiConfig:
     """Load configuration from TOML file.
 
@@ -88,11 +98,14 @@ def save_config(config: MutsumiConfig | None = None, path: Path | None = None) -
     lines: list[str] = []
 
     def _quote(v: str) -> str:
-        return f'"{v}"'
+        escaped = v.replace("\\", "\\\\").replace('"', '\\"')
+        return f'"{escaped}"'
 
     # Simple scalar fields
-    for field_name in ("theme", "keybindings", "language", "default_scope",
-                       "notification_mode", "default_tab"):
+    for field_name in (
+        "theme", "keybindings", "language", "default_scope",
+        "notification_mode", "default_tab", "agent_integration_mode",
+    ):
         val = getattr(cfg, field_name, None)
         if val is not None:
             lines.append(f"{field_name} = {_quote(str(val))}")
@@ -104,7 +117,7 @@ def save_config(config: MutsumiConfig | None = None, path: Path | None = None) -
             lines.append(f"{field_name} = {val}")
 
     # Boolean fields
-    for field_name in ("dashboard_show_completed",):
+    for field_name in ("dashboard_show_completed", "onboarding_completed"):
         val = getattr(cfg, field_name, None)
         if val is not None:
             lines.append(f"{field_name} = {'true' if val else 'false'}")
@@ -114,6 +127,9 @@ def save_config(config: MutsumiConfig | None = None, path: Path | None = None) -
         val = getattr(cfg, field_name, None)
         if val is not None:
             lines.append(f"{field_name} = {_quote(str(val))}")
+
+    if cfg.preferred_agent is not None:
+        lines.append(f"preferred_agent = {_quote(cfg.preferred_agent)}")
 
     # Columns list
     if cfg.columns:

@@ -4,6 +4,10 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import pytest
+
+pytest.importorskip("textual")
+
 from mutsumi.core.models import Task, TaskFile, TaskStatus
 from mutsumi.core.sources import Source
 from mutsumi.tui.main_dashboard import MainDashboard, SourceCard

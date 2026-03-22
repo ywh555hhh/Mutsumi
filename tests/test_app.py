@@ -8,13 +8,34 @@ from pathlib import Path
 
 import pytest
 
+pytest.importorskip("textual")
+
 from mutsumi.app import MutsumiApp
+from mutsumi.onboarding.bootstrap import StartupState
 from mutsumi.tui.detail_panel import DetailPanel
 from mutsumi.tui.empty_state import EmptyState
 from mutsumi.tui.header_bar import HeaderBar
 from mutsumi.tui.task_row import TaskRow
 
 FIXTURE = Path(__file__).parent / "fixtures" / "tasks.json"
+
+
+@pytest.mark.asyncio
+async def test_app_accepts_startup_state() -> None:
+    """App should accept startup state wiring before onboarding UI lands."""
+    startup_state = StartupState(
+        mode="first_run",
+        cwd=Path.cwd(),
+        is_git_repo=False,
+        config_exists=False,
+        onboarding_completed=False,
+        personal_tasks_exists=False,
+        project_tasks_exists=False,
+        project_registered=False,
+    )
+    app = MutsumiApp(tasks_path=FIXTURE, startup_state=startup_state)
+    async with app.run_test():
+        assert app._startup_state == startup_state
 
 
 @pytest.mark.asyncio

@@ -8,6 +8,8 @@ from typing import TYPE_CHECKING
 
 import pytest
 
+pytest.importorskip("textual")
+
 from mutsumi.core.models import Task, TaskFile, TaskScope, TaskStatus
 from mutsumi.core.writer import (
     add_child_task,

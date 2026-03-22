@@ -7,6 +7,8 @@ from pathlib import Path
 
 import pytest
 
+pytest.importorskip("textual")
+
 from mutsumi.app import MutsumiApp
 from mutsumi.tui.confirm_bar import ConfirmBar
 from mutsumi.tui.search_bar import SearchBar

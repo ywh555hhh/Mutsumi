@@ -7,6 +7,7 @@ from pathlib import Path
 import click
 
 from mutsumi import __version__
+from mutsumi.onboarding.bootstrap import detect_startup_state
 
 
 @click.group(invoke_without_command=True)
@@ -37,7 +38,9 @@ def main(ctx: click.Context, path: str | None, watch: tuple[str, ...]) -> None:
             watch_paths = [Path(p) for p in watch]
             if task_path:
                 watch_paths.insert(0, task_path)
-        run(path=task_path, watch_paths=watch_paths)
+
+        startup_state = detect_startup_state()
+        run(path=task_path, watch_paths=watch_paths, startup_state=startup_state)
 
 
 # Register subcommands

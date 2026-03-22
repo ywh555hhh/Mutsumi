@@ -33,3 +33,6 @@ class MutsumiConfig(BaseModel):
     default_tab: str = "main"
     dashboard_max_tasks: int = 3
     dashboard_show_completed: bool = True
+    onboarding_completed: bool = False
+    preferred_agent: str | None = None
+    agent_integration_mode: str = "none"

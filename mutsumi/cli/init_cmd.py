@@ -2,37 +2,10 @@
 
 from __future__ import annotations
 
-import json
-from typing import TYPE_CHECKING
-
 import click
 
 from mutsumi.core.loader import resolve_tasks_path
-
-if TYPE_CHECKING:
-    from pathlib import Path
-
-_TEMPLATE = {
-    "version": 1,
-    "tasks": [
-        {
-            "id": "example-001",
-            "title": "My first task",
-            "status": "pending",
-            "scope": "day",
-            "priority": "normal",
-            "tags": [],
-            "children": [],
-        }
-    ],
-}
-
-
-def _write_template(path: Path) -> None:
-    """Write the task template to a file."""
-    path.parent.mkdir(parents=True, exist_ok=True)
-    content = json.dumps(_TEMPLATE, indent=2, ensure_ascii=False) + "\n"
-    path.write_text(content, encoding="utf-8")
+from mutsumi.onboarding.files import ensure_personal_task_file, ensure_project_task_file, register_project
 
 
 @click.command("init")
@@ -56,7 +29,7 @@ def init(ctx: click.Context, force: bool, personal: bool, as_project: bool) -> N
             click.echo(f"{path} already exists. Use --force to overwrite.")
             ctx.exit(1)
             return
-        _write_template(path)
+        ensure_personal_task_file(force=True)
         click.echo(f"Created personal tasks: {path}")
         return
 
@@ -66,19 +39,14 @@ def init(ctx: click.Context, force: bool, personal: bool, as_project: bool) -> N
         ctx.exit(1)
         return
 
-    _write_template(path)
+    ensure_project_task_file(path.parent, force=True)
     click.echo(f"Created {path}")
 
     if as_project:
         from mutsumi.config import get_config, save_config
-        from mutsumi.config.settings import ProjectEntry
 
         config = get_config()
-        proj_name = path.parent.name
-        # Don't add if already registered
-        if not any(p.name == proj_name for p in config.projects):
-            config.projects.append(
-                ProjectEntry(name=proj_name, path=path.parent.resolve())
-            )
+        added, entry = register_project(config, path.parent)
+        if added:
             save_config(config)
-            click.echo(f"Registered project: {proj_name}")
+            click.echo(f"Registered project: {entry.name}")

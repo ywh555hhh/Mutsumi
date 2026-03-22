@@ -1,73 +1,17 @@
-"""CLI command: mutsumi setup — inject agent integration instructions."""
+"""CLI command: mutsumi setup — configure agent integration modes."""
 
 from __future__ import annotations
 
-from pathlib import Path
-
 import click
 
-_MARKER = "## Mutsumi Task Integration"
-
-_PROMPT_TEMPLATE = """\
-## Mutsumi Task Integration
-
-This project uses Mutsumi for task management.
-Tasks live in `./mutsumi.json` (fallback: `./tasks.json`).
-
-### Schema
-- Required: `id` (unique string), `title` (string), `status` ("pending"|"done")
-- Optional: `scope` ("day"|"week"|"month"|"inbox"), `priority` ("high"|"normal"|"low"),
-  `tags` (string[]), `children` (Task[]), `due_date` (ISO date), `description` (string)
-- **Preserve any fields you don't recognize — do NOT delete them**
-
-### CLI (preferred)
-- `mutsumi add "title" --priority high --scope day --tags "dev,urgent"`
-- `mutsumi done <id-prefix>` / `mutsumi edit <id-prefix> --title "new"`
-- `mutsumi rm <id-prefix>` / `mutsumi list`
-
-### Direct JSON
-1. Read `./mutsumi.json`  2. Modify tasks array  3. Write ENTIRE file back
-4. Atomic write: temp file + `os.rename()`  5. Generate unique ID for new tasks
-
-The Mutsumi TUI watches this file and re-renders automatically on every save.
-"""
-
-AGENT_TARGETS: dict[str, str | None] = {
-    "claude-code": "CLAUDE.md",
-    "codex-cli": "AGENTS.md",
-    "opencode": "opencode.md",
-    "gemini-cli": "GEMINI.md",
-    "aider": None,
-    "custom": None,
-}
-
-
-def _file_contains_marker(path: Path) -> bool:
-    """Check if file already contains the Mutsumi integration marker."""
-    if not path.exists():
-        return False
-    content = path.read_text(encoding="utf-8")
-    return _MARKER in content
-
-
-def _inject_to_file(path: Path) -> None:
-    """Append the prompt template to a file, creating it if needed."""
-    if _file_contains_marker(path):
-        click.echo(f"Already configured: {path} already contains '{_MARKER}'")
-        return
-
-    existing = ""
-    if path.exists():
-        existing = path.read_text(encoding="utf-8")
-
-    separator = "\n\n" if existing and not existing.endswith("\n\n") else (
-        "\n" if existing and not existing.endswith("\n") else ""
-    )
-
-    with open(path, "a", encoding="utf-8") as f:
-        f.write(separator + _PROMPT_TEMPLATE)
-
-    click.echo(f"Injected Mutsumi integration into {path}")
+from mutsumi.config import get_config, save_config
+from mutsumi.onboarding.agent_setup import (
+    AGENT_TARGETS,
+    _MARKER,
+    apply_agent_setup,
+    get_prompt_template,
+    inject_project_doc,
+)
 
 
 @click.command("setup")
@@ -77,20 +21,51 @@ def _inject_to_file(path: Path) -> None:
     default=None,
     help="Target agent to configure.",
 )
-def setup(agent: str | None) -> None:
+@click.option(
+    "--mode",
+    type=click.Choice(["skills", "skills+project-doc", "snippet"]),
+    default="skills",
+    show_default=True,
+    help="Integration mode to configure.",
+)
+def setup(agent: str | None, mode: str) -> None:
     """Set up Mutsumi integration for an AI agent."""
     if agent is None:
         click.echo("Available agents:\n")
         for name, target in AGENT_TARGETS.items():
-            dest = target if target else "(stdout)"
+            dest = target if target else "(stdout only)"
             click.echo(f"  {name:<14} → {dest}")
-        click.echo("\nUsage: mutsumi setup --agent <name>")
+        click.echo("\nModes:")
+        click.echo("  skills            → remember preferred agent only")
+        click.echo("  skills+project-doc → remember agent and append project doc")
+        click.echo("  snippet           → print copyable instructions")
+        click.echo("\nUsage: mutsumi setup --agent <name> --mode <mode>")
         return
 
-    target_file = AGENT_TARGETS[agent]
+    config = get_config()
+    result = apply_agent_setup(config, agent, mode)  # type: ignore[arg-type]
+    save_config(config)
 
-    if target_file is None:
-        click.echo(_PROMPT_TEMPLATE)
+    if mode == "snippet":
+        click.echo(get_prompt_template())
+        click.echo(f"Saved integration mode: {result.config_mode}")
         return
 
-    _inject_to_file(Path(target_file))
+    if mode == "skills+project-doc":
+        if result.target_file is None:
+            click.echo(get_prompt_template())
+            click.echo("This agent has no default project doc target; printed snippet instead.")
+            click.echo(f"Saved integration mode: {result.config_mode}")
+            return
+
+        wrote = inject_project_doc(result.target_file)
+        if wrote:
+            click.echo(f"Injected Mutsumi integration into {result.target_file}")
+        else:
+            click.echo(f"Already configured: {result.target_file} already contains '{_MARKER}'")
+        click.echo(f"Saved integration mode: {result.config_mode}")
+        return
+
+    click.echo(f"Configured {agent} for skills-first integration.")
+    click.echo("No project instruction files were modified.")
+    click.echo(f"Saved integration mode: {result.config_mode}")

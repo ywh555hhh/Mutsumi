@@ -14,7 +14,9 @@ from textual.widgets import Input, Static
 if TYPE_CHECKING:
     from textual.widget import Widget
 
-from mutsumi.config import load_config
+    from mutsumi.onboarding.bootstrap import StartupState
+
+from mutsumi.config import load_config, save_config
 from mutsumi.config.keybindings import get_keybindings
 from mutsumi.core.loader import (
     filter_tasks_by_scope,
@@ -40,6 +42,8 @@ from mutsumi.core.writer import (
     update_task,
 )
 from mutsumi.i18n import init_i18n
+from mutsumi.onboarding.bootstrap import project_tasks_path
+from mutsumi.onboarding.files import ensure_personal_task_file, ensure_project_task_file, register_project
 from mutsumi.themes import load_theme, theme_to_css
 from mutsumi.tui.confirm_bar import ConfirmBar
 from mutsumi.tui.confirm_dialog import ConfirmDialog
@@ -48,7 +52,9 @@ from mutsumi.tui.footer_bar import BarMode, FooterBar
 from mutsumi.tui.header_bar import HeaderBar, TabButton
 from mutsumi.tui.key_manager import KeyManager, MatchResult, get_key_sequences
 from mutsumi.tui.main_dashboard import MainDashboard
+from mutsumi.tui.onboarding_screen import OnboardingScreen
 from mutsumi.tui.priority_group import PriorityGroup, PriorityGroupHeader
+from mutsumi.tui.project_attach_screen import ProjectAttachScreen
 from mutsumi.tui.scope_filter import ScopeFilter
 from mutsumi.tui.search_bar import SearchBar
 from mutsumi.tui.task_form import TaskForm
@@ -132,6 +138,7 @@ class MutsumiApp(App[None]):
         tasks_path: Path | None = None,
         watch_paths: list[Path] | None = None,
         config_path: Path | None = None,
+        startup_state: StartupState | None = None,
     ) -> None:
         # Load config before super().__init__ so theme CSS is ready
         config = load_config(config_path)
@@ -156,6 +163,7 @@ class MutsumiApp(App[None]):
             config, "columns", ["checkbox", "title", "tags", "priority"],
         )
         self._custom_css = self._load_custom_css(config)
+        self._startup_state = startup_state
 
         super().__init__()
 
@@ -225,6 +233,10 @@ class MutsumiApp(App[None]):
             self._source_registry._sources = reordered
 
         if not has_projects:
+            personal_path = personal_tasks_path()
+            if personal_path.exists():
+                self._source_registry.add_source("default", personal_path)
+                return
             # Single-source fallback: just the cwd's mutsumi.json
             default_path = resolve_tasks_path()
             self._source_registry.add_source("default", default_path)
@@ -298,6 +310,17 @@ class MutsumiApp(App[None]):
 
     async def on_mount(self) -> None:
         """Load tasks and start file watcher."""
+        if self._startup_state is not None and self._startup_state.mode == "first_run":
+            self.push_screen(OnboardingScreen(self._config, self._startup_state.is_git_repo))
+            return
+        if self._startup_state is not None and self._startup_state.mode == "attach_needed":
+            self.push_screen(ProjectAttachScreen())
+            return
+
+        await self._initialize_main_view()
+
+    async def _initialize_main_view(self) -> None:
+        """Initialize the main task board UI and watchers."""
         header = self.query_one(HeaderBar)
         scope_filter = self.query_one(ScopeFilter)
         dashboard = self.query_one(MainDashboard)
@@ -668,6 +691,53 @@ class MutsumiApp(App[None]):
         footer = self.query_one(FooterBar)
         footer.set_mode(BarMode.NORMAL)
         await self._render_current_tab()
+
+    async def on_onboarding_screen_finished(self, event: OnboardingScreen.Finished) -> None:
+        """Persist first-run onboarding choices and continue startup."""
+        selections = event.selections
+        if not event.skipped:
+            self._config.language = selections.get("language", self._config.language)
+            self._config.keybindings = selections.get("keybindings", self._config.keybindings)
+            self._config.theme = selections.get("theme", self._config.theme)
+            self._config.agent_integration_mode = selections.get(
+                "agent_integration_mode",
+                self._config.agent_integration_mode,
+            )
+            self._config.onboarding_completed = True
+
+            workspace_mode = selections.get("workspace_mode", "personal-only")
+            if workspace_mode in {"personal-only", "personal+project"}:
+                ensure_personal_task_file()
+            if workspace_mode in {"project-only", "personal+project"}:
+                project_path = ensure_project_task_file(self._startup_state.cwd if self._startup_state else None)
+                register_project(self._config, project_path.parent)
+            save_config(self._config)
+
+        self._source_registry = SourceRegistry()
+        self._build_sources_from_config(self._config, None)
+        self._active_source = self._source_registry.source_names[0]
+        self._default_scope = self._config.default_scope
+        await self._initialize_main_view()
+
+    async def on_project_attach_screen_resolved(self, event: ProjectAttachScreen.Resolved) -> None:
+        """Handle lightweight project attach after onboarding."""
+        if self._startup_state is None:
+            await self._initialize_main_view()
+            return
+
+        if event.action in {"register", "create"}:
+            project_path = (
+                ensure_project_task_file(self._startup_state.cwd)
+                if event.action == "create"
+                else project_tasks_path(self._startup_state.cwd)
+            )
+            register_project(self._config, project_path.parent)
+            save_config(self._config)
+            self._source_registry = SourceRegistry()
+            self._build_sources_from_config(self._config, None)
+            self._active_source = self._source_registry.source_names[0]
+
+        await self._initialize_main_view()
 
     # --- Task form events ---
 
@@ -1261,9 +1331,13 @@ class MutsumiApp(App[None]):
         self._source_registry.stop_all_watchers()
 
 
-def run(path: Path | None = None, watch_paths: list[Path] | None = None) -> None:
+def run(
+    path: Path | None = None,
+    watch_paths: list[Path] | None = None,
+    startup_state: StartupState | None = None,
+) -> None:
     """Launch the Mutsumi TUI."""
-    app = MutsumiApp(tasks_path=path, watch_paths=watch_paths)
+    app = MutsumiApp(tasks_path=path, watch_paths=watch_paths, startup_state=startup_state)
     app.run()
 
 

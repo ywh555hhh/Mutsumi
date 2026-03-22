@@ -7,7 +7,7 @@ from pathlib import Path
 import click
 
 from mutsumi.config import get_config, save_config
-from mutsumi.config.settings import ProjectEntry
+from mutsumi.onboarding.files import register_project
 
 
 @click.group("project")
@@ -24,19 +24,16 @@ def project_add(path: str, name: str | None) -> None:
     proj_name = name or proj_path.name
 
     config = get_config()
-
-    # Check for duplicates
-    for existing in config.projects:
-        if existing.name == proj_name:
+    added, entry = register_project(config, proj_path, proj_name)
+    if not added:
+        if entry.name == proj_name:
             click.echo(f"Project '{proj_name}' already registered.", err=True)
-            raise SystemExit(1)
-        if existing.path.resolve() == proj_path:
-            click.echo(f"Path already registered as '{existing.name}'.", err=True)
-            raise SystemExit(1)
+        else:
+            click.echo(f"Path already registered as '{entry.name}'.", err=True)
+        raise SystemExit(1)
 
-    config.projects.append(ProjectEntry(name=proj_name, path=proj_path))
     save_config(config)
-    click.echo(f"Added project: {proj_name} → {proj_path}")
+    click.echo(f"Added project: {entry.name} → {entry.path}")
 
 
 @project.command("remove")

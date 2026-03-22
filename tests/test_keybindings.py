@@ -2,6 +2,10 @@
 
 from __future__ import annotations
 
+import pytest
+
+pytest.importorskip("textual")
+
 from mutsumi.config.keybindings import (
     ARROW_BINDINGS,
     EMACS_BINDINGS,
