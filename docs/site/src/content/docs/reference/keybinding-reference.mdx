@@ -11,22 +11,22 @@ Complete reference of every keybinding action with keys for each preset. Actions
 
 | Action | Description | vim | emacs | arrows |
 |--------|-------------|-----|-------|--------|
-| `cursor_down` | Move cursor down | `j` | `Ctrl+N` | `Down` |
-| `cursor_up` | Move cursor up | `k` | `Ctrl+P` | `Up` |
-| `cursor_bottom` | Jump to bottom of list | `G` (Shift+G) | `Ctrl+E` | `End` |
-| `cursor_top` | Jump to top of list | `gg` (multi-key) | `Ctrl+A` | `Home` |
+| `cursor_down` | Move cursor down | <kbd>j</kbd> | <kbd>Ctrl+N</kbd> | <kbd>Down</kbd> |
+| `cursor_up` | Move cursor up | <kbd>k</kbd> | <kbd>Ctrl+P</kbd> | <kbd>Up</kbd> |
+| `cursor_bottom` | Jump to bottom of list | <kbd>G</kbd> (Shift+G) | <kbd>Ctrl+E</kbd> | <kbd>End</kbd> |
+| `cursor_top` | Jump to top of list | <kbd>gg</kbd> (multi-key) | <kbd>Ctrl+A</kbd> | <kbd>Home</kbd> |
 
 ### Task Operations
 
 | Action | Description | Key (all presets) |
 |--------|-------------|-------------------|
-| `toggle_done` | Toggle done/pending | `Space` |
-| `new_task` | Create new task dialog | `n` |
-| `edit_task` | Edit task dialog | `e` |
-| `inline_edit` | Inline edit title | `i` |
-| `show_detail` | Open/close detail panel | `Enter` |
-| `close_detail` | Close detail panel / cancel | `Escape` |
-| `delete` | Delete task (multi-key) | `dd` |
+| `toggle_done` | Toggle done/pending | <kbd>Space</kbd> |
+| `new_task` | Create new task dialog | <kbd>n</kbd> |
+| `edit_task` | Edit task dialog | <kbd>e</kbd> |
+| `inline_edit` | Inline edit title | <kbd>i</kbd> |
+| `show_detail` | Open/close detail panel | <kbd>Enter</kbd> |
+| `close_detail` | Close detail panel / cancel | <kbd>Escape</kbd> |
+| <kbd>delete</kbd> | Delete task (multi-key) | <kbd>dd</kbd> |
 
 ### Priority
 
@@ -39,32 +39,32 @@ Complete reference of every keybinding action with keys for each preset. Actions
 
 | Action | Description | Key (all presets) |
 |--------|-------------|-------------------|
-| `copy_task` | Copy selected task | `y` |
-| `paste_task` | Paste below cursor | `p` |
-| `paste_task_above` | Paste above cursor | `P` (Shift+P) |
+| `copy_task` | Copy selected task | <kbd>y</kbd> |
+| `paste_task` | Paste below cursor | <kbd>p</kbd> |
+| `paste_task_above` | Paste above cursor | <kbd>P</kbd> (Shift+P) |
 
 ### Subtasks
 
 | Action | Description | Key (all presets) |
 |--------|-------------|-------------------|
-| `add_child` | Add subtask to selected task | `A` (Shift+A) |
-| `toggle_fold` | Show/hide subtasks | `z` |
+| `add_child` | Add subtask to selected task | <kbd>A</kbd> (Shift+A) |
+| `toggle_fold` | Show/hide subtasks | <kbd>z</kbd> |
 
 ### View Controls
 
 | Action | Description | vim | emacs | arrows |
 |--------|-------------|-----|-------|--------|
-| `collapse_group` | Collapse priority group | `h` | `Ctrl+B` | `Left` |
-| `expand_group` | Expand priority group | `l` | `Ctrl+F` | `Right` |
-| `move_down` | Reorder task down | `J` (Shift+J) | `Ctrl+Shift+N` | `Shift+Down` |
-| `move_up` | Reorder task up | `K` (Shift+K) | `Ctrl+Shift+P` | `Shift+Up` |
+| `collapse_group` | Collapse priority group | <kbd>h</kbd> | <kbd>Ctrl+B</kbd> | <kbd>Left</kbd> |
+| `expand_group` | Expand priority group | <kbd>l</kbd> | <kbd>Ctrl+F</kbd> | <kbd>Right</kbd> |
+| `move_down` | Reorder task down | <kbd>J</kbd> (Shift+J) | <kbd>Ctrl+Shift+N</kbd> | <kbd>Shift+Down</kbd> |
+| `move_up` | Reorder task up | <kbd>K</kbd> (Shift+K) | <kbd>Ctrl+Shift+P</kbd> | <kbd>Shift+Up</kbd> |
 
 ### Tab Management
 
 | Action | Description | Key (all presets) |
 |--------|-------------|-------------------|
-| `next_tab` | Switch to next tab | `Tab` |
-| `prev_tab` | Switch to previous tab | `Shift+Tab` |
+| `next_tab` | Switch to next tab | <kbd>Tab</kbd> |
+| `prev_tab` | Switch to previous tab | <kbd>Shift+Tab</kbd> |
 | `tab_1` | Switch to Today | `1` |
 | `tab_2` | Switch to Week | `2` |
 | `tab_3` | Switch to Month | `3` |
@@ -74,15 +74,15 @@ Complete reference of every keybinding action with keys for each preset. Actions
 
 | Action | Description | Key (all presets) |
 |--------|-------------|-------------------|
-| `search` | Open search bar | `/` |
-| `sort` | Open sort overlay | `s` |
+| `search` | Open search bar | <kbd>/</kbd> |
+| `sort` | Open sort overlay | <kbd>s</kbd> |
 
 ### Utility
 
 | Action | Description | vim | emacs | arrows |
 |--------|-------------|-----|-------|--------|
-| `quit` | Quit Mutsumi | `q` | `Ctrl+Q` | `q` |
-| `show_help` | Show keybinding help | `?` | `?` | `?` |
+| `quit` | Quit Mutsumi | <kbd>q</kbd> | <kbd>Ctrl+Q</kbd> | <kbd>q</kbd> |
+| `show_help` | Show keybinding help | <kbd>?</kbd> | <kbd>?</kbd> | <kbd>?</kbd> |
 
 ## Multi-Key Sequences
 
@@ -90,10 +90,10 @@ These actions require two key presses in sequence, handled by the `KeyManager` e
 
 | Sequence | Action | Preset |
 |----------|--------|--------|
-| `dd` | Delete selected task (then `y` to confirm) | All presets |
-| `gg` | Jump to top of list | vim only |
+| <kbd>dd</kbd> | Delete selected task (then <kbd>y</kbd> to confirm) | All presets |
+| <kbd>gg</kbd> | Jump to top of list | vim only |
 
-Multi-key sequences have no timeout. Type keys at any speed. Press `Escape` to cancel a partial sequence.
+Multi-key sequences have no timeout. Type keys at any speed. Press <kbd>Escape</kbd> to cancel a partial sequence.
 
 ## Mouse Actions
 
@@ -111,31 +111,31 @@ Mouse behavior is identical across all presets:
 
 ## Sort Overlay Keys
 
-When the sort overlay is open (triggered by `s`):
+When the sort overlay is open (triggered by <kbd>s</kbd>):
 
 | Key | Action |
 |-----|--------|
-| `h` / `Left` | Previous sort field |
-| `l` / `Right` | Next sort field |
-| `j` / `Down` | Next sort field |
-| `k` / `Up` | Previous sort field |
-| `r` | Toggle reverse order |
-| `Enter` | Apply sort |
-| `Escape` | Cancel |
+| <kbd>h</kbd> / <kbd>Left</kbd> | Previous sort field |
+| <kbd>l</kbd> / <kbd>Right</kbd> | Next sort field |
+| <kbd>j</kbd> / <kbd>Down</kbd> | Next sort field |
+| <kbd>k</kbd> / <kbd>Up</kbd> | Previous sort field |
+| <kbd>r</kbd> | Toggle reverse order |
+| <kbd>Enter</kbd> | Apply sort |
+| <kbd>Escape</kbd> | Cancel |
 
 ## Search Bar Keys
 
-When the search bar is active (triggered by `/`):
+When the search bar is active (triggered by <kbd>/</kbd>):
 
 | Key | Action |
 |-----|--------|
 | Any character | Type search query |
-| `Escape` | Exit search, restore full list |
-| `Enter` | Confirm search (keep filter active) |
+| <kbd>Escape</kbd> | Exit search, restore full list |
+| <kbd>Enter</kbd> | Confirm search (keep filter active) |
 
 ## Help Screen
 
-Press `?` to open the help screen displaying all keybindings for the active preset, organized by category:
+Press <kbd>?</kbd> to open the help screen displaying all keybindings for the active preset, organized by category:
 
 - Navigation
 - Task Operations
@@ -144,4 +144,4 @@ Press `?` to open the help screen displaying all keybindings for the active pres
 - Clipboard
 - Utility
 
-Dismiss with `Escape`, `q`, or `?`.
+Dismiss with <kbd>Escape</kbd>, <kbd>q</kbd>, or <kbd>?</kbd>.

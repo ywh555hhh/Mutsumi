@@ -32,27 +32,27 @@ These are all the action names you can override:
 
 | Action | Description | vim default | emacs default | arrows default |
 |--------|-------------|-------------|---------------|----------------|
-| `cursor_down` | Move cursor down | `j` | `ctrl+n` | `down` |
-| `cursor_up` | Move cursor up | `k` | `ctrl+p` | `up` |
-| `cursor_top` | Jump to top | `gg` (multi-key) | `ctrl+a` | `home` |
-| `cursor_bottom` | Jump to bottom | `G` | `ctrl+e` | `end` |
+| `cursor_down` | Move cursor down | <kbd>j</kbd> | <kbd>ctrl+n</kbd> | <kbd>down</kbd> |
+| `cursor_up` | Move cursor up | <kbd>k</kbd> | <kbd>ctrl+p</kbd> | <kbd>up</kbd> |
+| `cursor_top` | Jump to top | <kbd>gg</kbd> (multi-key) | <kbd>ctrl+a</kbd> | <kbd>home</kbd> |
+| `cursor_bottom` | Jump to bottom | <kbd>G</kbd> | <kbd>ctrl+e</kbd> | <kbd>end</kbd> |
 
 ### Task Operations
 
 | Action | Description | Default (all presets) |
 |--------|-------------|----------------------|
-| `toggle_done` | Toggle done/pending | `space` |
-| `new_task` | Create new task | `n` |
-| `edit_task` | Edit selected task | `e` |
-| `inline_edit` | Inline edit title | `i` |
-| `show_detail` | Open detail panel | `enter` |
-| `close_detail` | Close detail panel | `escape` |
-| `copy_task` | Copy task | `y` |
-| `paste_task` | Paste below | `p` |
-| `paste_task_above` | Paste above | `P` (shift+p) |
-| `add_child` | Add subtask | `A` (shift+a) |
-| `search` | Open search | `/` |
-| `sort` | Open sort overlay | `s` |
+| `toggle_done` | Toggle done/pending | <kbd>space</kbd> |
+| `new_task` | Create new task | <kbd>n</kbd> |
+| `edit_task` | Edit selected task | <kbd>e</kbd> |
+| `inline_edit` | Inline edit title | <kbd>i</kbd> |
+| `show_detail` | Open detail panel | <kbd>enter</kbd> |
+| `close_detail` | Close detail panel | <kbd>escape</kbd> |
+| `copy_task` | Copy task | <kbd>y</kbd> |
+| `paste_task` | Paste below | <kbd>p</kbd> |
+| `paste_task_above` | Paste above | <kbd>P</kbd> (shift+p) |
+| `add_child` | Add subtask | <kbd>A</kbd> (shift+a) |
+| `search` | Open search | <kbd>/</kbd> |
+| `sort` | Open sort overlay | <kbd>s</kbd> |
 
 ### Priority
 
@@ -65,18 +65,18 @@ These are all the action names you can override:
 
 | Action | Description | vim default | emacs default | arrows default |
 |--------|-------------|-------------|---------------|----------------|
-| `collapse_group` | Collapse priority group | `h` | `ctrl+b` | `left` |
-| `expand_group` | Expand priority group | `l` | `ctrl+f` | `right` |
-| `toggle_fold` | Toggle subtask fold | `z` | `z` | `z` |
-| `move_down` | Move task down | `J` | `ctrl+shift+n` | `shift+down` |
-| `move_up` | Move task up | `K` | `ctrl+shift+p` | `shift+up` |
+| `collapse_group` | Collapse priority group | <kbd>h</kbd> | <kbd>ctrl+b</kbd> | <kbd>left</kbd> |
+| `expand_group` | Expand priority group | <kbd>l</kbd> | <kbd>ctrl+f</kbd> | <kbd>right</kbd> |
+| `toggle_fold` | Toggle subtask fold | <kbd>z</kbd> | <kbd>z</kbd> | <kbd>z</kbd> |
+| `move_down` | Move task down | <kbd>J</kbd> | <kbd>ctrl+shift+n</kbd> | <kbd>shift+down</kbd> |
+| `move_up` | Move task up | <kbd>K</kbd> | <kbd>ctrl+shift+p</kbd> | <kbd>shift+up</kbd> |
 
 ### Tab Management
 
 | Action | Description | Default |
 |--------|-------------|---------|
-| `next_tab` | Next scope tab | `tab` |
-| `prev_tab` | Previous scope tab | `shift+tab` |
+| `next_tab` | Next scope tab | <kbd>tab</kbd> |
+| `prev_tab` | Previous scope tab | <kbd>shift+tab</kbd> |
 | `tab_1` | Switch to Today | `1` |
 | `tab_2` | Switch to Week | `2` |
 | `tab_3` | Switch to Month | `3` |
@@ -86,8 +86,8 @@ These are all the action names you can override:
 
 | Action | Description | vim/arrows default | emacs default |
 |--------|-------------|-------------------|---------------|
-| `quit` | Quit Mutsumi | `q` | `ctrl+q` |
-| `show_help` | Show help screen | `?` | `?` |
+| `quit` | Quit Mutsumi | <kbd>q</kbd> | <kbd>ctrl+q</kbd> |
+| `show_help` | Show help screen | <kbd>?</kbd> | <kbd>?</kbd> |
 
 ## Key Syntax
 
@@ -95,22 +95,22 @@ Key strings follow Textual's key notation:
 
 | Example | Meaning |
 |---------|---------|
-| `j` | Single character key |
-| `space` | Space bar |
-| `enter` | Enter key |
-| `escape` | Escape key |
-| `tab` | Tab key |
-| `ctrl+q` | Ctrl + Q |
-| `shift+tab` | Shift + Tab |
-| `ctrl+shift+n` | Ctrl + Shift + N |
-| `up` | Up arrow |
-| `down` | Down arrow |
-| `left` | Left arrow |
-| `right` | Right arrow |
-| `home` | Home key |
-| `end` | End key |
-| `slash` | `/` key |
-| `question_mark` | `?` key |
+| <kbd>j</kbd> | Single character key |
+| <kbd>space</kbd> | Space bar |
+| <kbd>enter</kbd> | Enter key |
+| <kbd>escape</kbd> | Escape key |
+| <kbd>tab</kbd> | Tab key |
+| <kbd>ctrl+q</kbd> | Ctrl + Q |
+| <kbd>shift+tab</kbd> | Shift + Tab |
+| <kbd>ctrl+shift+n</kbd> | Ctrl + Shift + N |
+| <kbd>up</kbd> | Up arrow |
+| <kbd>down</kbd> | Down arrow |
+| <kbd>left</kbd> | Left arrow |
+| <kbd>right</kbd> | Right arrow |
+| <kbd>home</kbd> | Home key |
+| <kbd>end</kbd> | End key |
+| `slash` | <kbd>/</kbd> key |
+| `question_mark` | <kbd>?</kbd> key |
 
 ## Example: Hybrid vim + Ctrl-Q quit
 
@@ -132,7 +132,7 @@ move_up = "K"
 ```
 
 <Aside type="caution">
-Multi-key sequences (`dd`, `gg`) are handled by the KeyManager engine, not the Textual Binding system. Overriding `cursor_top` changes the single-key binding but does not affect the `gg` multi-key sequence in the vim preset.
+Multi-key sequences (<kbd>dd</kbd>, <kbd>gg</kbd>) are handled by the KeyManager engine, not the Textual Binding system. Overriding `cursor_top` changes the single-key binding but does not affect the <kbd>gg</kbd> multi-key sequence in the vim preset.
 </Aside>
 
 ## How Overrides Work

@@ -70,16 +70,16 @@ One hotkey opens your command center. Two panes: left is your AI agent, right is
 
     Windows Terminal has built-in pane splitting — no tmux needed:
 
-    - `Alt+Shift+D` — auto-split (duplicate current pane)
-    - `Alt+Shift+=` — split vertically
-    - `Alt+Shift+-` — split horizontally
-    - `Alt+Arrow keys` — switch between panes
+    - <kbd>Alt+Shift+D</kbd> — auto-split (duplicate current pane)
+    - <kbd>Alt+Shift+=</kbd> — split vertically
+    - <kbd>Alt+Shift+-</kbd> — split horizontally
+    - <kbd>Alt+Arrow keys</kbd> — switch between panes
 
     Workflow:
     1. Open your project directory
-    2. `Alt+Shift+=` to split vertically
+    2. <kbd>Alt+Shift+=</kbd> to split vertically
     3. In the right pane, type `mutsumi`
-    4. `Alt+←` to switch back to the left pane, start your agent
+    4. <kbd>Alt+←</kbd> to switch back to the left pane, start your agent
 
     <Aside type="tip" title="Prefer tmux?">
     If you prefer tmux's session management, install it via WSL: `wsl --install -d Ubuntu`, then follow the Linux steps inside WSL. But this is entirely optional.
@@ -138,9 +138,9 @@ One hotkey opens your command center. Two panes: left is your AI agent, right is
 
     | Desktop | Tool | Hotkey |
     |---------|------|--------|
-    | KDE | Yakuake | `F12` |
-    | GNOME | [ddterm](https://github.com/ddterm/gnome-shell-extension-ddterm) | `F12` |
-    | Any | Guake | `F12` |
+    | KDE | Yakuake | <kbd>F12</kbd> |
+    | GNOME | [ddterm](https://github.com/ddterm/gnome-shell-extension-ddterm) | <kbd>F12</kbd> |
+    | Any | Guake | <kbd>F12</kbd> |
     | Any | Tilix (Quake mode) | configurable |
 
     ### Step 2: tmux
@@ -293,11 +293,11 @@ chmod +x ~/.local/bin/mu
 
 3. **Work** — talk to your AI agent in the left pane, watch tasks appear in the right pane
 
-4. **Toggle tasks** — click checkboxes or press `x` in Mutsumi to mark done
+4. **Toggle tasks** — click checkboxes or press <kbd>x</kbd> in Mutsumi to mark done
 
-5. **Switch projects** — `mu ~/projects/other-app` opens a new tmux session; switch between them with `Ctrl-b s`
+5. **Switch projects** — `mu ~/projects/other-app` opens a new tmux session; switch between them with <kbd>Ctrl-b s</kbd>
 
-6. **Detach** — `Ctrl-b d` to detach; the session keeps running. Come back anytime with `mu`
+6. **Detach** — <kbd>Ctrl-b d</kbd> to detach; the session keeps running. Come back anytime with `mu`
 
 7. **Dismiss** — press the hotkey again to hide the terminal
 </Steps>
@@ -344,6 +344,6 @@ bind M command-prompt -p "Project:" "run-shell '~/.local/bin/mu %1'"
 | Problem | Fix |
 |---------|-----|
 | `mu: command not found` | Add `~/.local/bin` to your `$PATH` |
-| tmux pane too narrow for Mutsumi | `export MUTSUMI_WIDTH=40` or resize with `Ctrl-b →` |
+| tmux pane too narrow for Mutsumi | `export MUTSUMI_WIDTH=40` or resize with <kbd>Ctrl-b →</kbd> |
 | Agent doesn't write `mutsumi.json` | Run `mutsumi setup --agent <name>` to inject the prompt |
 | Quake mode not working | Check your terminal's hotkey settings; some DEs grab the key first |

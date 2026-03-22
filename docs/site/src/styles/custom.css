@@ -52,8 +52,8 @@
   /* — Typography — */
   --sl-font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
     Ubuntu, Cantarell, 'Noto Sans SC', 'Noto Sans JP', sans-serif;
-  --sl-font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo,
-    Consolas, 'Noto Sans Mono', monospace;
+  --sl-font-mono: 'JetBrains Mono', 'Sarasa Mono SC', ui-monospace, SFMono-Regular, Menlo,
+    Consolas, 'Noto Sans Mono CJK SC', 'Noto Sans Mono', monospace;
 }
 
 /* ── Light mode ─────────────────────────────────────────── */

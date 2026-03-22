@@ -7,7 +7,7 @@ description: Create, edit, delete, and manage tasks in Mutsumi.
 
 ### Create Task
 
-Trigger: `n` key or click `[+New]` button.
+Trigger: <kbd>n</kbd> key or click `[+New]` button.
 
 A dialog opens with fields:
 - **Title** (required)
@@ -19,21 +19,21 @@ UUIDv7 ID and `created_at` are auto-generated.
 
 ### Edit Task
 
-- Press `e` to open the edit form for the selected task
-- Press `i` for inline title editing directly in the list row
+- Press <kbd>e</kbd> to open the edit form for the selected task
+- Press <kbd>i</kbd> for inline title editing directly in the list row
 - Double-click a title to inline edit
-- Press `Enter` to confirm, `Escape` to cancel
+- Press <kbd>Enter</kbd> to confirm, <kbd>Escape</kbd> to cancel
 
 ### Delete Task
 
-- Press `dd` (vim-style two-key sequence)
+- Press <kbd>dd</kbd> (vim-style two-key sequence)
 - A confirmation bar appears: `"Delete 'xxx'? [y/N]"`
-- Press `y` to confirm, any other key to cancel
+- Press <kbd>y</kbd> to confirm, any other key to cancel
 - The task and all its children are removed
 
 ### Toggle Status
 
-- Press `Space` or click the checkbox
+- Press <kbd>Space</kbd> or click the checkbox
 - `pending` → `done`: auto-fills `completed_at`
 - `done` → `pending`: clears `completed_at`
 - Immediate write-back, no confirmation needed
@@ -48,8 +48,8 @@ Tasks can have nested subtasks via the `children` array:
   └─ [ ] Write middleware
 ```
 
-- Press `A` (Shift+A) to add a subtask to the selected task
-- Press `z` to toggle fold (show/hide subtasks)
+- Press <kbd>A</kbd> (Shift+A) to add a subtask to the selected task
+- Press <kbd>z</kbd> to toggle fold (show/hide subtasks)
 - Cascading completion: marking parent done marks all children done
 
 ## Priority Cycling
@@ -65,31 +65,31 @@ Priority is clamped at boundaries — pressing `+` on a `high` task does nothing
 
 | Key | Action |
 |-----|--------|
-| `y` | Copy selected task to internal clipboard |
-| `p` | Paste task below current selection |
-| `P` (Shift+P) | Paste task above current selection |
+| <kbd>y</kbd> | Copy selected task to internal clipboard |
+| <kbd>p</kbd> | Paste task below current selection |
+| <kbd>P</kbd> (Shift+P) | Paste task above current selection |
 
 ## Reorder Tasks
 
 | Preset | Move Down | Move Up |
 |--------|-----------|---------|
-| vim | `J` (Shift+J) | `K` (Shift+K) |
-| emacs | `Ctrl+Shift+N` | `Ctrl+Shift+P` |
-| arrows | `Shift+↓` | `Shift+↑` |
+| vim | <kbd>J</kbd> (Shift+J) | <kbd>K</kbd> (Shift+K) |
+| emacs | <kbd>Ctrl+Shift+N</kbd> | <kbd>Ctrl+Shift+P</kbd> |
+| arrows | <kbd>Shift+↓</kbd> | <kbd>Shift+↑</kbd> |
 
 ## Search
 
-Press `/` to open the search bar.
+Press <kbd>/</kbd> to open the search bar.
 
 - Real-time filtering as you type
 - Search scope: title + tags + description
 - Non-matching tasks are **dimmed** (not hidden) — preserves spatial context
-- `Escape` exits search and restores the full list
+- <kbd>Escape</kbd> exits search and restores the full list
 
 ## Sort
 
-Press `s` to open the sort overlay.
+Press <kbd>s</kbd> to open the sort overlay.
 
 Sort fields: `title`, `priority`, `status`, `due`
 
-Press `r` to toggle reverse order. Navigate with `h/l` or arrow keys.
+Press <kbd>r</kbd> to toggle reverse order. Navigate with <kbd>h/l</kbd> or arrow keys.

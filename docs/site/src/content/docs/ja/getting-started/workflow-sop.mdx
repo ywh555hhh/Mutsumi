@@ -70,16 +70,16 @@ import { Tabs, TabItem, Aside, Steps, Badge } from '@astrojs/starlight/component
 
     Windows Terminal にはペイン分割が内蔵されています。tmux は不要です：
 
-    - `Alt+Shift+D` — 自動分割（現在のペインを複製）
-    - `Alt+Shift+=` — 垂直分割
-    - `Alt+Shift+-` — 水平分割
-    - `Alt+矢印キー` — ペイン間の切り替え
+    - <kbd>Alt+Shift+D</kbd> — 自動分割（現在のペインを複製）
+    - <kbd>Alt+Shift+=</kbd> — 垂直分割
+    - <kbd>Alt+Shift+-</kbd> — 水平分割
+    - <kbd>Alt+矢印キー</kbd> — ペイン間の切り替え
 
     ワークフロー：
     1. プロジェクトディレクトリを開く
-    2. `Alt+Shift+=` で垂直分割
+    2. <kbd>Alt+Shift+=</kbd> で垂直分割
     3. 右ペインで `mutsumi` と入力
-    4. `Alt+←` で左ペインに戻り、Agent を起動
+    4. <kbd>Alt+←</kbd> で左ペインに戻り、Agent を起動
 
     <Aside type="tip" title="tmux を使いたい場合">
     tmux のセッション管理が好みなら、WSL 経由でインストールできます：`wsl --install -d Ubuntu`。その後 WSL 内で Linux のステップに従ってください。ただし必須ではありません。
@@ -138,9 +138,9 @@ import { Tabs, TabItem, Aside, Steps, Badge } from '@astrojs/starlight/component
 
     | デスクトップ | ツール | ホットキー |
     |-------------|--------|-----------|
-    | KDE | Yakuake | `F12` |
-    | GNOME | [ddterm](https://github.com/ddterm/gnome-shell-extension-ddterm) | `F12` |
-    | 汎用 | Guake | `F12` |
+    | KDE | Yakuake | <kbd>F12</kbd> |
+    | GNOME | [ddterm](https://github.com/ddterm/gnome-shell-extension-ddterm) | <kbd>F12</kbd> |
+    | 汎用 | Guake | <kbd>F12</kbd> |
     | 汎用 | Tilix（Quake モード） | 設定可能 |
 
     ### ステップ 2：tmux
@@ -293,11 +293,11 @@ chmod +x ~/.local/bin/mu
 
 3. **作業** — 左ペインで AI Agent と会話、右ペインでタスクがリアルタイム更新
 
-4. **タスク完了** — Mutsumi でチェックボックスをクリックするか `x` キーで完了マーク
+4. **タスク完了** — Mutsumi でチェックボックスをクリックするか <kbd>x</kbd> キーで完了マーク
 
-5. **プロジェクト切替** — `mu ~/projects/other-app` で新しい tmux セッションを開き、`Ctrl-b s` でセッション間を切り替え
+5. **プロジェクト切替** — `mu ~/projects/other-app` で新しい tmux セッションを開き、<kbd>Ctrl-b s</kbd> でセッション間を切り替え
 
-6. **デタッチ** — `Ctrl-b d` でセッションをデタッチ。バックグラウンドで動き続けます。`mu` でいつでも復帰
+6. **デタッチ** — <kbd>Ctrl-b d</kbd> でセッションをデタッチ。バックグラウンドで動き続けます。`mu` でいつでも復帰
 
 7. **非表示** — ホットキーをもう一度押してターミナルを非表示
 </Steps>
@@ -344,6 +344,6 @@ bind M command-prompt -p "Project:" "run-shell '~/.local/bin/mu %1'"
 | 問題 | 解決方法 |
 |------|---------|
 | `mu: command not found` | `~/.local/bin` を `$PATH` に追加 |
-| tmux ペインが狭すぎる | `export MUTSUMI_WIDTH=40` または `Ctrl-b →` でリサイズ |
+| tmux ペインが狭すぎる | `export MUTSUMI_WIDTH=40` または <kbd>Ctrl-b →</kbd> でリサイズ |
 | Agent が `mutsumi.json` に書き込まない | `mutsumi setup --agent <name>` でプロンプトを注入 |
 | Quake モードが動作しない | ターミナルのホットキー設定を確認。DE がキーを横取りしている可能性 |

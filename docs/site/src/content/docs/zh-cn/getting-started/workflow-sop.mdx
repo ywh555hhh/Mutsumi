@@ -70,16 +70,16 @@ import { Tabs, TabItem, Aside, Steps, Badge } from '@astrojs/starlight/component
 
     Windows Terminal 自带分屏功能，不需要 tmux：
 
-    - `Alt+Shift+D` — 自动分屏（复制当前 pane）
-    - `Alt+Shift+=` — 垂直分屏
-    - `Alt+Shift+-` — 水平分屏
-    - `Alt+方向键` — 切换 pane
+    - <kbd>Alt+Shift+D</kbd> — 自动分屏（复制当前 pane）
+    - <kbd>Alt+Shift+=</kbd> — 垂直分屏
+    - <kbd>Alt+Shift+-</kbd> — 水平分屏
+    - <kbd>Alt+方向键</kbd> — 切换 pane
 
     操作流程：
     1. 打开项目目录
-    2. `Alt+Shift+=` 垂直分屏
+    2. <kbd>Alt+Shift+=</kbd> 垂直分屏
     3. 右侧 pane 输入 `mutsumi`
-    4. `Alt+←` 切回左侧，启动你的 Agent
+    4. <kbd>Alt+←</kbd> 切回左侧，启动你的 Agent
 
     <Aside type="tip" title="想用 tmux？">
     如果你更喜欢 tmux 的会话管理，可以通过 WSL 使用：`wsl --install -d Ubuntu`，然后在 WSL 内按 Linux 的步骤操作。但这不是必须的。
@@ -138,9 +138,9 @@ import { Tabs, TabItem, Aside, Steps, Badge } from '@astrojs/starlight/component
 
     | 桌面环境 | 工具 | 快捷键 |
     |---------|------|--------|
-    | KDE | Yakuake | `F12` |
-    | GNOME | [ddterm](https://github.com/ddterm/gnome-shell-extension-ddterm) | `F12` |
-    | 通用 | Guake | `F12` |
+    | KDE | Yakuake | <kbd>F12</kbd> |
+    | GNOME | [ddterm](https://github.com/ddterm/gnome-shell-extension-ddterm) | <kbd>F12</kbd> |
+    | 通用 | Guake | <kbd>F12</kbd> |
     | 通用 | Tilix（Quake 模式） | 可配置 |
 
     ### 第 2 步：tmux
@@ -293,11 +293,11 @@ chmod +x ~/.local/bin/mu
 
 3. **工作** — 在左侧和 AI Agent 对话，右侧看板实时更新任务
 
-4. **完成任务** — 在 Mutsumi 中点击复选框或按 `x` 标记完成
+4. **完成任务** — 在 Mutsumi 中点击复选框或按 <kbd>x</kbd> 标记完成
 
-5. **切换项目** — `mu ~/projects/other-app` 打开新的 tmux 会话；用 `Ctrl-b s` 在会话间切换
+5. **切换项目** — `mu ~/projects/other-app` 打开新的 tmux 会话；用 <kbd>Ctrl-b s</kbd> 在会话间切换
 
-6. **分离** — `Ctrl-b d` 分离会话，后台保持运行。随时用 `mu` 回来
+6. **分离** — <kbd>Ctrl-b d</kbd> 分离会话，后台保持运行。随时用 `mu` 回来
 
 7. **收起** — 再按快捷键隐藏终端
 </Steps>
@@ -344,6 +344,6 @@ bind M command-prompt -p "Project:" "run-shell '~/.local/bin/mu %1'"
 | 问题 | 解决方法 |
 |------|---------|
 | `mu: command not found` | 把 `~/.local/bin` 加到 `$PATH` |
-| tmux 分屏太窄 | `export MUTSUMI_WIDTH=40` 或用 `Ctrl-b →` 调整 |
+| tmux 分屏太窄 | `export MUTSUMI_WIDTH=40` 或用 <kbd>Ctrl-b →</kbd> 调整 |
 | Agent 没写 `mutsumi.json` | 运行 `mutsumi setup --agent <name>` 注入提示 |
 | 雷神模式不工作 | 检查终端快捷键设置；某些桌面环境会抢占按键 |
