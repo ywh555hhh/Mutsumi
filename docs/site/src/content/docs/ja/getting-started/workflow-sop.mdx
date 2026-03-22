@@ -29,7 +29,7 @@ import { Tabs, TabItem, Aside, Steps, Badge } from '@astrojs/starlight/component
 | ツール | 用途 | インストール |
 |--------|------|-------------|
 | **ターミナルエミュレータ** | ドロップダウン（Quake）モード | Windows Terminal / iTerm2 / Yakuake |
-| **tmux** | ペイン分割、セッション永続化 | `apt install tmux` / `brew install tmux` |
+| **tmux**（任意） | ペイン分割、セッション永続化 | `apt install tmux` / `brew install tmux`（Windows は Terminal の内蔵分割を使用） |
 | **uv** | Python パッケージマネージャ | `curl -LsSf https://astral.sh/uv/install.sh \| sh` |
 | **Mutsumi** | タスクボード TUI | `uv tool install mutsumi` |
 | **AI Agent** | `mutsumi.json` にタスクを書き込む | opencode / Claude Code / aider / Codex CLI |
@@ -51,23 +51,13 @@ import { Tabs, TabItem, Aside, Steps, Badge } from '@astrojs/starlight/component
 
     これで `Win+`` でドロップダウンターミナルをグローバルに切り替えられます。
 
-    ### ステップ 2：WSL2 + tmux
+    ### ステップ 2：ツールのインストール
+
+    Mutsumi は Windows でネイティブに動作します。WSL は不要です。
 
     ```powershell
-    # WSL2 のインストール（未インストールの場合）
-    wsl --install -d Ubuntu
-
-    # WSL 内で：
-    sudo apt update && sudo apt install -y tmux
-    ```
-
-    Windows Terminal のデフォルトプロファイルを **Ubuntu (WSL)** に設定してください。
-
-    ### ステップ 3：WSL 内にツールをインストール
-
-    ```bash
     # uv（Python マネージャ）
-    curl -LsSf https://astral.sh/uv/install.sh | sh
+    powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
 
     # Mutsumi
     uv tool install mutsumi
@@ -75,6 +65,25 @@ import { Tabs, TabItem, Aside, Steps, Badge } from '@astrojs/starlight/component
     # AI Agent（いずれかを選択）
     uv tool install opencode    # または：npm install -g @anthropic-ai/claude-code
     ```
+
+    ### ステップ 3：ペイン分割
+
+    Windows Terminal にはペイン分割が内蔵されています。tmux は不要です：
+
+    - `Alt+Shift+D` — 自動分割（現在のペインを複製）
+    - `Alt+Shift+=` — 垂直分割
+    - `Alt+Shift+-` — 水平分割
+    - `Alt+矢印キー` — ペイン間の切り替え
+
+    ワークフロー：
+    1. プロジェクトディレクトリを開く
+    2. `Alt+Shift+=` で垂直分割
+    3. 右ペインで `mutsumi` と入力
+    4. `Alt+←` で左ペインに戻り、Agent を起動
+
+    <Aside type="tip" title="tmux を使いたい場合">
+    tmux のセッション管理が好みなら、WSL 経由でインストールできます：`wsl --install -d Ubuntu`。その後 WSL 内で Linux のステップに従ってください。ただし必須ではありません。
+    </Aside>
 
     ### ステップ 4：プロジェクトの初期化
 
@@ -241,9 +250,9 @@ import { Tabs, TabItem, Aside, Steps, Badge } from '@astrojs/starlight/component
     ```
   </TabItem>
 
-  <TabItem label="PowerShell (WSL)">
+  <TabItem label="PowerShell">
     ```powershell
-    # mu.ps1 — WSL を呼び出す Windows ショートカット
+    # mu.ps1 — Windows ネイティブ起動スクリプト
     # PATH に配置するかスタートメニューにピン留め
 
     param(
@@ -251,11 +260,20 @@ import { Tabs, TabItem, Aside, Steps, Badge } from '@astrojs/starlight/component
       [string]$Agent = "opencode"
     )
 
-    # Windows パスを WSL パスに変換
-    $wslPath = wsl wslpath -u (Resolve-Path $ProjectDir).Path
+    Push-Location (Resolve-Path $ProjectDir).Path
 
-    # WSL 内で起動
-    wsl bash -lc "~/.local/bin/mu '$wslPath' '$Agent'"
+    # mutsumi.json がなければ自動作成
+    if (-not (Test-Path mutsumi.json) -and -not (Test-Path tasks.json)) {
+      mutsumi init --quiet 2>$null
+    }
+
+    # Windows Terminal で右ペインに mutsumi を分割起動
+    wt -w 0 sp -V --size 0.35 mutsumi
+
+    # 左ペインで agent を起動
+    if ($Agent -ne "shell") {
+      & $Agent
+    }
     ```
   </TabItem>
 </Tabs>
@@ -329,4 +347,3 @@ bind M command-prompt -p "Project:" "run-shell '~/.local/bin/mu %1'"
 | tmux ペインが狭すぎる | `export MUTSUMI_WIDTH=40` または `Ctrl-b →` でリサイズ |
 | Agent が `mutsumi.json` に書き込まない | `mutsumi setup --agent <name>` でプロンプトを注入 |
 | Quake モードが動作しない | ターミナルのホットキー設定を確認。DE がキーを横取りしている可能性 |
-| WSL パスの問題 | `wslpath` でパス変換。PowerShell スクリプトは自動処理済み |

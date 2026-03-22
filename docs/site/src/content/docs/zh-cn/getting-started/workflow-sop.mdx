@@ -29,7 +29,7 @@ import { Tabs, TabItem, Aside, Steps, Badge } from '@astrojs/starlight/component
 | 工具 | 用途 | 安装 |
 |------|------|------|
 | **终端模拟器** | 下拉（雷神）模式 | Windows Terminal / iTerm2 / Yakuake |
-| **tmux** | 分屏、会话持久化 | `apt install tmux` / `brew install tmux` |
+| **tmux**（可选） | 分屏、会话持久化 | `apt install tmux` / `brew install tmux`（Windows 用 Terminal 内置分屏） |
 | **uv** | Python 包管理 | `curl -LsSf https://astral.sh/uv/install.sh \| sh` |
 | **Mutsumi** | 任务看板 TUI | `uv tool install mutsumi` |
 | **AI Agent** | 向 `mutsumi.json` 写任务 | opencode / Claude Code / aider / Codex CLI |
@@ -51,23 +51,13 @@ import { Tabs, TabItem, Aside, Steps, Badge } from '@astrojs/starlight/component
 
     现在 `Win+`` 可以全局切换下拉终端。
 
-    ### 第 2 步：WSL2 + tmux
+    ### 第 2 步：安装工具
+
+    Mutsumi 原生支持 Windows，不需要 WSL。
 
     ```powershell
-    # 安装 WSL2（如果未安装）
-    wsl --install -d Ubuntu
-
-    # 在 WSL 内：
-    sudo apt update && sudo apt install -y tmux
-    ```
-
-    将 Windows Terminal 的默认配置文件设为 **Ubuntu (WSL)**。
-
-    ### 第 3 步：在 WSL 内安装工具
-
-    ```bash
     # uv（Python 管理器）
-    curl -LsSf https://astral.sh/uv/install.sh | sh
+    powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
 
     # Mutsumi
     uv tool install mutsumi
@@ -75,6 +65,25 @@ import { Tabs, TabItem, Aside, Steps, Badge } from '@astrojs/starlight/component
     # AI Agent（选一个）
     uv tool install opencode    # 或：npm install -g @anthropic-ai/claude-code
     ```
+
+    ### 第 3 步：分屏
+
+    Windows Terminal 自带分屏功能，不需要 tmux：
+
+    - `Alt+Shift+D` — 自动分屏（复制当前 pane）
+    - `Alt+Shift+=` — 垂直分屏
+    - `Alt+Shift+-` — 水平分屏
+    - `Alt+方向键` — 切换 pane
+
+    操作流程：
+    1. 打开项目目录
+    2. `Alt+Shift+=` 垂直分屏
+    3. 右侧 pane 输入 `mutsumi`
+    4. `Alt+←` 切回左侧，启动你的 Agent
+
+    <Aside type="tip" title="想用 tmux？">
+    如果你更喜欢 tmux 的会话管理，可以通过 WSL 使用：`wsl --install -d Ubuntu`，然后在 WSL 内按 Linux 的步骤操作。但这不是必须的。
+    </Aside>
 
     ### 第 4 步：初始化项目
 
@@ -241,9 +250,9 @@ import { Tabs, TabItem, Aside, Steps, Badge } from '@astrojs/starlight/component
     ```
   </TabItem>
 
-  <TabItem label="PowerShell (WSL)">
+  <TabItem label="PowerShell">
     ```powershell
-    # mu.ps1 — Windows 快捷方式，调用 WSL
+    # mu.ps1 — Windows 原生启动脚本
     # 放到 PATH 中或固定到开始菜单
 
     param(
@@ -251,11 +260,20 @@ import { Tabs, TabItem, Aside, Steps, Badge } from '@astrojs/starlight/component
       [string]$Agent = "opencode"
     )
 
-    # Windows 路径转 WSL 路径
-    $wslPath = wsl wslpath -u (Resolve-Path $ProjectDir).Path
+    Push-Location (Resolve-Path $ProjectDir).Path
 
-    # 在 WSL 中启动
-    wsl bash -lc "~/.local/bin/mu '$wslPath' '$Agent'"
+    # 如果没有 mutsumi.json，自动创建
+    if (-not (Test-Path mutsumi.json) -and -not (Test-Path tasks.json)) {
+      mutsumi init --quiet 2>$null
+    }
+
+    # 用 Windows Terminal 分屏：右侧启动 mutsumi
+    wt -w 0 sp -V --size 0.35 mutsumi
+
+    # 左侧启动 agent
+    if ($Agent -ne "shell") {
+      & $Agent
+    }
     ```
   </TabItem>
 </Tabs>
@@ -329,4 +347,3 @@ bind M command-prompt -p "Project:" "run-shell '~/.local/bin/mu %1'"
 | tmux 分屏太窄 | `export MUTSUMI_WIDTH=40` 或用 `Ctrl-b →` 调整 |
 | Agent 没写 `mutsumi.json` | 运行 `mutsumi setup --agent <name>` 注入提示 |
 | 雷神模式不工作 | 检查终端快捷键设置；某些桌面环境会抢占按键 |
-| WSL 路径问题 | 用 `wslpath` 转换路径；PowerShell 脚本已自动处理 |
