@@ -26,7 +26,7 @@ Any program that writes valid JSON to `mutsumi.json` is a supported agent. Teste
 - Aider
 - Shell scripts and cron jobs
 
-See [Agent Setup](/getting-started/agent-setup/) for integration instructions.
+See [Agent Setup](../../getting-started/agent-setup/) for integration instructions.
 
 ### Can I use Mutsumi without a config file?
 
@@ -49,7 +49,7 @@ JSON is the lingua franca of AI agents. Claude, GPT, Gemini -- they all output J
 - **Git-diffable**: Changes are visible in `git diff`
 - **Editable**: You can modify it with `jq`, a text editor, or any scripting language
 
-SQLite requires a driver, imposes schema constraints, and is opaque to simple inspection. See [Comparison](/introduction/comparison/) for the full analysis.
+SQLite requires a driver, imposes schema constraints, and is opaque to simple inspection. See [Comparison](../../introduction/comparison/) for the full analysis.
 
 ### Can I sync tasks across devices?
 
@@ -102,7 +102,7 @@ Edit `~/.mutsumi/config.toml`:
 keybindings = "emacs"   # or "vim" or "arrows"
 ```
 
-Restart Mutsumi for the change to take effect. See [Keybindings](/features/keybindings/) for all three presets.
+Restart Mutsumi for the change to take effect. See [Keybindings](../../features/keybindings/) for all three presets.
 
 ### How do I change the theme?
 
@@ -112,7 +112,7 @@ Edit `~/.mutsumi/config.toml`:
 theme = "dracula"   # or "nord" or "solarized" or a custom theme name
 ```
 
-See [Themes](/features/themes/) for color palettes, or [Custom Themes](/customization/custom-themes/) to create your own.
+See [Themes](../../features/themes/) for color palettes, or [Custom Themes](../../customization/custom-themes/) to create your own.
 
 ### Why do tasks show up in the wrong tab?
 
@@ -150,7 +150,7 @@ Mutsumi displays all registered projects as tabs in a single TUI instance:
 [★ Main] [Personal] [saas-app] [oshigrid]
 ```
 
-Use `mutsumi project list` to view registered projects, and `mutsumi project remove NAME` to unregister one. See [CLI Reference](/reference/cli-commands/) for details.
+Use `mutsumi project list` to view registered projects, and `mutsumi project remove NAME` to unregister one. See [CLI Reference](../../reference/cli-commands/) for details.
 
 ## Comparison
 
@@ -162,7 +162,7 @@ Mutsumi is local, terminal-native, and agent-agnostic. Notion and Todoist are cl
 
 Mutsumi is TUI-primary (visual kanban) while Taskwarrior is CLI-primary (text reports). Mutsumi watches `mutsumi.json` for hot-reload, supports mouse interaction, and is designed for agent integration. Taskwarrior has more features (40+ report types, sync server, hooks) but higher complexity.
 
-See [Comparison](/introduction/comparison/) for a detailed feature matrix.
+See [Comparison](../../introduction/comparison/) for a detailed feature matrix.
 
 ## Troubleshooting
 

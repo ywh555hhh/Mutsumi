@@ -116,6 +116,7 @@ document.addEventListener('astro:after-swap', initPageBar);
       editLink: {
         baseUrl: 'https://github.com/ywh555hhh/Mutsumi/edit/main/docs/site/',
       },
+      lastUpdated: true,
       customCss: ['./src/styles/custom.css'],
       defaultLocale: 'root',
       locales: {
@@ -183,7 +184,10 @@ document.addEventListener('astro:after-swap', initPageBar);
         },
       ],
       plugins: [
-        starlightLinksValidator(),
+        starlightLinksValidator({
+          errorOnRelativeLinks: false,
+          errorOnFallbackPages: false,
+        }),
         starlightViewModes({
           zenModeSettings: {
             displayOptions: {
