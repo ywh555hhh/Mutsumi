@@ -10,7 +10,7 @@ import { Tabs, TabItem, Aside, Steps, Badge } from '@astrojs/starlight/component
 ホットキーひとつでコマンドセンターを起動。左ペインは AI Agent、右ペインはリアルタイムタスクボード。Agent がタスクを書き込み、ボードが即座に更新される。コンテキストスイッチなし。
 
 ```
- Win+`  /  Ctrl+`  (ドロップダウンターミナル)
+ Win+~  /  Ctrl+~  (ドロップダウンターミナル)
 ┌──────────────────────────────┬──────────────────┐
 │                              │                  │
 │  AI Agent (opencode/claude)  │   Mutsumi TUI    │
@@ -49,7 +49,7 @@ import { Tabs, TabItem, Aside, Steps, Badge } from '@astrojs/starlight/component
     { "command": { "action": "quakeMode" }, "keys": "win+`" }
     ```
 
-    これで `Win+`` でドロップダウンターミナルをグローバルに切り替えられます。
+    これで <kbd>Win+`</kbd> でドロップダウンターミナルをグローバルに切り替えられます。
 
     ### ステップ 2：ツールのインストール
 
@@ -99,7 +99,7 @@ import { Tabs, TabItem, Aside, Steps, Badge } from '@astrojs/starlight/component
 
     1. [iTerm2](https://iterm2.com/) をインストール
     2. Preferences → Keys → Hotkey → **"Show/hide all windows with a system-wide hotkey"** をチェック
-    3. ホットキーを `` Ctrl+` `` に設定
+    3. ホットキーを <kbd>Ctrl+`</kbd> に設定
 
     代替案：[Ghostty](https://ghostty.org/) の `quick-terminal-hotkey` 設定。
 
@@ -287,7 +287,7 @@ chmod +x ~/.local/bin/mu
 ## 日常の使い方
 
 <Steps>
-1. **ホットキーを押す** — `Win+`` / `Ctrl+`` / `F12` — ターミナルがドロップダウン
+1. **ホットキーを押す** — <kbd>Win+`</kbd> / <kbd>Ctrl+`</kbd> / <kbd>F12</kbd> — ターミナルがドロップダウン
 
 2. **起動** — プロジェクトディレクトリで `mu` と入力（または `mu ~/projects/my-app`）
 
