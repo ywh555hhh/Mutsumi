@@ -4,11 +4,11 @@ from __future__ import annotations
 
 import json
 from datetime import date, timedelta
-from pathlib import Path
+from typing import TYPE_CHECKING
 
 import pytest
 
-from mutsumi.core.models import Task, TaskFile, TaskPriority, TaskScope, TaskStatus
+from mutsumi.core.models import Task, TaskFile, TaskScope, TaskStatus
 from mutsumi.core.writer import (
     add_child_task,
     cascade_toggle_status,
@@ -16,6 +16,9 @@ from mutsumi.core.writer import (
     handle_recurrence,
 )
 from mutsumi.tui.task_row import _due_status
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 
 # ── Tier 1: Cascading completion ──────────────────────────────────────
