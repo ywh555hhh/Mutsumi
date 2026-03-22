@@ -23,6 +23,7 @@ class ConfirmDialog(ModalScreen[bool]):
 
     ConfirmDialog > Vertical {
         width: 40;
+        max-width: 90%;
         height: auto;
         max-height: 10;
         background: #1a1a1a;

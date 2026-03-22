@@ -25,8 +25,9 @@ class TaskForm(ModalScreen[None]):
 
     TaskForm > VerticalScroll {
         width: 64;
-        max-height: 36;
-        min-height: 20;
+        max-width: 90%;
+        height: auto;
+        max-height: 80%;
         background: #1a1a1a;
         border: solid #333333;
         padding: 1 2;

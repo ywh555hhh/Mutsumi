@@ -77,6 +77,7 @@ class HelpScreen(ModalScreen[None]):
 
     HelpScreen > Static {
         width: 60;
+        max-width: 90%;
         max-height: 80%;
         background: #1a1a1a;
         border: tall #333333;
