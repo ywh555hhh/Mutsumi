@@ -31,7 +31,7 @@ One hotkey opens your command center. Two panes: left is your AI agent, right is
 | **Terminal emulator** | Drop-down (Quake) mode | Windows Terminal / iTerm2 / Yakuake |
 | **tmux** (optional) | Split panes, persist sessions | `apt install tmux` / `brew install tmux` (Windows: use Terminal's built-in splits) |
 | **uv** | Python package manager | `curl -LsSf https://astral.sh/uv/install.sh \| sh` |
-| **Mutsumi** | Task board TUI | `uv tool install mutsumi` |
+| **Mutsumi** | Task board TUI | `uv tool install git+https://github.com/ywh555hhh/Mutsumi` |
 | **AI Agent** | Writes tasks to `mutsumi.json` | opencode / Claude Code / aider / Codex CLI |
 
 ## Platform Setup
@@ -60,7 +60,7 @@ One hotkey opens your command center. Two panes: left is your AI agent, right is
     powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
 
     # Mutsumi
-    uv tool install mutsumi
+    uv tool install git+https://github.com/ywh555hhh/Mutsumi
 
     # Your AI agent (pick one)
     uv tool install opencode    # or: npm install -g @anthropic-ai/claude-code
@@ -116,7 +116,7 @@ One hotkey opens your command center. Two panes: left is your AI agent, right is
     curl -LsSf https://astral.sh/uv/install.sh | sh
 
     # Mutsumi
-    uv tool install mutsumi
+    uv tool install git+https://github.com/ywh555hhh/Mutsumi
 
     # AI agent
     uv tool install opencode    # or: npm install -g @anthropic-ai/claude-code
@@ -155,7 +155,7 @@ One hotkey opens your command center. Two panes: left is your AI agent, right is
 
     ```bash
     curl -LsSf https://astral.sh/uv/install.sh | sh
-    uv tool install mutsumi
+    uv tool install git+https://github.com/ywh555hhh/Mutsumi
     uv tool install opencode
     ```
 

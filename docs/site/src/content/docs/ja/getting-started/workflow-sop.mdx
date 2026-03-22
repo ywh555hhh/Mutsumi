@@ -31,7 +31,7 @@ import { Tabs, TabItem, Aside, Steps, Badge } from '@astrojs/starlight/component
 | **ターミナルエミュレータ** | ドロップダウン（Quake）モード | Windows Terminal / iTerm2 / Yakuake |
 | **tmux**（任意） | ペイン分割、セッション永続化 | `apt install tmux` / `brew install tmux`（Windows は Terminal の内蔵分割を使用） |
 | **uv** | Python パッケージマネージャ | `curl -LsSf https://astral.sh/uv/install.sh \| sh` |
-| **Mutsumi** | タスクボード TUI | `uv tool install mutsumi` |
+| **Mutsumi** | タスクボード TUI | `uv tool install git+https://github.com/ywh555hhh/Mutsumi` |
 | **AI Agent** | `mutsumi.json` にタスクを書き込む | opencode / Claude Code / aider / Codex CLI |
 
 ## プラットフォーム別セットアップ
@@ -60,7 +60,7 @@ import { Tabs, TabItem, Aside, Steps, Badge } from '@astrojs/starlight/component
     powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
 
     # Mutsumi
-    uv tool install mutsumi
+    uv tool install git+https://github.com/ywh555hhh/Mutsumi
 
     # AI Agent（いずれかを選択）
     uv tool install opencode    # または：npm install -g @anthropic-ai/claude-code
@@ -116,7 +116,7 @@ import { Tabs, TabItem, Aside, Steps, Badge } from '@astrojs/starlight/component
     curl -LsSf https://astral.sh/uv/install.sh | sh
 
     # Mutsumi
-    uv tool install mutsumi
+    uv tool install git+https://github.com/ywh555hhh/Mutsumi
 
     # AI Agent
     uv tool install opencode    # または：npm install -g @anthropic-ai/claude-code
@@ -155,7 +155,7 @@ import { Tabs, TabItem, Aside, Steps, Badge } from '@astrojs/starlight/component
 
     ```bash
     curl -LsSf https://astral.sh/uv/install.sh | sh
-    uv tool install mutsumi
+    uv tool install git+https://github.com/ywh555hhh/Mutsumi
     uv tool install opencode
     ```
 

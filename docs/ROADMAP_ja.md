@@ -153,7 +153,7 @@ dashboard
 - [ ] ヒーロー GIF の録画: Claude Code + Mutsumi のスプリットスクリーンコラボレーション
 - [ ] ボーナス GIF の録画: Typeless 音声 → エージェント → Mutsumi の更新
 - [ ] Product Hunt ページのコピー
-- [ ] PyPI への公開
+- [ ] PyPI に `mutsumi-tui` として公開（`mutsumi` は別プロジェクトが使用中）；CLI コマンドは `mutsumi` のまま（`[project.scripts]` で設定）；インストール: `uv tool install mutsumi-tui` / `pip install mutsumi-tui`
 - [ ] GitHub Release v0.5.0
 - [ ] Hacker News / Reddit /r/commandline への投稿
 - [ ] V2EX への投稿

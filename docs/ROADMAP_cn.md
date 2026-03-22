@@ -153,7 +153,7 @@ dashboard
 - [ ] 录制 Hero GIF：Claude Code + Mutsumi 分屏协作
 - [ ] 录制 Bonus GIF：Typeless 语音 → Agent → Mutsumi 刷新
 - [ ] Product Hunt 页面文案
-- [ ] 发布到 PyPI
+- [ ] 发布到 PyPI，包名 `mutsumi-tui`（`mutsumi` 已被占用）；CLI 命令仍为 `mutsumi`（通过 `[project.scripts]` 配置）；安装：`uv tool install mutsumi-tui` / `pip install mutsumi-tui`
 - [ ] GitHub Release v0.5.0
 - [ ] Hacker News / Reddit /r/commandline 发帖
 - [ ] V2EX 发帖

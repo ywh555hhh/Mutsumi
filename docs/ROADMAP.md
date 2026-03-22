@@ -153,7 +153,7 @@ dashboard
 - [ ] Record Hero GIF: Claude Code + Mutsumi split-screen collaboration
 - [ ] Record Bonus GIF: Typeless voice → Agent → Mutsumi refresh
 - [ ] Product Hunt page copy
-- [ ] Publish to PyPI
+- [ ] Publish to PyPI as `mutsumi-tui` (`mutsumi` is taken); CLI stays `mutsumi` via `[project.scripts]`; install: `uv tool install mutsumi-tui` / `pip install mutsumi-tui`
 - [ ] GitHub Release v0.5.0
 - [ ] Hacker News / Reddit /r/commandline post
 - [ ] V2EX post
