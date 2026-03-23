@@ -85,13 +85,8 @@ import { Tabs, TabItem, Aside, Steps, Badge } from '@astrojs/starlight/component
     如果你更喜欢 tmux 的会话管理，可以通过 WSL 使用：`wsl --install -d Ubuntu`，然后在 WSL 内按 Linux 的步骤操作。但这不是必须的。
     </Aside>
 
-    ### 第 4 步：初始化项目
+    搞定！首次运行 `mutsumi` 时，内置的引导向导会带你完成语言、键绑定、主题、工作区模式和 Agent 集成配置 —— 不需要手动 `init` 或 `setup`。
 
-    ```bash
-    cd ~/your-project
-    mutsumi init                           # 创建 mutsumi.json
-    mutsumi setup --agent claude-code      # 注入提示到 CLAUDE.md
-    ```
   </TabItem>
 
   <TabItem label="macOS">
@@ -122,13 +117,8 @@ import { Tabs, TabItem, Aside, Steps, Badge } from '@astrojs/starlight/component
     uv tool install opencode    # 或：npm install -g @anthropic-ai/claude-code
     ```
 
-    ### 第 4 步：初始化
+    首次运行 `mutsumi` 会自动进入引导向导 —— 不需要手动 `init` 或 `setup`。
 
-    ```bash
-    cd ~/your-project
-    mutsumi init
-    mutsumi setup --agent claude-code
-    ```
   </TabItem>
 
   <TabItem label="Linux">
@@ -159,13 +149,8 @@ import { Tabs, TabItem, Aside, Steps, Badge } from '@astrojs/starlight/component
     uv tool install opencode
     ```
 
-    ### 第 4 步：初始化
+    首次运行 `mutsumi` 会自动进入引导向导 —— 不需要手动 `init` 或 `setup`。
 
-    ```bash
-    cd ~/your-project
-    mutsumi init
-    mutsumi setup --agent claude-code
-    ```
   </TabItem>
 </Tabs>
 
@@ -191,11 +176,6 @@ import { Tabs, TabItem, Aside, Steps, Badge } from '@astrojs/starlight/component
     MUTSUMI_WIDTH="${MUTSUMI_WIDTH:-35}"
 
     cd "$PROJECT_DIR"
-
-    # 如果没有 mutsumi.json，自动创建
-    if [ ! -f mutsumi.json ] && [ ! -f tasks.json ]; then
-      mutsumi init --quiet 2>/dev/null || true
-    fi
 
     # 如果会话已存在，直接 attach
     if tmux has-session -t "$SESSION" 2>/dev/null; then
@@ -229,10 +209,6 @@ import { Tabs, TabItem, Aside, Steps, Badge } from '@astrojs/starlight/component
 
     cd $PROJECT_DIR
 
-    if not test -f mutsumi.json; and not test -f tasks.json
-      mutsumi init --quiet 2>/dev/null; or true
-    end
-
     if tmux has-session -t $SESSION 2>/dev/null
       tmux attach -t $SESSION
       exit 0
@@ -261,11 +237,6 @@ import { Tabs, TabItem, Aside, Steps, Badge } from '@astrojs/starlight/component
     )
 
     Push-Location (Resolve-Path $ProjectDir).Path
-
-    # 如果没有 mutsumi.json，自动创建
-    if (-not (Test-Path mutsumi.json) -and -not (Test-Path tasks.json)) {
-      mutsumi init --quiet 2>$null
-    }
 
     # 用 Windows Terminal 分屏：右侧启动 mutsumi
     wt -w 0 sp -V --size 0.35 mutsumi
@@ -345,5 +316,5 @@ bind M command-prompt -p "Project:" "run-shell '~/.local/bin/mu %1'"
 |------|---------|
 | `mu: command not found` | 把 `~/.local/bin` 加到 `$PATH` |
 | tmux 分屏太窄 | `export MUTSUMI_WIDTH=40` 或用 <kbd>Ctrl-b →</kbd> 调整 |
-| Agent 没写 `mutsumi.json` | 运行 `mutsumi setup --agent <name>` 注入提示 |
+| Agent 没写 `mutsumi.json` | 运行 `mutsumi setup --agent <name>` 或通过 `mutsumi init` 重新引导 |
 | 雷神模式不工作 | 检查终端快捷键设置；某些桌面环境会抢占按键 |

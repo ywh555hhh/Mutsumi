@@ -85,13 +85,8 @@ One hotkey opens your command center. Two panes: left is your AI agent, right is
     If you prefer tmux's session management, install it via WSL: `wsl --install -d Ubuntu`, then follow the Linux steps inside WSL. But this is entirely optional.
     </Aside>
 
-    ### Step 4: Initialize your project
+    That's it! When you run `mutsumi` for the first time, the built-in onboarding wizard will guide you through language, keybindings, theme, workspace mode, and agent integration — no manual `init` or `setup` needed.
 
-    ```bash
-    cd ~/your-project
-    mutsumi init                           # Creates mutsumi.json
-    mutsumi setup --agent claude-code      # Injects prompt into CLAUDE.md
-    ```
   </TabItem>
 
   <TabItem label="macOS">
@@ -122,13 +117,8 @@ One hotkey opens your command center. Two panes: left is your AI agent, right is
     uv tool install opencode    # or: npm install -g @anthropic-ai/claude-code
     ```
 
-    ### Step 4: Initialize
+    First launch of `mutsumi` will auto-run the onboarding wizard — no manual `init` or `setup` needed.
 
-    ```bash
-    cd ~/your-project
-    mutsumi init
-    mutsumi setup --agent claude-code
-    ```
   </TabItem>
 
   <TabItem label="Linux">
@@ -159,13 +149,8 @@ One hotkey opens your command center. Two panes: left is your AI agent, right is
     uv tool install opencode
     ```
 
-    ### Step 4: Initialize
+    First launch of `mutsumi` will auto-run the onboarding wizard — no manual `init` or `setup` needed.
 
-    ```bash
-    cd ~/your-project
-    mutsumi init
-    mutsumi setup --agent claude-code
-    ```
   </TabItem>
 </Tabs>
 
@@ -191,11 +176,6 @@ Save this as `~/.local/bin/mu` (or anywhere on your `$PATH`):
     MUTSUMI_WIDTH="${MUTSUMI_WIDTH:-35}"
 
     cd "$PROJECT_DIR"
-
-    # Create mutsumi.json if missing
-    if [ ! -f mutsumi.json ] && [ ! -f tasks.json ]; then
-      mutsumi init --quiet 2>/dev/null || true
-    fi
 
     # Attach if session exists
     if tmux has-session -t "$SESSION" 2>/dev/null; then
@@ -229,10 +209,6 @@ Save this as `~/.local/bin/mu` (or anywhere on your `$PATH`):
 
     cd $PROJECT_DIR
 
-    if not test -f mutsumi.json; and not test -f tasks.json
-      mutsumi init --quiet 2>/dev/null; or true
-    end
-
     if tmux has-session -t $SESSION 2>/dev/null
       tmux attach -t $SESSION
       exit 0
@@ -261,11 +237,6 @@ Save this as `~/.local/bin/mu` (or anywhere on your `$PATH`):
     )
 
     Push-Location (Resolve-Path $ProjectDir).Path
-
-    # Create mutsumi.json if missing
-    if (-not (Test-Path mutsumi.json) -and -not (Test-Path tasks.json)) {
-      mutsumi init --quiet 2>$null
-    }
 
     # Split right pane in Windows Terminal for mutsumi
     wt -w 0 sp -V --size 0.35 mutsumi
@@ -345,5 +316,5 @@ bind M command-prompt -p "Project:" "run-shell '~/.local/bin/mu %1'"
 |---------|-----|
 | `mu: command not found` | Add `~/.local/bin` to your `$PATH` |
 | tmux pane too narrow for Mutsumi | `export MUTSUMI_WIDTH=40` or resize with <kbd>Ctrl-b →</kbd> |
-| Agent doesn't write `mutsumi.json` | Run `mutsumi setup --agent <name>` to inject the prompt |
+| Agent doesn't write `mutsumi.json` | Run `mutsumi setup --agent <name>` or re-run onboarding via `mutsumi init` |
 | Quake mode not working | Check your terminal's hotkey settings; some DEs grab the key first |

@@ -85,13 +85,8 @@ import { Tabs, TabItem, Aside, Steps, Badge } from '@astrojs/starlight/component
     tmux のセッション管理が好みなら、WSL 経由でインストールできます：`wsl --install -d Ubuntu`。その後 WSL 内で Linux のステップに従ってください。ただし必須ではありません。
     </Aside>
 
-    ### ステップ 4：プロジェクトの初期化
+    以上です！初回の `mutsumi` 起動時、内蔵のオンボーディングウィザードが言語、キーバインド、テーマ、ワークスペースモード、Agent 統合の設定をガイドします — 手動の `init` や `setup` は不要です。
 
-    ```bash
-    cd ~/your-project
-    mutsumi init                           # mutsumi.json を作成
-    mutsumi setup --agent claude-code      # CLAUDE.md にプロンプトを注入
-    ```
   </TabItem>
 
   <TabItem label="macOS">
@@ -122,13 +117,8 @@ import { Tabs, TabItem, Aside, Steps, Badge } from '@astrojs/starlight/component
     uv tool install opencode    # または：npm install -g @anthropic-ai/claude-code
     ```
 
-    ### ステップ 4：初期化
+    初回の `mutsumi` 起動時、オンボーディングウィザードが自動的に実行されます — 手動の `init` や `setup` は不要です。
 
-    ```bash
-    cd ~/your-project
-    mutsumi init
-    mutsumi setup --agent claude-code
-    ```
   </TabItem>
 
   <TabItem label="Linux">
@@ -159,13 +149,8 @@ import { Tabs, TabItem, Aside, Steps, Badge } from '@astrojs/starlight/component
     uv tool install opencode
     ```
 
-    ### ステップ 4：初期化
+    初回の `mutsumi` 起動時、オンボーディングウィザードが自動的に実行されます — 手動の `init` や `setup` は不要です。
 
-    ```bash
-    cd ~/your-project
-    mutsumi init
-    mutsumi setup --agent claude-code
-    ```
   </TabItem>
 </Tabs>
 
@@ -191,11 +176,6 @@ import { Tabs, TabItem, Aside, Steps, Badge } from '@astrojs/starlight/component
     MUTSUMI_WIDTH="${MUTSUMI_WIDTH:-35}"
 
     cd "$PROJECT_DIR"
-
-    # mutsumi.json がなければ自動作成
-    if [ ! -f mutsumi.json ] && [ ! -f tasks.json ]; then
-      mutsumi init --quiet 2>/dev/null || true
-    fi
 
     # セッションが既にあればアタッチ
     if tmux has-session -t "$SESSION" 2>/dev/null; then
@@ -229,10 +209,6 @@ import { Tabs, TabItem, Aside, Steps, Badge } from '@astrojs/starlight/component
 
     cd $PROJECT_DIR
 
-    if not test -f mutsumi.json; and not test -f tasks.json
-      mutsumi init --quiet 2>/dev/null; or true
-    end
-
     if tmux has-session -t $SESSION 2>/dev/null
       tmux attach -t $SESSION
       exit 0
@@ -261,11 +237,6 @@ import { Tabs, TabItem, Aside, Steps, Badge } from '@astrojs/starlight/component
     )
 
     Push-Location (Resolve-Path $ProjectDir).Path
-
-    # mutsumi.json がなければ自動作成
-    if (-not (Test-Path mutsumi.json) -and -not (Test-Path tasks.json)) {
-      mutsumi init --quiet 2>$null
-    }
 
     # Windows Terminal で右ペインに mutsumi を分割起動
     wt -w 0 sp -V --size 0.35 mutsumi
@@ -345,5 +316,5 @@ bind M command-prompt -p "Project:" "run-shell '~/.local/bin/mu %1'"
 |------|---------|
 | `mu: command not found` | `~/.local/bin` を `$PATH` に追加 |
 | tmux ペインが狭すぎる | `export MUTSUMI_WIDTH=40` または <kbd>Ctrl-b →</kbd> でリサイズ |
-| Agent が `mutsumi.json` に書き込まない | `mutsumi setup --agent <name>` でプロンプトを注入 |
+| Agent が `mutsumi.json` に書き込まない | `mutsumi setup --agent <name>` でプロンプトを注入、または `mutsumi init` でオンボーディングを再実行 |
 | Quake モードが動作しない | ターミナルのホットキー設定を確認。DE がキーを横取りしている可能性 |
