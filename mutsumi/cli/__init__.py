@@ -45,6 +45,7 @@ def main(ctx: click.Context, path: str | None, watch: tuple[str, ...]) -> None:
 
 # Register subcommands
 from mutsumi.cli.add import add  # noqa: E402
+from mutsumi.cli.bye import bye  # noqa: E402
 from mutsumi.cli.done import done  # noqa: E402
 from mutsumi.cli.edit import edit  # noqa: E402
 from mutsumi.cli.init_cmd import init  # noqa: E402
@@ -67,6 +68,7 @@ main.add_command(edit)
 main.add_command(setup)
 main.add_command(migrate)
 main.add_command(project)
+main.add_command(bye)
 
 
 if __name__ == "__main__":
