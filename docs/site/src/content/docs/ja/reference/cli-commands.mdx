@@ -231,7 +231,7 @@ mutsumi init --project
 
 ## mutsumi setup
 
-AI Agent の統合を設定します。
+AI Agent の統合を設定します。[Agent Skills](https://agentskills.io) をシンボリックリンクで Agent のスキルディレクトリにインストールします。
 
 ```bash
 mutsumi setup [オプション]
@@ -246,9 +246,28 @@ mutsumi setup [オプション]
 
 | モード | 動作 |
 |--------|------|
-| `skills` | 設定に優先 Agent を記録するのみ。ファイルは変更されない。 |
-| `skills+project-doc` | 設定を保存し、Agent のプロジェクトドキュメント（`CLAUDE.md`、`AGENTS.md` など）に統合手順を追記。 |
-| `snippet` | 統合プロンプトを標準出力に表示。手動ペースト用。 |
+| `skills` | 5 つの Mutsumi スキルファイル（`mutsumi-manage`、`mutsumi-track`、`mutsumi-plan`、`mutsumi-report`、`mutsumi-context`）を `~/.mutsumi/skills/` からシンボリックリンクで Agent のスキルディレクトリにインストール。 |
+| `skills+project-doc` | スキルをインストールし、`## Mutsumi Task Integration` セクションを Agent のプロジェクトドキュメント（`CLAUDE.md`、`AGENTS.md` など）に追記。 |
+| `snippet` | 統合プロンプトを標準出力に表示。ファイルのインストールなし。 |
+
+### インストールされるスキル
+
+| スキル | 用途 | 自動トリガー？ |
+|--------|------|--------------|
+| `mutsumi-manage` | タスク CRUD（追加、編集、完了、削除） | いいえ — ユーザーの依頼時 |
+| `mutsumi-track` | 作業中にタスク進捗を自動更新 | はい |
+| `mutsumi-plan` | 目標をサブタスクに分解 | いいえ — ユーザーの依頼時 |
+| `mutsumi-report` | ステータスサマリーを生成 | いいえ — ユーザーの依頼時 |
+| `mutsumi-context` | セッション開始時にタスクボードのコンテキストを読み込み | はい |
+
+### スキルディレクトリ
+
+| Agent | ディレクトリ |
+|-------|-------------|
+| Claude Code | `~/.claude/skills/` |
+| Codex CLI | `~/.agents/skills/` |
+| Gemini CLI | `~/.gemini/skills/` |
+| OpenCode | `~/.config/opencode/skills/` |
 
 ### 使用例
 
@@ -256,20 +275,22 @@ mutsumi setup [オプション]
 # 利用可能な Agent とモードを表示
 mutsumi setup
 
-# Skills-first（デフォルト — ファイル変更なし）
+# Claude Code にスキルをインストール（デフォルトモード）
 mutsumi setup --agent claude-code
 
-# CLAUDE.md にプロジェクトドキュメントを注入
+# スキルをインストール + CLAUDE.md にプロジェクトドキュメントを注入
 mutsumi setup --agent claude-code --mode skills+project-doc
 
-# 手動使用のためにプロンプトを表示
+# 手動使用のためにプロンプトを表示（Aider、カスタム Agent）
 mutsumi setup --agent custom --mode snippet
 
-# Gemini CLI + プロジェクトドキュメント注入
-mutsumi setup --agent gemini-cli --mode skills+project-doc
+# 他の Agent にもスキルをインストール
+mutsumi setup --agent gemini-cli
+mutsumi setup --agent codex-cli
+mutsumi setup --agent opencode
 ```
 
-`skills+project-doc` を再実行しても安全です — 既存セクションを検出し、重複しません。
+再実行しても安全です — 古いシンボリックリンクを置き換え、重複インストールは発生しません。
 
 ---
 

@@ -13,6 +13,75 @@ import { Aside } from '@astrojs/starlight/components';
 
 **核心原则：Mutsumi 不绑定任何特定 Agent。任何能正确读写 JSON 的程序都是合法的 Controller。**
 
+## Agent Skills（推荐）
+
+Mutsumi 内置 5 个技能文件，遵循 [Agent Skills 开放标准](https://agentskills.io)。安装后，Agent 会自动发现它们 —— 无需手动粘贴 prompt。
+
+### 安装
+
+```bash
+mutsumi setup --agent claude-code   # 或 codex-cli、gemini-cli、opencode
+```
+
+这会从 `~/.mutsumi/skills/`（SSOT）创建符号链接到 Agent 的技能目录。
+
+### 技能一览
+
+| 技能 | 说明 | 触发方式 |
+|------|------|---------|
+| `mutsumi-manage` | 任务增删改查 —— 通过 CLI 或直接 JSON 操作 | 用户请求管理任务时 |
+| `mutsumi-track` | 工作过程中自动更新任务进度 | 自动触发（`user-invocable: false`） |
+| `mutsumi-plan` | 将复杂目标分解为 parent + 子任务 | 用户请求规划或拆分工作时 |
+| `mutsumi-report` | 生成按范围分组的状态摘要 | 用户请求报告时（`disable-model-invocation: true`） |
+| `mutsumi-context` | 会话开始时加载任务板状态，感知优先级 | 自动触发（`user-invocable: false`） |
+
+### SKILL.md 结构
+
+每个技能是一个包含 `SKILL.md` 文件的目录：
+
+```
+mutsumi-manage/
+  SKILL.md          ← YAML frontmatter + Markdown 指令
+```
+
+frontmatter 遵循 [agentskills.io 规范](https://agentskills.io/specification)：
+
+```yaml
+---
+name: mutsumi-manage
+description: >
+  Add, edit, complete, or remove tasks in mutsumi.json.
+---
+```
+
+关键 frontmatter 字段：
+- `name` — 小写 + 连字符，最长 64 字符
+- `description` — Agent 何时应激活此技能
+- `user-invocable: false` — Agent 自动触发，用户不能直接调用
+- `disable-model-invocation: true` — 仅在用户明确请求时激活
+
+### 架构
+
+```
+pip 包内置                     SSOT（唯一副本）              Agent 技能目录
+mutsumi/skills/           →    ~/.mutsumi/skills/      →    ~/.claude/skills/
+  mutsumi-manage/                mutsumi-manage/              mutsumi-manage/ (symlink)
+  mutsumi-track/                 mutsumi-track/               mutsumi-track/  (symlink)
+  mutsumi-plan/                  mutsumi-plan/                ...
+  mutsumi-report/                mutsumi-report/
+  mutsumi-context/               mutsumi-context/
+  references/                    references/
+```
+
+第 1 步：`ensure_ssot()` 将内置技能复制到 `~/.mutsumi/skills/`。
+第 2 步：`install_for_agent()` 从 SSOT 创建符号链接到 Agent 目录。
+
+这种 SSOT 架构确保所有 Agent 共享相同的技能定义。升级 Mutsumi（`pip install --upgrade`）后，下次运行 `mutsumi setup` 会自动刷新 SSOT。
+
+<Aside type="tip">
+Skills 是**推荐**的集成方式。下面的手动 prompt 模板作为不支持 Agent Skills 标准的工具的备用方案。
+</Aside>
+
 ## 写入协议 (Agent → Mutsumi)
 
 ### 工作流

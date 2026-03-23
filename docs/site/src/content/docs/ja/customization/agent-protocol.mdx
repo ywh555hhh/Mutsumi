@@ -13,6 +13,75 @@ import { Aside, Steps } from '@astrojs/starlight/components';
 
 **核心原則: Mutsumi は特定の Agent に縛られません。JSON を正しく読み書きできる**あらゆるプログラム**が正当な Controller です。**
 
+## Agent Skills（推奨）
+
+Mutsumi は [Agent Skills オープン標準](https://agentskills.io) に準拠した 5 つのバンドルスキルを同梱しています。インストール後、Agent が自動的にスキルを検出するため、手動でプロンプトをペーストする必要はありません。
+
+### インストール
+
+```bash
+mutsumi setup --agent claude-code   # または codex-cli、gemini-cli、opencode
+```
+
+これで `~/.mutsumi/skills/`（SSOT）から Agent のスキルディレクトリにシンボリックリンクが作成されます。
+
+### スキル一覧
+
+| スキル | 説明 | トリガー |
+|--------|------|---------|
+| `mutsumi-manage` | タスク CRUD — CLI または直接 JSON 操作で追加・編集・完了・削除 | ユーザーがタスク管理を依頼した時 |
+| `mutsumi-track` | 作業中にタスク進捗を自動更新 | 自動トリガー（`user-invocable: false`） |
+| `mutsumi-plan` | 複雑な目標を parent + サブタスクに分解 | ユーザーが計画や分解を依頼した時 |
+| `mutsumi-report` | スコープ別のステータスサマリーを生成 | ユーザーがレポートを依頼した時（`disable-model-invocation: true`） |
+| `mutsumi-context` | セッション開始時にタスクボードの状態を読み込み、優先順位を把握 | 自動トリガー（`user-invocable: false`） |
+
+### SKILL.md の構造
+
+各スキルは `SKILL.md` ファイルを含むディレクトリです：
+
+```
+mutsumi-manage/
+  SKILL.md          ← YAML frontmatter + Markdown 指示
+```
+
+frontmatter は [agentskills.io 仕様](https://agentskills.io/specification) に準拠：
+
+```yaml
+---
+name: mutsumi-manage
+description: >
+  Add, edit, complete, or remove tasks in mutsumi.json.
+---
+```
+
+主要な frontmatter フィールド：
+- `name` — 小文字 + ハイフン、最大 64 文字
+- `description` — Agent がこのスキルを有効化すべきタイミング
+- `user-invocable: false` — Agent が自動トリガー、ユーザーは直接呼び出し不可
+- `disable-model-invocation: true` — ユーザーが明示的に依頼した時のみ有効化
+
+### アーキテクチャ
+
+```
+pip パッケージに同梱              SSOT（単一コピー）            Agent スキルディレクトリ
+mutsumi/skills/              →    ~/.mutsumi/skills/      →    ~/.claude/skills/
+  mutsumi-manage/                   mutsumi-manage/              mutsumi-manage/ (symlink)
+  mutsumi-track/                    mutsumi-track/               mutsumi-track/  (symlink)
+  mutsumi-plan/                     mutsumi-plan/                ...
+  mutsumi-report/                   mutsumi-report/
+  mutsumi-context/                  mutsumi-context/
+  references/                       references/
+```
+
+ステップ 1: `ensure_ssot()` がバンドルスキルを `~/.mutsumi/skills/` にコピー。
+ステップ 2: `install_for_agent()` が SSOT から Agent ディレクトリにシンボリックリンクを作成。
+
+この SSOT アーキテクチャにより、すべての Agent が同一のスキル定義を共有します。Mutsumi のアップグレード（`pip install --upgrade`）後、次回 `mutsumi setup` を実行すると SSOT が自動的に更新されます。
+
+<Aside type="tip">
+Skills は**推奨される**統合方法です。下記の手動プロンプトテンプレートは、Agent Skills 標準をサポートしないツール向けのフォールバックです。
+</Aside>
+
 ## 書き込みプロトコル（Agent → Mutsumi）
 
 ### ワークフロー

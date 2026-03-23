@@ -13,6 +13,75 @@ This document defines how external Agents (AI CLI tools, custom scripts, cron jo
 
 **Core principle**: Mutsumi does not bind to any specific Agent. Any program that can correctly read and write JSON is a legitimate Controller.
 
+## Agent Skills (Recommended)
+
+Mutsumi ships 5 bundled skills that follow the [Agent Skills open standard](https://agentskills.io). When installed, agents discover them automatically — no manual prompt pasting needed.
+
+### Installation
+
+```bash
+mutsumi setup --agent claude-code   # or codex-cli, gemini-cli, opencode
+```
+
+This creates symlinks from `~/.mutsumi/skills/` (SSOT) into the agent's skill directory.
+
+### Skill Reference
+
+| Skill | Description | Trigger |
+|-------|-------------|---------|
+| `mutsumi-manage` | Task CRUD — add, edit, done, remove via CLI or direct JSON | User asks to manage tasks |
+| `mutsumi-track` | Auto-update task progress as the agent works | Auto-triggered (`user-invocable: false`) |
+| `mutsumi-plan` | Decompose a complex goal into parent + subtasks | User asks to plan or break down work |
+| `mutsumi-report` | Generate a status summary grouped by scope | User asks for a report (`disable-model-invocation: true`) |
+| `mutsumi-context` | Load task board state at session start for priority awareness | Auto-triggered (`user-invocable: false`) |
+
+### SKILL.md Anatomy
+
+Each skill is a directory with a `SKILL.md` file:
+
+```
+mutsumi-manage/
+  SKILL.md          ← YAML frontmatter + Markdown instructions
+```
+
+The frontmatter follows the [agentskills.io specification](https://agentskills.io/specification):
+
+```yaml
+---
+name: mutsumi-manage
+description: >
+  Add, edit, complete, or remove tasks in mutsumi.json.
+---
+```
+
+Key frontmatter fields:
+- `name` — lowercase + hyphens, max 64 chars
+- `description` — when the agent should activate this skill
+- `user-invocable: false` — agent auto-triggers, user cannot invoke directly
+- `disable-model-invocation: true` — only activated when user explicitly asks
+
+### Architecture
+
+```
+Bundled in pip package          SSOT (single copy)           Agent skill dirs
+mutsumi/skills/            →    ~/.mutsumi/skills/      →    ~/.claude/skills/
+  mutsumi-manage/                 mutsumi-manage/              mutsumi-manage/ (symlink)
+  mutsumi-track/                  mutsumi-track/               mutsumi-track/  (symlink)
+  mutsumi-plan/                   mutsumi-plan/                ...
+  mutsumi-report/                 mutsumi-report/
+  mutsumi-context/                mutsumi-context/
+  references/                     references/
+```
+
+Step 1: `ensure_ssot()` copies bundled skills → `~/.mutsumi/skills/`.
+Step 2: `install_for_agent()` creates symlinks from SSOT → agent directory.
+
+This SSOT architecture ensures all agents share the same skill definitions. Updating Mutsumi (`pip install --upgrade`) automatically refreshes the SSOT on next `mutsumi setup`.
+
+<Aside type="tip">
+Skills are the **recommended** integration method. The manual prompt template (below) is provided as a fallback for agents that don't support the Agent Skills standard.
+</Aside>
+
 ## Supported Agents
 
 | Agent | Type | Integration Level |

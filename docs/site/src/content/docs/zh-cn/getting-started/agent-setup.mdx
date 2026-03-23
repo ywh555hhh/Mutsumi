@@ -1,160 +1,184 @@
 ---
 title: Agent 集成
-description: 三种方式将 Mutsumi 与你的 AI Agent 集成。
+description: 通过 Agent Skills 标准将 Mutsumi 与 Claude Code、Codex CLI、Gemini CLI、OpenCode 集成。
 ---
 
-import { Tabs, TabItem, Steps, Aside } from '@astrojs/starlight/components';
+import { Tabs, TabItem, Steps, Aside, Card, CardGrid } from '@astrojs/starlight/components';
 
-## 概述
+## 工作原理
 
-Mutsumi 是 Agent 无关的 —— 任何能读写 JSON 的程序都可以作为 Controller。集成有三种方式：
+Mutsumi 内置 **5 个技能文件**，遵循 [Agent Skills 开放标准](https://agentskills.io)。运行 `mutsumi setup` 时，这些技能文件通过符号链接安装到你的 Agent 技能目录中。Agent 会自动发现它们 —— 无需手动粘贴 prompt。
 
-## 方式一：自动注入（推荐）
+```
+~/.mutsumi/skills/          ← SSOT（唯一真实来源）
+  mutsumi-manage/SKILL.md
+  mutsumi-track/SKILL.md
+  mutsumi-plan/SKILL.md
+  mutsumi-report/SKILL.md
+  mutsumi-context/SKILL.md
+        │
+        ├── symlink → ~/.claude/skills/     (Claude Code)
+        ├── symlink → ~/.agents/skills/     (Codex CLI)
+        ├── symlink → ~/.gemini/skills/     (Gemini CLI)
+        └── symlink → ~/.config/opencode/skills/  (OpenCode)
+```
+
+## 快速开始
 
 <Steps>
 
-1. 进入你的项目目录：
+1. 安装 Mutsumi（如尚未安装）：
 
    ```bash
-   cd ~/your-project
+   pip install mutsumi-tui
    ```
 
-2. 选择你的 Agent 运行 setup 命令：
+2. 为你的 Agent 运行 setup：
 
    <Tabs>
      <TabItem label="Claude Code">
      ```bash
      mutsumi setup --agent claude-code
-     # 自动追加规则到 CLAUDE.md
      ```
+     技能安装到 `~/.claude/skills/`。
      </TabItem>
      <TabItem label="Codex CLI">
      ```bash
      mutsumi setup --agent codex-cli
-     # 自动追加规则到 AGENTS.md
      ```
+     技能安装到 `~/.agents/skills/`。
      </TabItem>
      <TabItem label="Gemini CLI">
      ```bash
      mutsumi setup --agent gemini-cli
-     # 自动追加规则到 GEMINI.md
      ```
+     技能安装到 `~/.gemini/skills/`。
+     </TabItem>
+     <TabItem label="OpenCode">
+     ```bash
+     mutsumi setup --agent opencode
+     ```
+     技能安装到 `~/.config/opencode/skills/`。
      </TabItem>
    </Tabs>
 
-3. 验证：
+3. 验证安装：
 
    ```bash
-   cat CLAUDE.md   # 末尾应包含 "## Mutsumi Task Integration"
+   ls ~/.claude/skills/mutsumi-*/SKILL.md   # 以 Claude Code 为例
+   # mutsumi-manage/SKILL.md
+   # mutsumi-track/SKILL.md
+   # mutsumi-plan/SKILL.md
+   # mutsumi-report/SKILL.md
+   # mutsumi-context/SKILL.md
+   ```
+
+4. 开始使用 —— 告诉你的 Agent：
+
+   ```
+   "添加一个任务：修复登录 Bug，优先级 high，范围 today"
+   "把 auth 重构拆分成子任务"
+   "给我一份任务状态报告"
    ```
 
 </Steps>
 
-<Aside type="note">
-重复运行 setup 是安全的 —— 不会重复追加内容。
+<Aside type="tip">
+重复运行 `mutsumi setup` 是安全的 —— 会替换过期的符号链接，不会重复安装。
 </Aside>
 
-## 方式二：手动提示
+## 5 个内置技能
 
-在开始会话时告诉你的 Agent：
+<CardGrid>
+  <Card title="mutsumi-manage" icon="pencil">
+    **任务增删改查**：添加、编辑、完成、删除任务。支持 CLI 命令（`mutsumi add`、`mutsumi done`）和直接 JSON 操作。
+  </Card>
+  <Card title="mutsumi-track" icon="approve-check">
+    **自动进度跟踪**：在你工作时自动更新任务状态。标记子任务完成、更新父任务进度。由 Agent 自动触发，非手动调用。
+  </Card>
+  <Card title="mutsumi-plan" icon="list-format">
+    **任务分解**：将复杂目标分解为可执行的子任务，使用 parent-children 结构。调用方式："帮我规划 v2 迁移方案"。
+  </Card>
+  <Card title="mutsumi-report" icon="document">
+    **状态报告**：读取 `mutsumi.json`，生成按范围分组的进度摘要（Today → Week → Month → Inbox）。调用方式："给我一份任务报告"。
+  </Card>
+  <Card title="mutsumi-context" icon="open-book">
+    **上下文加载器**：在会话开始时加载任务板，理解当前优先级。Agent 静默读取 —— 没有输出，只有感知。自动触发，非手动调用。
+  </Card>
+</CardGrid>
 
-```
-这个项目使用 Mutsumi 管理任务。任务存放在 ./mutsumi.json。
-读取文件，修改 tasks 数组，然后写回整个文件。
-必填字段：id（唯一字符串）、title（字符串）、status（"pending" 或 "done"）。
-可选字段：scope（"day"/"week"/"month"/"inbox"）、priority（"high"/"normal"/"low"）、tags（字符串数组）、description（字符串）。
-```
+## Setup 模式
 
-这种方式适用于任何 Agent —— 不需要特殊插件或 SDK。
+| 模式 | 命令 | 行为 |
+|------|------|------|
+| **skills**（默认） | `mutsumi setup --agent claude-code` | 将 5 个技能文件以符号链接安装到 Agent 的技能目录。 |
+| **skills+project-doc** | `mutsumi setup --agent claude-code --mode skills+project-doc` | 安装技能，并在 Agent 项目文档（`CLAUDE.md`、`AGENTS.md` 等）中追加集成说明。 |
+| **snippet** | `mutsumi setup --agent custom --mode snippet` | 将集成 prompt 打印到标准输出，供手动粘贴。不安装任何文件。 |
 
-## 方式三：自定义脚本
+### 何时使用哪种模式
 
-```bash
-mutsumi setup --agent custom
-# 将集成提示打印到 stdout
-```
+- **skills** —— 适合大多数用户。Agent 会自动发现技能文件。
+- **skills+project-doc** —— 在仓库的 Agent 配置文件中添加项目级说明。适合希望把规则纳入版本控制的场景。
+- **snippet** —— 用于不支持 Agent Skills 标准的工具（如 Aider、自定义脚本）。
 
-复制输出并粘贴到你 Agent 的系统提示或配置中。
+## Agent 如何调用技能
 
-## Agent 推荐提示模板
+你不需要做任何配置 —— Agent 通过扫描其技能目录自动发现技能。
 
-以下是嵌入 Agent 系统提示的推荐指令：
+### 用户可调用的技能
 
-```markdown
-## Task Management (Mutsumi Integration)
+当你提出相关请求时触发：
 
-You have access to a local task file at `./mutsumi.json`.
-When the user asks you to manage tasks, read and write this file.
+| 你说的话 | 触发的技能 |
+|----------|-----------|
+| "添加一个任务：修复登录 Bug" | `mutsumi-manage` |
+| "把重构任务拆分成子任务" | `mutsumi-plan` |
+| "给我一份所有任务的状态报告" | `mutsumi-report` |
+| "把 auth 任务标记为完成" | `mutsumi-manage` |
 
-Schema:
-- Required fields: id (unique string), title (string), status ("pending" | "done")
-- Optional fields: scope ("day"|"week"|"month"|"inbox"), priority ("high"|"normal"|"low"),
-  tags (string[]), children (Task[]), due_date (ISO date), description (string)
-- Preserve any fields you don't recognize — do NOT delete them
-- Use atomic write (temp file + rename) when possible
-- Generate UUIDv7 for new task IDs
+### 自动触发的技能
 
-Example task:
-{"id":"01JQ...","title":"Fix auth","status":"pending","scope":"day","priority":"high","tags":["dev"],"children":[]}
-```
+这些技能根据上下文自动激活：
+
+| 行为 | 技能 |
+|------|------|
+| Agent 在会话开始时读取任务板 | `mutsumi-context` |
+| Agent 在工作过程中更新任务进度 | `mutsumi-track` |
+
+<Aside>
+自动触发的技能在 frontmatter 中设有 `user-invocable: false`。它们在后台静默工作。
+</Aside>
 
 ## 支持的 Agent
 
-| Agent | 类型 | 集成级别 |
-|---|---|---|
-| Claude Code | AI CLI | 原生（推荐） |
-| Codex CLI | AI CLI | 原生 |
-| Gemini CLI | AI CLI | 原生 |
-| OpenCode | AI CLI | 原生 |
-| Aider | AI CLI | 原生 |
-| Shell 脚本 | 自定义 | 原生 |
-| Cron 任务 | 系统 | 原生 |
+| Agent | 技能目录 | 项目文档 |
+|-------|---------|---------|
+| Claude Code | `~/.claude/skills/` | `CLAUDE.md` |
+| Codex CLI | `~/.agents/skills/` | `AGENTS.md` |
+| Gemini CLI | `~/.gemini/skills/` | `GEMINI.md` |
+| OpenCode | `~/.config/opencode/skills/` | `opencode.md` |
+| Aider | — | — |
+| Custom | — | — |
 
-"原生"意味着只需要 JSON 文件读写 —— 无需安装 SDK 或插件。
-
-## 写入示例（Python）
-
-```python
-import json, uuid, datetime, tempfile, os
-
-# 1. 读取
-with open("mutsumi.json") as f:
-    data = json.load(f)
-
-# 2. 添加任务
-new_task = {
-    "id": str(uuid.uuid4()),  # 或使用 UUIDv7
-    "title": "修复登录 Bug",
-    "status": "pending",
-    "scope": "day",
-    "priority": "high",
-    "tags": ["bugfix"],
-    "created_at": datetime.datetime.now(datetime.UTC).isoformat(),
-    "children": []
-}
-data["tasks"].append(new_task)
-
-# 3. 原子写入
-tmp = tempfile.NamedTemporaryFile(mode='w', dir='.', suffix='.tmp', delete=False)
-json.dump(data, tmp, ensure_ascii=False, indent=2)
-tmp.close()
-os.rename(tmp.name, "mutsumi.json")
-```
-
-<Aside type="caution">
-**重要**：写入时必须保留你不认识的字段 —— 永远不要删除它们。写入后文件必须是有效的 JSON。
+<Aside type="note">
+Aider 和自定义 Agent 不支持 Agent Skills 标准。请使用 `--mode snippet` 并手动粘贴 prompt。
 </Aside>
 
-## 错误自愈
+## 验证与排障
 
-建议在 Agent 提示中加入：
+```bash
+# 检查已安装的技能
+ls -la ~/.claude/skills/mutsumi-*/SKILL.md
 
-```markdown
-写入 mutsumi.json 后，检查 ~/.local/share/mutsumi/error.log
-是否有 Schema 校验错误。如有错误，修复后重新写入。
+# 重新安装（修复损坏的符号链接）
+mutsumi setup --agent claude-code
+
+# 卸载（手动删除）
+rm -rf ~/.claude/skills/mutsumi-*
 ```
 
 ## 下一步
 
-- [Agent 协议](../../customization/agent-protocol/) —— 完整的 Agent 集成协议规范
-- [数据契约](../../customization/data-contract/) —— mutsumi.json 的完整 Schema 定义
+- [Agent 协议](../../customization/agent-protocol/) —— 完整的 Agent 读写 `mutsumi.json` 技术规范
+- [数据契约](../../customization/data-contract/) —— 完整的 Schema 定义
+- [CLI 命令参考](../../reference/cli-commands/) —— 所有可用的 CLI 命令

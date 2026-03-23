@@ -1,153 +1,184 @@
 ---
 title: "Agent セットアップ"
-description: "Mutsumi と AI Agent（Claude Code、Codex CLI、Gemini CLI 等）を統合する 3 つの方法。"
+description: "Agent Skills 標準で Mutsumi を Claude Code、Codex CLI、Gemini CLI、OpenCode と統合する。"
 ---
 
-import { Tabs, TabItem, Steps, Aside } from '@astrojs/starlight/components';
+import { Tabs, TabItem, Steps, Aside, Card, CardGrid } from '@astrojs/starlight/components';
 
-## 概要
+## 仕組み
 
-Mutsumi は **Agent 非依存** です。JSON を正しく書ける**あらゆるプログラム**が Controller として動作します。Agent との統合には 3 つの方法があります。
+Mutsumi は [Agent Skills オープン標準](https://agentskills.io) に準拠した **5 つのバンドルスキル**を同梱しています。`mutsumi setup` を実行すると、これらのスキルファイルがシンボリックリンクで Agent のスキルディレクトリにインストールされます。Agent は自動的にスキルを検出するため、手動でプロンプトをペーストする必要はありません。
 
-## 方法 A: 自動注入（推奨）
-
-`mutsumi setup` コマンドで、Agent の設定ファイルに統合ルールを自動注入します。
-
-<Tabs>
-  <TabItem label="Claude Code">
-
-```bash
-cd ~/your-project
-mutsumi setup --agent claude-code
+```
+~/.mutsumi/skills/          ← SSOT（信頼できる唯一の情報源）
+  mutsumi-manage/SKILL.md
+  mutsumi-track/SKILL.md
+  mutsumi-plan/SKILL.md
+  mutsumi-report/SKILL.md
+  mutsumi-context/SKILL.md
+        │
+        ├── symlink → ~/.claude/skills/     (Claude Code)
+        ├── symlink → ~/.agents/skills/     (Codex CLI)
+        ├── symlink → ~/.gemini/skills/     (Gemini CLI)
+        └── symlink → ~/.config/opencode/skills/  (OpenCode)
 ```
 
-これで `CLAUDE.md` の末尾に `## Mutsumi Task Integration` セクションが追記されます。
+## クイックスタート
 
-確認：
-```bash
-cat CLAUDE.md
-# 末尾に "## Mutsumi Task Integration" が含まれているはず
-```
+<Steps>
 
-  </TabItem>
-  <TabItem label="Codex CLI">
+1. Mutsumi をインストール（まだの場合）：
 
-```bash
-mutsumi setup --agent codex-cli
-```
+   ```bash
+   pip install mutsumi-tui
+   ```
 
-`AGENTS.md` に統合ルールが追記されます。
+2. Agent に対して setup を実行：
 
-  </TabItem>
-  <TabItem label="Gemini CLI">
+   <Tabs>
+     <TabItem label="Claude Code">
+     ```bash
+     mutsumi setup --agent claude-code
+     ```
+     スキルは `~/.claude/skills/` にインストールされます。
+     </TabItem>
+     <TabItem label="Codex CLI">
+     ```bash
+     mutsumi setup --agent codex-cli
+     ```
+     スキルは `~/.agents/skills/` にインストールされます。
+     </TabItem>
+     <TabItem label="Gemini CLI">
+     ```bash
+     mutsumi setup --agent gemini-cli
+     ```
+     スキルは `~/.gemini/skills/` にインストールされます。
+     </TabItem>
+     <TabItem label="OpenCode">
+     ```bash
+     mutsumi setup --agent opencode
+     ```
+     スキルは `~/.config/opencode/skills/` にインストールされます。
+     </TabItem>
+   </Tabs>
 
-```bash
-mutsumi setup --agent gemini-cli
-```
+3. インストールを確認：
 
-`GEMINI.md` に統合ルールが追記されます。
+   ```bash
+   ls ~/.claude/skills/mutsumi-*/SKILL.md   # Claude Code の例
+   # mutsumi-manage/SKILL.md
+   # mutsumi-track/SKILL.md
+   # mutsumi-plan/SKILL.md
+   # mutsumi-report/SKILL.md
+   # mutsumi-context/SKILL.md
+   ```
 
-  </TabItem>
-</Tabs>
+4. 使い始める — Agent に話しかけるだけ：
 
-<Aside type="note">
-`mutsumi setup` は何度実行しても安全です。セクションの重複は発生しません。
+   ```
+   "ログインバグ修正のタスクを追加して、優先度 high、スコープ today"
+   "認証リファクタリングをサブタスクに分解して"
+   "タスクのステータスレポートを出して"
+   ```
+
+</Steps>
+
+<Aside type="tip">
+`mutsumi setup` は何度実行しても安全です。古いシンボリックリンクを置き換え、重複インストールは発生しません。
 </Aside>
 
-## 方法 B: 手動指示（任意の Agent で動作）
+## 5 つのバンドルスキル
 
-Agent とのセッション開始時に以下を伝えてください：
+<CardGrid>
+  <Card title="mutsumi-manage" icon="pencil">
+    **タスク CRUD**：タスクの追加・編集・完了・削除。CLI コマンド（`mutsumi add`、`mutsumi done`）と直接 JSON 操作の両方に対応。
+  </Card>
+  <Card title="mutsumi-track" icon="approve-check">
+    **自動進捗トラッキング**：作業中にタスクのステータスを自動更新。サブタスクの完了マークや親タスクの進捗更新を行う。Agent が自動的にトリガーし、手動呼び出し不要。
+  </Card>
+  <Card title="mutsumi-plan" icon="list-format">
+    **タスク分解**：複雑な目標を parent-children 構造のアクショナブルなサブタスクに分解。呼び出し方："v2 への移行を計画して"。
+  </Card>
+  <Card title="mutsumi-report" icon="document">
+    **ステータスレポート**：`mutsumi.json` を読み取り、スコープ別（Today → Week → Month → Inbox）の進捗サマリーを生成。呼び出し方："タスクレポートを出して"。
+  </Card>
+  <Card title="mutsumi-context" icon="open-book">
+    **コンテキストローダー**：セッション開始時にタスクボードを読み込み、現在の優先順位を把握。Agent がサイレントに読み込む — 出力なし、認識のみ。自動トリガー、手動呼び出し不要。
+  </Card>
+</CardGrid>
 
-> このプロジェクトは Mutsumi をタスク管理に使用しています。タスクは `./mutsumi.json` にあります。
-> ファイルを読み取り、`tasks` 配列を変更し、ファイル全体を書き戻してください。
-> 必須フィールド: `id`（一意の文字列）、`title`（文字列）、`status`（`"pending"` または `"done"`）。
-> オプション: `scope`（`"day"`/`"week"`/`"month"`/`"inbox"`）、`priority`（`"high"`/`"normal"`/`"low"`）、`tags`（文字列配列）、`description`（文字列）。
+## セットアップモード
 
-## 方法 C: プロンプトテンプレート出力
+| モード | コマンド | 動作 |
+|--------|---------|------|
+| **skills**（デフォルト） | `mutsumi setup --agent claude-code` | 5 つのスキルファイルをシンボリックリンクで Agent のスキルディレクトリにインストール。 |
+| **skills+project-doc** | `mutsumi setup --agent claude-code --mode skills+project-doc` | スキルをインストールし、Agent のプロジェクトドキュメント（`CLAUDE.md`、`AGENTS.md` など）に統合手順を追記。 |
+| **snippet** | `mutsumi setup --agent custom --mode snippet` | 統合プロンプトを標準出力に表示。ファイルのインストールなし。 |
 
-```bash
-mutsumi setup --agent custom
-```
+### どのモードを使うべきか
 
-これは統合プロンプトを stdout に出力します。コピーして任意の Agent のシステムプロンプトや設定にペーストしてください。
+- **skills** — ほとんどのユーザーに最適。Agent がスキルを自動検出します。
+- **skills+project-doc** — リポジトリの Agent 設定ファイルにプロジェクトレベルの指示を追加。ルールをバージョン管理に含めたい場合に有用。
+- **snippet** — Agent Skills 標準をサポートしないツール（Aider、カスタムスクリプトなど）向け。
 
-## Agent プロンプトテンプレート
+## Agent がスキルを呼び出す方法
 
-以下は Agent のシステムプロンプトに埋め込む推奨テンプレートです：
+設定は不要です — Agent はスキルディレクトリをスキャンして自動検出します。
 
-```markdown
-## Task Management (Mutsumi Integration)
+### ユーザー呼び出しスキル
 
-You have access to a local task file at `./mutsumi.json`.
-When the user asks you to manage tasks, read and write this file.
+関連するリクエストをすると発動：
 
-Schema:
-- Required fields: id (unique string), title (string), status ("pending" | "done")
-- Optional fields: scope ("day"|"week"|"month"|"inbox"), priority ("high"|"normal"|"low"),
-  tags (string[]), children (Task[]), due_date (ISO date), description (string)
-- Preserve any fields you don't recognize — do NOT delete them
-- Use atomic write (temp file + rename) when possible
-- Generate UUIDv7 for new task IDs
+| あなたの発言 | トリガーされるスキル |
+|-------------|-------------------|
+| 「ログインバグ修正のタスクを追加して」 | `mutsumi-manage` |
+| 「リファクタリングをサブタスクに分解して」 | `mutsumi-plan` |
+| 「全タスクのステータスレポートを出して」 | `mutsumi-report` |
+| 「認証タスクを完了にして」 | `mutsumi-manage` |
 
-Example task:
-{"id":"01JQ...","title":"Fix auth","status":"pending","scope":"day","priority":"high","tags":["dev"],"children":[]}
-```
+### 自動トリガースキル
+
+コンテキストに基づいて自動的に発動：
+
+| 動作 | スキル |
+|------|--------|
+| Agent がセッション開始時にタスクボードを読み込む | `mutsumi-context` |
+| Agent が作業中にタスク進捗を更新する | `mutsumi-track` |
+
+<Aside>
+自動トリガースキルは frontmatter に `user-invocable: false` が設定されています。バックグラウンドでサイレントに動作します。
+</Aside>
 
 ## 対応 Agent 一覧
 
-| Agent | タイプ | 統合レベル |
-|---|---|---|
-| Claude Code | AI CLI | ネイティブ（推奨） |
-| Codex CLI | AI CLI | ネイティブ |
-| Gemini CLI | AI CLI | ネイティブ |
-| OpenCode | AI CLI | ネイティブ |
-| Aider | AI CLI | ネイティブ |
-| シェルスクリプト | カスタム | ネイティブ |
-| cron ジョブ | システム | ネイティブ |
+| Agent | スキルディレクトリ | プロジェクトドキュメント |
+|-------|-------------------|----------------------|
+| Claude Code | `~/.claude/skills/` | `CLAUDE.md` |
+| Codex CLI | `~/.agents/skills/` | `AGENTS.md` |
+| Gemini CLI | `~/.gemini/skills/` | `GEMINI.md` |
+| OpenCode | `~/.config/opencode/skills/` | `opencode.md` |
+| Aider | — | — |
+| Custom | — | — |
 
-<Aside type="tip">
-「ネイティブ」とは、JSON ファイルの読み書きのみで統合できることを意味します。SDK やプラグインのインストールは不要です。
+<Aside type="note">
+Aider とカスタム Agent は Agent Skills 標準をサポートしていません。`--mode snippet` を使用し、手動でプロンプトをペーストしてください。
 </Aside>
 
-## Agent がタスクを書く例
+## 確認とトラブルシューティング
 
-### タスクの追加（Python）
+```bash
+# インストール済みスキルを確認
+ls -la ~/.claude/skills/mutsumi-*/SKILL.md
 
-```python
-import json, uuid, datetime, tempfile, os
+# 再インストール（壊れたシンボリックリンクを修復）
+mutsumi setup --agent claude-code
 
-# 読み取り
-with open("mutsumi.json") as f:
-    data = json.load(f)
-
-# 追加
-new_task = {
-    "id": str(uuid.uuid7()),
-    "title": "ログインバグを修正",
-    "status": "pending",
-    "scope": "day",
-    "priority": "high",
-    "tags": ["bugfix"],
-    "created_at": datetime.datetime.now(datetime.UTC).isoformat(),
-    "children": []
-}
-data["tasks"].append(new_task)
-
-# アトミック書き込み
-tmp = tempfile.NamedTemporaryFile(
-    mode='w', dir='.', suffix='.tmp', delete=False
-)
-json.dump(data, tmp, ensure_ascii=False, indent=2)
-tmp.close()
-os.rename(tmp.name, "mutsumi.json")
+# アンインストール（手動削除）
+rm -rf ~/.claude/skills/mutsumi-*
 ```
 
-### タスクの完了
+## 次のステップ
 
-```python
-for task in data["tasks"]:
-    if task["id"] == target_id:
-        task["status"] = "done"
-        task["completed_at"] = datetime.datetime.now(datetime.UTC).isoformat()
-        break
-```
+- [Agent プロトコル](../../customization/agent-protocol/) — `mutsumi.json` の読み書きに関する完全な技術仕様
+- [データコントラクト](../../customization/data-contract/) — 完全な Schema 定義
+- [CLI コマンドリファレンス](../../reference/cli-commands/) — 利用可能な全 CLI コマンド

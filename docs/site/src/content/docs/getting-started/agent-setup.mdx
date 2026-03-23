@@ -1,76 +1,184 @@
 ---
 title: Agent Setup
-description: Integrate Mutsumi with your AI agent.
+description: Integrate Mutsumi with Claude Code, Codex CLI, Gemini CLI, and OpenCode via Agent Skills.
 ---
 
-import { Tabs, TabItem, Aside } from '@astrojs/starlight/components';
+import { Tabs, TabItem, Steps, Aside, Card, CardGrid } from '@astrojs/starlight/components';
+
+## How It Works
+
+Mutsumi ships **5 bundled skills** that follow the [Agent Skills open standard](https://agentskills.io). When you run `mutsumi setup`, these skills are installed into your agent's skill directory via symlinks. The agent discovers them automatically — no manual prompt pasting required.
+
+```
+~/.mutsumi/skills/          ← SSOT (single source of truth)
+  mutsumi-manage/SKILL.md
+  mutsumi-track/SKILL.md
+  mutsumi-plan/SKILL.md
+  mutsumi-report/SKILL.md
+  mutsumi-context/SKILL.md
+        │
+        ├── symlink → ~/.claude/skills/     (Claude Code)
+        ├── symlink → ~/.agents/skills/     (Codex CLI)
+        ├── symlink → ~/.gemini/skills/     (Gemini CLI)
+        └── symlink → ~/.config/opencode/skills/  (OpenCode)
+```
+
+## Quick Start
+
+<Steps>
+
+1. Install Mutsumi (if not already):
+
+   ```bash
+   pip install mutsumi-tui
+   ```
+
+2. Run setup for your agent:
+
+   <Tabs>
+     <TabItem label="Claude Code">
+     ```bash
+     mutsumi setup --agent claude-code
+     ```
+     Skills are installed to `~/.claude/skills/`.
+     </TabItem>
+     <TabItem label="Codex CLI">
+     ```bash
+     mutsumi setup --agent codex-cli
+     ```
+     Skills are installed to `~/.agents/skills/`.
+     </TabItem>
+     <TabItem label="Gemini CLI">
+     ```bash
+     mutsumi setup --agent gemini-cli
+     ```
+     Skills are installed to `~/.gemini/skills/`.
+     </TabItem>
+     <TabItem label="OpenCode">
+     ```bash
+     mutsumi setup --agent opencode
+     ```
+     Skills are installed to `~/.config/opencode/skills/`.
+     </TabItem>
+   </Tabs>
+
+3. Verify installation:
+
+   ```bash
+   ls ~/.claude/skills/mutsumi-*/SKILL.md   # Claude Code example
+   # mutsumi-manage/SKILL.md
+   # mutsumi-track/SKILL.md
+   # mutsumi-plan/SKILL.md
+   # mutsumi-report/SKILL.md
+   # mutsumi-context/SKILL.md
+   ```
+
+4. Start using — ask your agent:
+
+   ```
+   "Add a task: fix the login bug, priority high, scope today"
+   "Break down the auth refactor into subtasks"
+   "Give me a status report"
+   ```
+
+</Steps>
+
+<Aside type="tip">
+Running `mutsumi setup` again is safe — it replaces stale symlinks and never duplicates.
+</Aside>
+
+## The 5 Bundled Skills
+
+<CardGrid>
+  <Card title="mutsumi-manage" icon="pencil">
+    **Task CRUD**: Add, edit, complete, and remove tasks. Supports CLI commands (`mutsumi add`, `mutsumi done`) and direct JSON writes.
+  </Card>
+  <Card title="mutsumi-track" icon="approve-check">
+    **Auto Progress Tracking**: Automatically updates task status as you work. Marks subtasks done, updates parent progress. Triggered by the agent, not manually invoked.
+  </Card>
+  <Card title="mutsumi-plan" icon="list-format">
+    **Task Decomposition**: Breaks a complex goal into actionable subtasks with a parent-children structure. Invoke with: *"Plan out the migration to v2"*.
+  </Card>
+  <Card title="mutsumi-report" icon="document">
+    **Status Report**: Reads `mutsumi.json` and generates a progress summary grouped by scope (Today → Week → Month → Inbox). Invoke with: *"Give me a task report"*.
+  </Card>
+  <Card title="mutsumi-context" icon="open-book">
+    **Context Loader**: Loads the task board at session start to understand priorities. The agent reads this silently — no output, just awareness. Auto-triggered, not manually invoked.
+  </Card>
+</CardGrid>
+
+## Setup Modes
+
+| Mode | Command | What it does |
+|------|---------|--------------|
+| **skills** (default) | `mutsumi setup --agent claude-code` | Installs 5 skill files as symlinks into the agent's skill directory. |
+| **skills+project-doc** | `mutsumi setup --agent claude-code --mode skills+project-doc` | Installs skills AND appends a `## Mutsumi Task Integration` section to the agent's project doc (`CLAUDE.md`, `AGENTS.md`, etc.). |
+| **snippet** | `mutsumi setup --agent custom --mode snippet` | Prints the integration prompt to stdout for manual pasting. No files installed. |
+
+### When to use each mode
+
+- **skills** — Best for most users. The agent discovers skills automatically.
+- **skills+project-doc** — Adds project-level instructions to your repo's agent config file. Useful when you want the rules checked into version control.
+- **snippet** — For agents that don't support the skills standard (e.g., Aider, custom scripts).
+
+## How Agents Invoke Skills
+
+You don't need to configure anything — agents discover skills by scanning their skill directories.
+
+### User-invocable skills
+
+These are triggered when you ask the agent something relevant:
+
+| You say | Skill triggered |
+|---------|-----------------|
+| "Add a task to fix the login bug" | `mutsumi-manage` |
+| "Break down the refactor into subtasks" | `mutsumi-plan` |
+| "Give me a status report of all tasks" | `mutsumi-report` |
+| "Mark the auth task as done" | `mutsumi-manage` |
+
+### Auto-triggered skills
+
+These activate automatically based on context:
+
+| Behavior | Skill |
+|----------|-------|
+| Agent reads the task board at session start | `mutsumi-context` |
+| Agent updates task progress as it works | `mutsumi-track` |
+
+<Aside>
+Auto-triggered skills have `user-invocable: false` in their frontmatter. They work silently in the background.
+</Aside>
 
 ## Supported Agents
 
-| Agent | Type | Integration |
-|-------|------|-------------|
-| Claude Code | AI CLI | Native (recommended) |
-| Codex CLI | AI CLI | Native |
-| Gemini CLI | AI CLI | Native |
-| OpenCode | AI CLI | Native |
-| Aider | AI CLI | Native |
-| Shell scripts | Custom | Native |
-| Cron jobs | System | Native |
+| Agent | Skill Directory | Project Doc |
+|-------|----------------|-------------|
+| Claude Code | `~/.claude/skills/` | `CLAUDE.md` |
+| Codex CLI | `~/.agents/skills/` | `AGENTS.md` |
+| Gemini CLI | `~/.gemini/skills/` | `GEMINI.md` |
+| OpenCode | `~/.config/opencode/skills/` | `opencode.md` |
+| Aider | — | — |
+| Custom | — | — |
 
-"Native" means only JSON file read/write is needed — no SDK or plugin required.
+<Aside type="note">
+Aider and custom agents don't support the Agent Skills standard. Use `--mode snippet` and paste the prompt manually.
+</Aside>
 
-## Setup Methods
-
-<Tabs>
-  <TabItem label="Auto-inject (recommended)">
-    ```bash
-    cd ~/your-project
-    mutsumi setup --agent claude-code   # Appends rules to CLAUDE.md
-    mutsumi setup --agent codex-cli     # Appends to AGENTS.md
-    mutsumi setup --agent gemini-cli    # Appends to GEMINI.md
-    ```
-
-    This appends a `## Mutsumi Task Integration` section to the agent's config file. Running setup again is safe — it won't duplicate the section.
-  </TabItem>
-  <TabItem label="Manual">
-    Tell your agent this when starting a session:
-
-    > This project uses Mutsumi for task management. Tasks live in `./mutsumi.json`.
-    > Read the file, modify the `tasks` array, write the entire file back.
-    > Required fields: `id` (unique string), `title` (string), `status` ("pending" or "done").
-    > Optional: `scope`, `priority`, `tags`, `description`.
-  </TabItem>
-  <TabItem label="Custom">
-    ```bash
-    mutsumi setup --agent custom   # Prints prompt to stdout
-    ```
-
-    Copy the output and paste it into your agent's system prompt.
-  </TabItem>
-</Tabs>
-
-## Agent Prompt Template
-
-```markdown
-## Task Management (Mutsumi Integration)
-
-You have access to a local task file at `./mutsumi.json`.
-When the user asks you to manage tasks, read and write this file.
-
-Schema:
-- Required: id (unique string), title (string), status ("pending" | "done")
-- Optional: scope ("day"|"week"|"month"|"inbox"), priority ("high"|"normal"|"low"),
-  tags (string[]), children (Task[]), due_date (ISO date), description (string)
-- Preserve any fields you don't recognize — do NOT delete them
-- Use atomic write (temp file + rename) when possible
-```
-
-## Verify Setup
+## Verify & Troubleshoot
 
 ```bash
-cat CLAUDE.md   # Should contain "## Mutsumi Task Integration"
+# Check what's installed
+ls -la ~/.claude/skills/mutsumi-*/SKILL.md
+
+# Re-install (fix broken symlinks)
+mutsumi setup --agent claude-code
+
+# Uninstall (remove from shell)
+rm -rf ~/.claude/skills/mutsumi-*
 ```
 
-<Aside>
-Your agent only needs to read and write `mutsumi.json`. No special SDK, no API calls, no plugins. If it can write JSON, it works with Mutsumi.
-</Aside>
+## Next Steps
+
+- [Agent Protocol](../../customization/agent-protocol/) — Full technical spec for reading/writing `mutsumi.json`
+- [Data Contract](../../customization/data-contract/) — Complete schema definition
+- [CLI Commands](../../reference/cli-commands/) — All available CLI commands

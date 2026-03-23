@@ -231,7 +231,7 @@ mutsumi init --project
 
 ## mutsumi setup
 
-配置 AI Agent 集成。
+配置 AI Agent 集成。将 [Agent Skills](https://agentskills.io) 通过符号链接安装到 Agent 的技能目录。
 
 ```bash
 mutsumi setup [选项]
@@ -246,9 +246,28 @@ mutsumi setup [选项]
 
 | 模式 | 行为 |
 |------|------|
-| `skills` | 仅在配置中记住首选 Agent。不修改任何文件。 |
-| `skills+project-doc` | 保存偏好，并将集成说明追加到 Agent 的项目文档（`CLAUDE.md`、`AGENTS.md` 等） |
-| `snippet` | 将集成 prompt 打印到标准输出，供手动粘贴。 |
+| `skills` | 将 5 个 Mutsumi 技能文件（`mutsumi-manage`、`mutsumi-track`、`mutsumi-plan`、`mutsumi-report`、`mutsumi-context`）以符号链接形式从 `~/.mutsumi/skills/` 安装到 Agent 的技能目录。 |
+| `skills+project-doc` | 安装技能，并将 `## Mutsumi Task Integration` 部分追加到 Agent 的项目文档（`CLAUDE.md`、`AGENTS.md` 等）。 |
+| `snippet` | 将集成 prompt 打印到标准输出，供手动粘贴。不安装任何文件。 |
+
+### 安装的技能
+
+| 技能 | 用途 | 自动触发？ |
+|------|------|-----------|
+| `mutsumi-manage` | 任务增删改查（添加、编辑、完成、删除） | 否 — 用户请求时 |
+| `mutsumi-track` | 工作时自动更新任务进度 | 是 |
+| `mutsumi-plan` | 将目标分解为子任务 | 否 — 用户请求时 |
+| `mutsumi-report` | 生成状态摘要 | 否 — 用户请求时 |
+| `mutsumi-context` | 会话开始时加载任务板上下文 | 是 |
+
+### 技能目录
+
+| Agent | 目录 |
+|-------|------|
+| Claude Code | `~/.claude/skills/` |
+| Codex CLI | `~/.agents/skills/` |
+| Gemini CLI | `~/.gemini/skills/` |
+| OpenCode | `~/.config/opencode/skills/` |
 
 ### 示例
 
@@ -256,20 +275,22 @@ mutsumi setup [选项]
 # 列出可用 Agent 和模式
 mutsumi setup
 
-# Skills-first（默认 — 不修改文件）
+# 为 Claude Code 安装技能（默认模式）
 mutsumi setup --agent claude-code
 
-# 注入项目文档到 CLAUDE.md
+# 安装技能 + 注入项目文档到 CLAUDE.md
 mutsumi setup --agent claude-code --mode skills+project-doc
 
-# 打印 prompt 供手动使用
+# 打印 prompt 供手动使用（Aider、自定义 Agent）
 mutsumi setup --agent custom --mode snippet
 
-# Gemini CLI + 项目文档注入
-mutsumi setup --agent gemini-cli --mode skills+project-doc
+# 为其他 Agent 安装技能
+mutsumi setup --agent gemini-cli
+mutsumi setup --agent codex-cli
+mutsumi setup --agent opencode
 ```
 
-重复运行 `skills+project-doc` 是安全的 —— 会检测已有内容，不会重复。
+重复运行是安全的 —— 会替换过期的符号链接，不会重复安装。
 
 ---
 
