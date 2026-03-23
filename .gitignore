@@ -37,3 +37,8 @@ events.jsonl
 error.log
 *.tmp
 /tasks.json
+
+# Docs site (Astro/Node)
+node_modules/
+.astro/
+docs/site/dist/

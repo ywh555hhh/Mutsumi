@@ -3,6 +3,8 @@ title: Keybinding Reference
 description: Complete table of all keybinding actions across vim, emacs, and arrows presets.
 ---
 
+{/* AUTO-GENERATED from commit e24353d — DO NOT EDIT. Run: uv run python scripts/gen_docs.py */}
+
 ## All Actions
 
 Complete reference of every keybinding action with keys for each preset. Actions marked "shared" use the same key in all three presets.
@@ -11,78 +13,78 @@ Complete reference of every keybinding action with keys for each preset. Actions
 
 | Action | Description | vim | emacs | arrows |
 |--------|-------------|-----|-------|--------|
-| `cursor_down` | Move cursor down | <kbd>j</kbd> | <kbd>Ctrl+N</kbd> | <kbd>Down</kbd> |
-| `cursor_up` | Move cursor up | <kbd>k</kbd> | <kbd>Ctrl+P</kbd> | <kbd>Up</kbd> |
-| `cursor_bottom` | Jump to bottom of list | <kbd>G</kbd> (Shift+G) | <kbd>Ctrl+E</kbd> | <kbd>End</kbd> |
-| `cursor_top` | Jump to top of list | <kbd>gg</kbd> (multi-key) | <kbd>Ctrl+A</kbd> | <kbd>Home</kbd> |
+| `cursor_bottom` | Bottom | <kbd>shift+g</kbd> | <kbd>ctrl+e</kbd> | <kbd>End</kbd> |
+| `cursor_down` | Down | <kbd>j</kbd> | <kbd>ctrl+n</kbd> | <kbd>Down</kbd> |
+| `cursor_top` | Top | -- | <kbd>ctrl+a</kbd> | <kbd>Home</kbd> |
+| `cursor_up` | Up | <kbd>k</kbd> | <kbd>ctrl+p</kbd> | <kbd>Up</kbd> |
 
 ### Task Operations
 
 | Action | Description | Key (all presets) |
 |--------|-------------|-------------------|
-| `toggle_done` | Toggle done/pending | <kbd>Space</kbd> |
-| `new_task` | Create new task dialog | <kbd>n</kbd> |
-| `edit_task` | Edit task dialog | <kbd>e</kbd> |
-| `inline_edit` | Inline edit title | <kbd>i</kbd> |
-| `show_detail` | Open/close detail panel | <kbd>Enter</kbd> |
-| `close_detail` | Close detail panel / cancel | <kbd>Escape</kbd> |
-| <kbd>delete</kbd> | Delete task (multi-key) | <kbd>dd</kbd> |
+| `close_detail` | Close | <kbd>Escape</kbd> |
+| `cycle_scope` | Cycle Scope | <kbd>f</kbd> |
+| `edit_task` | Edit | <kbd>e</kbd> |
+| `inline_edit` | Inline Edit | <kbd>i</kbd> |
+| `new_task` | New | <kbd>n</kbd> |
+| `show_detail` | Detail | <kbd>Enter</kbd> |
+| `toggle_done` | Toggle | <kbd>Space</kbd> |
 
 ### Priority
 
 | Action | Description | Key (all presets) |
 |--------|-------------|-------------------|
-| `priority_up` | Increase priority | `+` or `=` |
-| `priority_down` | Decrease priority | `-` or `_` |
+| `priority_down` | Priority Down | `-` or `_` |
+| `priority_up` | Priority Up | `+` or `=` |
 
 ### Clipboard
 
 | Action | Description | Key (all presets) |
 |--------|-------------|-------------------|
-| `copy_task` | Copy selected task | <kbd>y</kbd> |
-| `paste_task` | Paste below cursor | <kbd>p</kbd> |
-| `paste_task_above` | Paste above cursor | <kbd>P</kbd> (Shift+P) |
+| `copy_task` | Copy | <kbd>y</kbd> |
+| `paste_task` | Paste | <kbd>p</kbd> |
+| `paste_task_above` | Paste Above | <kbd>shift+p</kbd> |
 
 ### Subtasks
 
 | Action | Description | Key (all presets) |
 |--------|-------------|-------------------|
-| `add_child` | Add subtask to selected task | <kbd>A</kbd> (Shift+A) |
-| `toggle_fold` | Show/hide subtasks | <kbd>z</kbd> |
+| `add_child` | Add Child | <kbd>shift+a</kbd> |
+| `toggle_fold` | Toggle Fold | <kbd>z</kbd> |
 
 ### View Controls
 
 | Action | Description | vim | emacs | arrows |
 |--------|-------------|-----|-------|--------|
-| `collapse_group` | Collapse priority group | <kbd>h</kbd> | <kbd>Ctrl+B</kbd> | <kbd>Left</kbd> |
-| `expand_group` | Expand priority group | <kbd>l</kbd> | <kbd>Ctrl+F</kbd> | <kbd>Right</kbd> |
-| `move_down` | Reorder task down | <kbd>J</kbd> (Shift+J) | <kbd>Ctrl+Shift+N</kbd> | <kbd>Shift+Down</kbd> |
-| `move_up` | Reorder task up | <kbd>K</kbd> (Shift+K) | <kbd>Ctrl+Shift+P</kbd> | <kbd>Shift+Up</kbd> |
+| `collapse_group` | Collapse | <kbd>h</kbd> | <kbd>ctrl+b</kbd> | <kbd>Left</kbd> |
+| `expand_group` | Expand | <kbd>l</kbd> | <kbd>ctrl+f</kbd> | <kbd>Right</kbd> |
+| `move_down` | Move Down | <kbd>shift+j</kbd> | <kbd>ctrl+shift+n</kbd> | <kbd>Shift+Down</kbd> |
+| `move_up` | Move Up | <kbd>shift+k</kbd> | <kbd>ctrl+shift+p</kbd> | <kbd>Shift+Up</kbd> |
 
 ### Tab Management
 
 | Action | Description | Key (all presets) |
 |--------|-------------|-------------------|
-| `next_tab` | Switch to next tab | <kbd>Tab</kbd> |
-| `prev_tab` | Switch to previous tab | <kbd>Shift+Tab</kbd> |
-| `tab_1` | Switch to Today | `1` |
-| `tab_2` | Switch to Week | `2` |
-| `tab_3` | Switch to Month | `3` |
-| `tab_4` | Switch to Inbox | `4` |
+| `next_tab` | Next Tab | <kbd>Tab</kbd> |
+| `prev_tab` | Prev Tab | <kbd>Shift+Tab</kbd> |
+| `tab_1` | Today | `1` |
+| `tab_2` | Week | `2` |
+| `tab_3` | Month | `3` |
+| `tab_4` | Inbox | `4` |
 
 ### Search and Sort
 
 | Action | Description | Key (all presets) |
 |--------|-------------|-------------------|
-| `search` | Open search bar | <kbd>/</kbd> |
-| `sort` | Open sort overlay | <kbd>s</kbd> |
+| `search` | Search | <kbd>/</kbd> |
+| `sort` | Sort | <kbd>s</kbd> |
 
 ### Utility
 
 | Action | Description | vim | emacs | arrows |
 |--------|-------------|-----|-------|--------|
-| `quit` | Quit Mutsumi | <kbd>q</kbd> | <kbd>Ctrl+Q</kbd> | <kbd>q</kbd> |
-| `show_help` | Show keybinding help | <kbd>?</kbd> | <kbd>?</kbd> | <kbd>?</kbd> |
+| `quit` | Quit | <kbd>q</kbd> | <kbd>ctrl+q</kbd> | <kbd>q</kbd> |
+| `show_help` | Help | <kbd>?</kbd> | <kbd>?</kbd> | <kbd>?</kbd> |
 
 ## Multi-Key Sequences
 
@@ -145,3 +147,4 @@ Press <kbd>?</kbd> to open the help screen displaying all keybindings for the ac
 - Utility
 
 Dismiss with <kbd>Escape</kbd>, <kbd>q</kbd>, or <kbd>?</kbd>.
+

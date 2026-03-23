@@ -3,20 +3,22 @@ title: Configuration Reference
 description: Complete reference for every config.toml field with type, default, description, and example values.
 ---
 
+{/* AUTO-GENERATED from commit e24353d — DO NOT EDIT. Run: uv run python scripts/gen_docs.py */}
+
 ## Config File Location
 
 | Platform | Path (preferred) | Legacy fallback |
 |----------|------------------|-----------------|
 | Linux | `~/.mutsumi/config.toml` | `~/.config/mutsumi/config.toml` |
 | macOS | `~/.mutsumi/config.toml` | `~/.config/mutsumi/config.toml` or `~/Library/Application Support/mutsumi/config.toml` |
-| Windows | `%APPDATA%\mutsumi\config.toml` | — |
+| Windows | `%APPDATA%\mutsumi\config.toml` | -- |
 
 Mutsumi searches the preferred path first, then falls back to legacy locations. Run `mutsumi migrate --config` to move your config to the new location.
 
 ## Full Config Template
 
 ```toml
-# ── Mutsumi Configuration ──────────────────────────
+# -- Mutsumi Configuration ----------------------
 
 # Theme: built-in name or custom theme filename
 theme = "monochrome-zen"
@@ -36,7 +38,7 @@ notification_mode = "quiet"
 # Default task file path (optional)
 # default_path = "/path/to/mutsumi.json"
 
-# Event log path (optional — disabled if unset)
+# Event log path (optional -- disabled if unset)
 # event_log_path = "~/.local/share/mutsumi/events.jsonl"
 
 # Custom Textual CSS path (optional)
@@ -149,7 +151,7 @@ notification_mode = "badge"
 | Property | Value |
 |----------|-------|
 | Type | `dict[string, string]` |
-| Default | `{}` (empty) |
+| Default | `{}` |
 
 Maps action names to new key strings, applied on top of the selected preset. See [Custom Keybindings](../../customization/custom-keybindings/) for all action names.
 
@@ -160,25 +162,12 @@ cursor_down = "ctrl+j"
 cursor_up = "ctrl+k"
 ```
 
-### `default_path`
-
-| Property | Value |
-|----------|-------|
-| Type | `Path` or `null` |
-| Default | `null` (watches `./mutsumi.json`) |
-
-Default path to `mutsumi.json`. If set, `mutsumi` (without `--path`) watches this file instead of `./mutsumi.json`.
-
-```toml
-default_path = "~/projects/main/mutsumi.json"
-```
-
 ### `event_log_path`
 
 | Property | Value |
 |----------|-------|
-| Type | `Path` or `null` |
-| Default | `null` (event logging disabled) |
+| Type | `Path or `null`` |
+| Default | -- |
 
 Path for the JSONL event log. If set, Mutsumi appends events when users operate in the TUI.
 
@@ -186,12 +175,25 @@ Path for the JSONL event log. If set, Mutsumi appends events when users operate 
 event_log_path = "./events.jsonl"
 ```
 
+### `default_path`
+
+| Property | Value |
+|----------|-------|
+| Type | `Path or `null`` |
+| Default | -- |
+
+Default path to `mutsumi.json`. If set, `mutsumi` (without `--path`) watches this file instead of `./mutsumi.json`.
+
+```toml
+default_path = "~/projects/main/mutsumi.json"
+```
+
 ### `custom_css_path`
 
 | Property | Value |
 |----------|-------|
-| Type | `Path` or `null` |
-| Default | `null` (no custom CSS) |
+| Type | `Path or `null`` |
+| Default | -- |
 
 Path to a Textual CSS file for visual overrides. See [Custom CSS](../../customization/custom-css/).
 
@@ -204,7 +206,7 @@ custom_css_path = "~/.mutsumi/custom.tcss"
 | Property | Value |
 |----------|-------|
 | Type | `list[string]` |
-| Default | `["checkbox", "title", "tags", "priority"]` |
+| Default | `[]` |
 
 Columns displayed in the task list. You can reference both built-in fields and custom fields added by agents.
 
@@ -228,6 +230,25 @@ columns = ["checkbox", "title", "effort", "sprint", "priority"]
 ```
 
 If a task doesn't have a referenced custom field, the column cell is empty.
+
+### `projects`
+
+| Property | Value |
+|----------|-------|
+| Type | `list[{name, path}]` |
+| Default | `[]` |
+
+Registered project sources. Each entry has a `name` (display name) and `path` (absolute path to directory containing `mutsumi.json`). Managed via `mutsumi project add/remove`.
+
+```toml
+[[projects]]
+name = "saas-app"
+path = "/Users/you/projects/saas-app"
+
+[[projects]]
+name = "oshigrid"
+path = "/Users/you/projects/oshigrid"
+```
 
 ### `default_tab`
 
@@ -268,25 +289,6 @@ Whether to include completed tasks in dashboard progress counts.
 dashboard_show_completed = false
 ```
 
-### `projects`
-
-| Property | Value |
-|----------|-------|
-| Type | `list[{name, path}]` |
-| Default | `[]` |
-
-Registered project sources. Each entry has a `name` (display name) and `path` (absolute path to directory containing `mutsumi.json`). Managed via `mutsumi project add/remove`.
-
-```toml
-[[projects]]
-name = "saas-app"
-path = "/Users/you/projects/saas-app"
-
-[[projects]]
-name = "oshigrid"
-path = "/Users/you/projects/oshigrid"
-```
-
 ## Config Commands
 
 ```bash
@@ -300,10 +302,11 @@ mutsumi config --path     # Print config file path
 
 ```
 ~/.mutsumi/                          (preferred location)
-├── config.toml          # Main config
-├── mutsumi.json         # Personal tasks
-├── themes/
-│   └── my-theme.toml    # Custom themes
-└── keys/
-    └── my-keys.toml     # Custom keybindings (future)
+|-- config.toml          # Main config
+|-- mutsumi.json         # Personal tasks
+|-- themes/
+|   +-- my-theme.toml    # Custom themes
++-- keys/
+    +-- my-keys.toml     # Custom keybindings (future)
 ```
+

@@ -3,6 +3,8 @@ title: Task Schema Reference
 description: Complete reference for every field in the Mutsumi task object. Types, required status, defaults, validation rules, and examples.
 ---
 
+{/* AUTO-GENERATED from commit e24353d — DO NOT EDIT. Run: uv run python scripts/gen_docs.py */}
+
 ## Root Object
 
 The `tasks.json` file has the following root structure:
@@ -19,7 +21,8 @@ The `tasks.json` file has the following root structure:
 |-------|------|----------|---------|------------|
 | `$schema` | `string` | No | -- | Valid URL. For editor hints only; Mutsumi does not fetch it. |
 | `version` | `integer` | Yes | -- | Must be `1`. Future versions may change the schema. |
-| `tasks` | `Task[]` | Yes | `[]` | Array of task objects. |
+| `tasks` | `Task[]` | No | `[]` | Array of task objects. |
+| `skipped_count` | `integer` | No | `0` |  |
 
 ## Task Object Fields
 
@@ -56,7 +59,7 @@ UUIDv7 encodes a millisecond-precision timestamp, making IDs naturally sortable 
 | Property | Value |
 |----------|-------|
 | Type | `string` |
-| Required | **Yes** |
+| Required | No |
 | Default | `"pending"` |
 | Validation | Must be `"pending"` or `"done"`. Unknown values trigger a warning badge. |
 
@@ -263,3 +266,4 @@ Any field not listed above is a custom field. Mutsumi's Pydantic model uses `ext
   ]
 }
 ```
+

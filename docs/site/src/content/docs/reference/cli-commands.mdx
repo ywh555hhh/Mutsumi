@@ -3,6 +3,8 @@ title: CLI Command Reference
 description: Complete reference for every Mutsumi CLI command — synced with code.
 ---
 
+{/* AUTO-GENERATED from commit e24353d — DO NOT EDIT. Run: uv run python scripts/gen_docs.py */}
+
 import { Aside } from '@astrojs/starlight/components';
 
 <Aside type="note">
@@ -19,10 +21,10 @@ mutsumi [OPTIONS] [COMMAND]
 
 | Option | Short | Description | Default |
 |--------|-------|-------------|---------|
-| `--path PATH` | `-p` | Path to task file | `./mutsumi.json` (fallback: `./tasks.json`) |
-| `--watch PATH` | `-w` | Additional task file paths to watch (repeatable) | — |
-| `--version` | | Show version and exit | — |
-| `--help` | | Show help and exit | — |
+| `--path PATH` | `-p` | Path to task file (default: ./mutsumi.json, fallback: ./tasks.json) | -- |
+| `--watch PATH` | `-w` | Additional task file paths to watch (multi-project) | -- |
+| `--version` | | Show version and exit | -- |
+| `--help` | | Show help and exit | -- |
 
 ### Examples
 
@@ -55,9 +57,9 @@ mutsumi add TITLE [OPTIONS]
 | Option | Short | Type | Values | Default |
 |--------|-------|------|--------|---------|
 | `--priority` | `-P` | choice | `high`, `normal`, `low` | `normal` |
-| `--scope` | `-s` | choice | `day`, `week`, `month`, `inbox` | Config `default_scope` |
-| `--tags` | `-t` | string | Comma-separated | `[]` |
-| `--description` | `-d` | string | Free text | — |
+| `--scope` | `-s` | choice | `day`, `week`, `month`, `inbox` | `inbox` |
+| `--tags` | `-t` | text | -- | -- |
+| `--description` | `-d` | text | -- | -- |
 
 ### Examples
 
@@ -86,8 +88,8 @@ mutsumi list [OPTIONS]
 
 | Option | Short | Type | Values | Default |
 |--------|-------|------|--------|---------|
-| `--scope` | `-s` | choice | `day`, `week`, `month`, `inbox` | all |
-| `--done / --no-done` | | flag | | show all |
+| `--scope` | `-s` | choice | `day`, `week`, `month`, `inbox` | -- |
+| `--done` / `--no-done` |  | flag | -- | -- |
 
 ### Examples
 
@@ -145,13 +147,13 @@ Edit an existing task's fields (supports ID prefix matching).
 mutsumi edit TASK_ID [OPTIONS]
 ```
 
-| Option | Short | Type | Values | Description |
-|--------|-------|------|--------|-------------|
-| `--title` | | string | | New task title |
-| `--priority` | `-P` | choice | `high`, `normal`, `low` | New priority |
-| `--scope` | `-s` | choice | `day`, `week`, `month`, `inbox` | New scope |
-| `--tags` | `-t` | string | Comma-separated | Replace tags |
-| `--description` | `-d` | string | Free text | New description |
+| Option | Short | Type | Values | Default |
+|--------|-------|------|--------|---------|
+| `--title` |  | text | -- | -- |
+| `--priority` | `-P` | choice | `high`, `normal`, `low` | -- |
+| `--scope` | `-s` | choice | `day`, `week`, `month`, `inbox` | -- |
+| `--tags` | `-t` | text | -- | -- |
+| `--description` | `-d` | text | -- | -- |
 
 ### Examples
 
@@ -204,8 +206,8 @@ mutsumi init [OPTIONS]
 | Option | Description |
 |--------|-------------|
 | `--force` | Overwrite existing file |
-| `--personal` | Initialize personal task file at `~/.mutsumi/mutsumi.json` |
-| `--project` | Create `mutsumi.json` in cwd AND register as a project source |
+| `--personal` | Initialize personal task file (~/.mutsumi/mutsumi.json) |
+| `--project` | Create mutsumi.json in cwd AND register as a project source |
 
 ### Examples
 
@@ -239,8 +241,8 @@ mutsumi setup [OPTIONS]
 
 | Option | Short | Type | Values | Default |
 |--------|-------|------|--------|---------|
-| `--agent` | `-a` | choice | `claude-code`, `codex-cli`, `opencode`, `gemini-cli`, `aider`, `custom` | — |
-| `--mode` | | choice | `skills`, `skills+project-doc`, `snippet` | `skills` |
+| `--agent` | `-a` | choice | `claude-code`, `codex-cli`, `opencode`, `gemini-cli`, `aider`, `custom` | -- |
+| `--mode` |  | choice | `skills`, `skills+project-doc`, `snippet` | `skills` |
 
 ### Modes
 
@@ -256,7 +258,7 @@ mutsumi setup [OPTIONS]
 # List available agents and modes
 mutsumi setup
 
-# Skills-first (default — no files modified)
+# Skills-first (default -- no files modified)
 mutsumi setup --agent claude-code
 
 # Inject project doc into CLAUDE.md
@@ -269,7 +271,7 @@ mutsumi setup --agent custom --mode snippet
 mutsumi setup --agent gemini-cli --mode skills+project-doc
 ```
 
-Running `skills+project-doc` again is safe — it detects existing sections and does not duplicate.
+Running `skills+project-doc` again is safe -- it detects existing sections and does not duplicate.
 
 ---
 
@@ -283,14 +285,13 @@ mutsumi migrate [OPTIONS]
 
 | Option | Description |
 |--------|-------------|
-| (none) | Rename `tasks.json` → `mutsumi.json` in current directory |
-| `--config` | Migrate config directory (`~/.config/mutsumi/` → `~/.mutsumi/`) |
-| `--all` | Migrate both task file and config |
+| `--config` | Migrate config from ~/.config/mutsumi/ to ~/.mutsumi/ |
+| `--all` | Migrate both task file and config directory |
 
 ### Examples
 
 ```bash
-# Migrate tasks.json → mutsumi.json
+# Migrate tasks.json -> mutsumi.json
 mutsumi migrate
 
 # Migrate config directory
@@ -302,45 +303,6 @@ mutsumi migrate --all
 
 ---
 
-## mutsumi project
-
-Manage registered project sources.
-
-### mutsumi project add
-
-```bash
-mutsumi project add PATH
-```
-
-Register a project directory as a source. The directory should contain (or will contain) a `mutsumi.json`.
-
-```bash
-mutsumi project add .
-mutsumi project add ~/projects/saas-app
-```
-
-### mutsumi project remove
-
-```bash
-mutsumi project remove NAME
-```
-
-Unregister a project source.
-
-```bash
-mutsumi project remove saas-app
-```
-
-### mutsumi project list
-
-```bash
-mutsumi project list
-```
-
-List all registered projects with their paths.
-
----
-
 ## mutsumi validate
 
 Validate the task file schema.
@@ -348,8 +310,6 @@ Validate the task file schema.
 ```bash
 mutsumi validate
 ```
-
-Validates `mutsumi.json` (or the file specified by `--path`) against the expected schema. Reports missing required fields, invalid enum values, and malformed JSON.
 
 ### Examples
 
@@ -383,6 +343,57 @@ mutsumi schema > schema.json
 
 ---
 
+## mutsumi project
+
+Manage registered project sources.
+
+```bash
+mutsumi project
+```
+
+### mutsumi project add
+
+Register a project directory as a source.
+
+```bash
+mutsumi project add PATH [OPTIONS]
+```
+
+| Option | Description |
+|--------|-------------|
+| `--name` | Display name (default: directory name) |
+
+```bash
+mutsumi project add .
+mutsumi project add ~/projects/saas-app
+```
+
+### mutsumi project remove
+
+Unregister a project source.
+
+```bash
+mutsumi project remove NAME
+```
+
+| Argument | Description |
+|----------|-------------|
+| `NAME` | Project name |
+
+```bash
+mutsumi project remove saas-app
+```
+
+### mutsumi project list
+
+List all registered projects with their paths.
+
+```bash
+mutsumi project list
+```
+
+---
+
 ## ID Prefix Matching
 
 Commands that take a `TASK_ID` argument (`done`, `edit`, `rm`) support prefix matching. You don't need to type the full ID:
@@ -402,3 +413,4 @@ If the prefix is ambiguous, Mutsumi lists matching tasks and asks you to be more
 | `0` | Success |
 | `1` | General error (file not found, ambiguous ID, etc.) |
 | `2` | Invalid arguments (click usage error) |
+

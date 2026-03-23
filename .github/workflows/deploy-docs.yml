@@ -5,6 +5,10 @@ on:
     branches: [main]
     paths:
       - 'docs/site/**'
+      - 'mutsumi/cli/**'
+      - 'mutsumi/core/models.py'
+      - 'mutsumi/config/**'
+      - 'scripts/gen_docs.py'
       - '.github/workflows/deploy-docs.yml'
   workflow_dispatch:
 
@@ -20,11 +24,14 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: docs/site
     steps:
       - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+
+      - name: Generate reference docs
+        run: uv run python scripts/gen_docs.py
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -32,9 +39,11 @@ jobs:
           node-version: 22
 
       - name: Install dependencies
+        working-directory: docs/site
         run: npm ci
 
       - name: Build site
+        working-directory: docs/site
         run: npx astro build
 
       - name: Upload artifact
