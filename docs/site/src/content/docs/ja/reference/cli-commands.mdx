@@ -1,73 +1,277 @@
 ---
 title: CLI コマンドリファレンス
-description: Mutsumi の全 CLI コマンドの完全なリファレンス。
+description: Mutsumi の全 CLI コマンドの完全なリファレンス — コードと同期。
 ---
 
-## mutsumi
+import { Aside } from '@astrojs/starlight/components';
 
-TUI を起動します。
+<Aside type="note">
+このリファレンスは `mutsumi --help` の出力に基づいています。すべてのオプション、引数、デフォルト値は実際のコードと一致しています。
+</Aside>
+
+## mutsumi（TUI 起動）
+
+Mutsumi TUI タスクボードを起動します。
 
 ```bash
-mutsumi                              # カレントディレクトリの mutsumi.json を監視
-mutsumi --path /path/to/mutsumi.json # パスを指定
-mutsumi --version                    # バージョンを表示
+mutsumi [オプション] [サブコマンド]
 ```
+
+| オプション | 短縮 | 説明 | デフォルト |
+|-----------|------|------|-----------|
+| `--path PATH` | `-p` | タスクファイルのパス | `./mutsumi.json`（フォールバック：`./tasks.json`） |
+| `--watch PATH` | `-w` | 追加で監視するタスクファイルパス（繰り返し可能） | — |
+| `--version` | | バージョンを表示して終了 | — |
+| `--help` | | ヘルプを表示して終了 | — |
+
+### 使用例
+
+```bash
+# TUI を起動（カレントディレクトリの mutsumi.json を監視）
+mutsumi
+
+# 特定のファイルを監視
+mutsumi --path /path/to/mutsumi.json
+
+# 複数ファイルを同時監視（マルチプロジェクト）
+mutsumi --path ~/proj-a/mutsumi.json -w ~/proj-b/mutsumi.json
+
+# バージョンを表示
+mutsumi --version
+```
+
+初回起動時、オンボーディングウィザードが自動的に実行されます。詳しくは[起動フロー](../../getting-started/startup-flow/)を参照してください。
+
+---
 
 ## mutsumi add
 
-新しいタスクを作成します。
+新しいタスクを作成し、`mutsumi.json` に追加します。
 
 ```bash
-mutsumi add "タイトル" [オプション]
+mutsumi add タイトル [オプション]
 ```
 
-| オプション | 短縮 | 値 | デフォルト |
-|-----------|------|------|-----------|
-| `--priority` | `-P` | `high`, `normal`, `low` | `normal` |
-| `--scope` | `-s` | `day`, `week`, `month`, `inbox` | `inbox` |
-| `--tags` | `-t` | カンマ区切り | — |
-| `--description` | `-d` | 文字列 | — |
+| オプション | 短縮 | タイプ | 値 | デフォルト |
+|-----------|------|--------|------|-----------|
+| `--priority` | `-P` | 選択 | `high`, `normal`, `low` | `normal` |
+| `--scope` | `-s` | 選択 | `day`, `week`, `month`, `inbox` | 設定の `default_scope` |
+| `--tags` | `-t` | 文字列 | カンマ区切り | `[]` |
+| `--description` | `-d` | 文字列 | フリーテキスト | — |
+
+### 使用例
+
+```bash
+# 最小限
+mutsumi add "ログインバグを修正"
+
+# フルオプション
+mutsumi add "ログインバグを修正" -P high -s day -t "bugfix,urgent" -d "リフレッシュ時にセッション切れ"
+
+# 短縮フラグ
+mutsumi add "テスト作成" -P low -s week -t "dev"
+```
+
+ユニーク ID と `created_at` タイムスタンプが自動生成されます。
+
+---
 
 ## mutsumi list
 
-すべてのタスクを一覧表示します。
+`mutsumi.json` のタスクを一覧表示します。
 
 ```bash
-mutsumi list
+mutsumi list [オプション]
 ```
+
+| オプション | 短縮 | タイプ | 値 | デフォルト |
+|-----------|------|--------|------|-----------|
+| `--scope` | `-s` | 選択 | `day`, `week`, `month`, `inbox` | すべて |
+| `--done / --no-done` | | フラグ | | すべて表示 |
+
+### 使用例
+
+```bash
+# すべてのタスクを表示
+mutsumi list
+
+# scope でフィルター
+mutsumi list --scope day
+
+# 未完了のみ
+mutsumi list --no-done
+
+# 完了済みのみ
+mutsumi list --done
+```
+
+---
 
 ## mutsumi done
 
-タスクを完了にします。
+タスクを完了にします（ID プレフィックスマッチング対応）。
 
 ```bash
-mutsumi done <id-プレフィックス>
+mutsumi done TASK_ID
 ```
+
+| 引数 | 説明 |
+|------|------|
+| `TASK_ID` | 完全なタスク ID またはユニークなプレフィックス |
+
+### 使用例
+
+```bash
+# 完全な ID
+mutsumi done 01JQ8X7K3M0000000000000001
+
+# プレフィックスマッチング
+mutsumi done 01JQ
+
+# プレフィックスが曖昧な場合、一致するタスクを列挙
+mutsumi done 01
+# エラー：'01' に一致するタスクが複数あります。より長いプレフィックスを指定してください。
+```
+
+`status` を `"done"` に設定し、`completed_at` を自動入力します。
+
+---
 
 ## mutsumi edit
 
-タスクを編集します。
+既存タスクのフィールドを編集します（ID プレフィックスマッチング対応）。
 
 ```bash
-mutsumi edit <id-プレフィックス> [--title "新タイトル"] [--priority high]
+mutsumi edit TASK_ID [オプション]
 ```
+
+| オプション | 短縮 | タイプ | 値 | 説明 |
+|-----------|------|--------|------|------|
+| `--title` | | 文字列 | | 新しいタイトル |
+| `--priority` | `-P` | 選択 | `high`, `normal`, `low` | 新しい優先度 |
+| `--scope` | `-s` | 選択 | `day`, `week`, `month`, `inbox` | 新しい scope |
+| `--tags` | `-t` | 文字列 | カンマ区切り | タグを置換 |
+| `--description` | `-d` | 文字列 | フリーテキスト | 新しい説明 |
+
+### 使用例
+
+```bash
+# タイトル変更
+mutsumi edit 01JQ --title "新しいタイトル"
+
+# 優先度と scope を変更
+mutsumi edit 01JQ -P low -s week
+
+# タグを置換
+mutsumi edit 01JQ -t "docs,review"
+
+# 説明を更新
+mutsumi edit 01JQ -d "要件変更"
+```
+
+---
 
 ## mutsumi rm
 
-タスクを削除します。
+タスクを削除します（ID プレフィックスマッチング対応）。
 
 ```bash
-mutsumi rm <id-プレフィックス>
+mutsumi rm TASK_ID
 ```
 
-## mutsumi init / setup / config
+| 引数 | 説明 |
+|------|------|
+| `TASK_ID` | 完全なタスク ID またはユニークなプレフィックス |
+
+### 使用例
 
 ```bash
-mutsumi init --defaults              # デフォルト設定で初期化
-mutsumi setup --agent claude-code    # Agent 統合
-mutsumi config --edit                # エディタで開く
-mutsumi config --show                # 設定を表示
+mutsumi rm 01JQ
 ```
+
+タスクとそのすべての子タスクを削除します。
+
+---
+
+## mutsumi init
+
+テンプレート `mutsumi.json` を生成します。
+
+```bash
+mutsumi init [オプション]
+```
+
+| オプション | 説明 |
+|-----------|------|
+| `--force` | 既存ファイルを上書き |
+| `--personal` | 個人タスクファイルを初期化（`~/.mutsumi/mutsumi.json`） |
+| `--project` | カレントディレクトリに `mutsumi.json` を作成し、プロジェクトソースとして登録 |
+
+### 使用例
+
+```bash
+# カレントディレクトリに mutsumi.json を作成
+mutsumi init
+
+# 既存ファイルを上書き
+mutsumi init --force
+
+# 個人タスクを初期化
+mutsumi init --personal
+
+# 作成してプロジェクトとして登録
+mutsumi init --project
+```
+
+<Aside type="tip">
+通常 `mutsumi init` を手動で実行する必要はありません — 初回の `mutsumi` 起動時にオンボーディングウィザードがファイル作成を自動的に処理します。
+</Aside>
+
+---
+
+## mutsumi setup
+
+AI Agent の統合を設定します。
+
+```bash
+mutsumi setup [オプション]
+```
+
+| オプション | 短縮 | タイプ | 値 | デフォルト |
+|-----------|------|--------|------|-----------|
+| `--agent` | `-a` | 選択 | `claude-code`, `codex-cli`, `opencode`, `gemini-cli`, `aider`, `custom` | — |
+| `--mode` | | 選択 | `skills`, `skills+project-doc`, `snippet` | `skills` |
+
+### モード説明
+
+| モード | 動作 |
+|--------|------|
+| `skills` | 設定に優先 Agent を記録するのみ。ファイルは変更されない。 |
+| `skills+project-doc` | 設定を保存し、Agent のプロジェクトドキュメント（`CLAUDE.md`、`AGENTS.md` など）に統合手順を追記。 |
+| `snippet` | 統合プロンプトを標準出力に表示。手動ペースト用。 |
+
+### 使用例
+
+```bash
+# 利用可能な Agent とモードを表示
+mutsumi setup
+
+# Skills-first（デフォルト — ファイル変更なし）
+mutsumi setup --agent claude-code
+
+# CLAUDE.md にプロジェクトドキュメントを注入
+mutsumi setup --agent claude-code --mode skills+project-doc
+
+# 手動使用のためにプロンプトを表示
+mutsumi setup --agent custom --mode snippet
+
+# Gemini CLI + プロジェクトドキュメント注入
+mutsumi setup --agent gemini-cli --mode skills+project-doc
+```
+
+`skills+project-doc` を再実行しても安全です — 既存セクションを検出し、重複しません。
+
+---
 
 ## mutsumi migrate
 
@@ -79,11 +283,14 @@ mutsumi migrate [オプション]
 
 | オプション | 説明 |
 |-----------|------|
+| （なし） | カレントディレクトリで `tasks.json` → `mutsumi.json` にリネーム |
 | `--config` | 設定ディレクトリを移行（`~/.config/mutsumi/` → `~/.mutsumi/`） |
 | `--all` | タスクファイルと設定の両方を移行 |
 
+### 使用例
+
 ```bash
-# カレントディレクトリで tasks.json → mutsumi.json に移行
+# tasks.json → mutsumi.json に移行
 mutsumi migrate
 
 # 設定ディレクトリを移行
@@ -105,9 +312,10 @@ mutsumi migrate --all
 mutsumi project add PATH
 ```
 
-プロジェクトディレクトリを登録します。ディレクトリには `mutsumi.json` が含まれている（または含まれる予定の）必要があります。
+プロジェクトディレクトリをソースとして登録します。ディレクトリには `mutsumi.json` が含まれている（または含まれる予定の）必要があります。
 
 ```bash
+mutsumi project add .
 mutsumi project add ~/projects/saas-app
 ```
 
@@ -117,7 +325,7 @@ mutsumi project add ~/projects/saas-app
 mutsumi project remove NAME
 ```
 
-プロジェクトを登録から削除します。
+プロジェクトの登録を解除します。
 
 ```bash
 mutsumi project remove saas-app
@@ -133,17 +341,64 @@ mutsumi project list
 
 ---
 
-## mutsumi validate / schema
+## mutsumi validate
+
+タスクファイルのスキーマを検証します。
 
 ```bash
-mutsumi validate                     # mutsumi.json を検証
-mutsumi schema                       # JSON Schema を出力
+mutsumi validate
 ```
+
+`mutsumi.json`（または `--path` で指定したファイル）を検証します。必須フィールドの欠落、無効な enum 値、不正な JSON を報告します。
+
+### 使用例
+
+```bash
+# デフォルトファイルを検証
+mutsumi validate
+
+# 特定のファイルを検証
+mutsumi -p /path/to/mutsumi.json validate
+```
+
+---
+
+## mutsumi schema
+
+`mutsumi.json` の JSON Schema を出力します。
+
+```bash
+mutsumi schema
+```
+
+### 使用例
+
+```bash
+# ターミナルに表示
+mutsumi schema
+
+# ファイルに出力
+mutsumi schema > schema.json
+```
+
+---
 
 ## ID プレフィックスマッチング
 
-完全な 26 文字の ID を入力する必要はありません。ユニークなプレフィックスで十分です：
+`TASK_ID` 引数を取るコマンド（`done`、`edit`、`rm`）はプレフィックスマッチングに対応しています。完全な ID を入力する必要はありません：
 
 ```bash
-mutsumi done 01EX
+mutsumi done 01EX    # "01EX" で始まる ID が1つだけならマッチ
 ```
+
+プレフィックスが曖昧な場合、Mutsumi は一致するタスクを列挙し、より長いプレフィックスの入力を求めます。
+
+---
+
+## 終了コード
+
+| コード | 意味 |
+|--------|------|
+| `0` | 成功 |
+| `1` | 一般エラー（ファイル未検出、ID 曖昧など） |
+| `2` | 引数無効 |

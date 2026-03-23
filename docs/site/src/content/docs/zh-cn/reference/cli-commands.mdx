@@ -1,101 +1,277 @@
 ---
 title: CLI 命令参考
-description: Mutsumi 所有 CLI 命令的完整参考。
+description: Mutsumi 所有 CLI 命令的完整参考 — 与代码同步。
 ---
 
-## mutsumi
+import { Aside } from '@astrojs/starlight/components';
 
-启动 TUI。
+<Aside type="note">
+本参考以 `mutsumi --help` 输出为准。所有选项、参数、默认值与实际代码一致。
+</Aside>
+
+## mutsumi（TUI 启动）
+
+启动 Mutsumi TUI 任务看板。
 
 ```bash
-mutsumi                              # 监听当前目录的 mutsumi.json
-mutsumi --path /path/to/mutsumi.json # 指定文件路径
-mutsumi --version                    # 打印版本号
+mutsumi [选项] [子命令]
 ```
+
+| 选项 | 短写 | 说明 | 默认 |
+|------|------|------|------|
+| `--path PATH` | `-p` | 任务文件路径 | `./mutsumi.json`（回退：`./tasks.json`） |
+| `--watch PATH` | `-w` | 额外监听的任务文件路径（可重复） | — |
+| `--version` | | 显示版本号并退出 | — |
+| `--help` | | 显示帮助并退出 | — |
+
+### 示例
+
+```bash
+# 启动 TUI（监听当前目录的 mutsumi.json）
+mutsumi
+
+# 指定文件路径
+mutsumi --path /path/to/mutsumi.json
+
+# 同时监听多个文件（多项目）
+mutsumi --path ~/proj-a/mutsumi.json -w ~/proj-b/mutsumi.json
+
+# 打印版本号
+mutsumi --version
+```
+
+首次启动时，引导向导会自动运行。详见[启动流程](../../getting-started/startup-flow/)。
+
+---
 
 ## mutsumi add
 
-创建新任务。
+创建新任务并追加到 `mutsumi.json`。
 
 ```bash
-mutsumi add "标题" [选项]
+mutsumi add 标题 [选项]
 ```
 
-| 选项 | 短写 | 可选值 | 默认 |
-|------|------|--------|------|
-| `--priority` | `-P` | `high`, `normal`, `low` | `normal` |
-| `--scope` | `-s` | `day`, `week`, `month`, `inbox` | `inbox` |
-| `--tags` | `-t` | 逗号分隔 | — |
-| `--description` | `-d` | 字符串 | — |
+| 选项 | 短写 | 类型 | 可选值 | 默认 |
+|------|------|------|--------|------|
+| `--priority` | `-P` | 选择 | `high`, `normal`, `low` | `normal` |
+| `--scope` | `-s` | 选择 | `day`, `week`, `month`, `inbox` | 配置中的 `default_scope` |
+| `--tags` | `-t` | 字符串 | 逗号分隔 | `[]` |
+| `--description` | `-d` | 字符串 | 自由文本 | — |
+
+### 示例
 
 ```bash
-mutsumi add "修复登录 Bug" -P high -s day -t "bugfix,urgent"
+# 最简
+mutsumi add "修复登录 Bug"
+
+# 完整选项
+mutsumi add "修复登录 Bug" -P high -s day -t "bugfix,urgent" -d "刷新时会话过期"
+
+# 短标志
+mutsumi add "写测试" -P low -s week -t "dev"
 ```
+
+自动生成唯一 ID 和 `created_at` 时间戳。
+
+---
 
 ## mutsumi list
 
-列出所有任务。
+列出 `mutsumi.json` 中的任务。
 
 ```bash
-mutsumi list
-mutsumi list --scope today
+mutsumi list [选项]
 ```
+
+| 选项 | 短写 | 类型 | 可选值 | 默认 |
+|------|------|------|--------|------|
+| `--scope` | `-s` | 选择 | `day`, `week`, `month`, `inbox` | 全部 |
+| `--done / --no-done` | | 标志 | | 显示全部 |
+
+### 示例
+
+```bash
+# 列出所有任务
+mutsumi list
+
+# 按 scope 过滤
+mutsumi list --scope day
+
+# 仅显示待办
+mutsumi list --no-done
+
+# 仅显示已完成
+mutsumi list --done
+```
+
+---
 
 ## mutsumi done
 
-标记任务完成。
+标记任务完成（支持 ID 前缀匹配）。
 
 ```bash
-mutsumi done <id-前缀>
+mutsumi done TASK_ID
 ```
+
+| 参数 | 说明 |
+|------|------|
+| `TASK_ID` | 完整任务 ID 或唯一前缀 |
+
+### 示例
+
+```bash
+# 完整 ID
+mutsumi done 01JQ8X7K3M0000000000000001
+
+# 前缀匹配
+mutsumi done 01JQ
+
+# 前缀不唯一时，列出匹配项
+mutsumi done 01
+# 错误：多个任务匹配 '01'，请输入更长的前缀。
+```
+
+设置 `status` 为 `"done"` 并自动填充 `completed_at`。
+
+---
 
 ## mutsumi edit
 
-编辑任务。
+编辑任务字段（支持 ID 前缀匹配）。
 
 ```bash
-mutsumi edit <id-前缀> [--title "新标题"] [--priority high] [--scope week]
+mutsumi edit TASK_ID [选项]
 ```
+
+| 选项 | 短写 | 类型 | 可选值 | 说明 |
+|------|------|------|--------|------|
+| `--title` | | 字符串 | | 新标题 |
+| `--priority` | `-P` | 选择 | `high`, `normal`, `low` | 新优先级 |
+| `--scope` | `-s` | 选择 | `day`, `week`, `month`, `inbox` | 新 scope |
+| `--tags` | `-t` | 字符串 | 逗号分隔 | 替换标签 |
+| `--description` | `-d` | 字符串 | 自由文本 | 新描述 |
+
+### 示例
+
+```bash
+# 改标题
+mutsumi edit 01JQ --title "新标题"
+
+# 改优先级和 scope
+mutsumi edit 01JQ -P low -s week
+
+# 替换标签
+mutsumi edit 01JQ -t "docs,review"
+
+# 更新描述
+mutsumi edit 01JQ -d "需求变更"
+```
+
+---
 
 ## mutsumi rm
 
-删除任务。
+删除任务（支持 ID 前缀匹配）。
 
 ```bash
-mutsumi rm <id-前缀>
+mutsumi rm TASK_ID
 ```
+
+| 参数 | 说明 |
+|------|------|
+| `TASK_ID` | 完整任务 ID 或唯一前缀 |
+
+### 示例
+
+```bash
+mutsumi rm 01JQ
+```
+
+删除任务及其所有子任务。
+
+---
 
 ## mutsumi init
 
-初始化配置。
+生成模板 `mutsumi.json`。
 
 ```bash
-mutsumi init              # 交互式
-mutsumi init --defaults   # 非交互式，使用默认值
-mutsumi init --lang zh    # 设置语言
+mutsumi init [选项]
 ```
+
+| 选项 | 说明 |
+|------|------|
+| `--force` | 覆盖已有文件 |
+| `--personal` | 初始化个人任务文件 `~/.mutsumi/mutsumi.json` |
+| `--project` | 在当前目录创建 `mutsumi.json` 并注册为项目源 |
+
+### 示例
+
+```bash
+# 在当前目录创建 mutsumi.json
+mutsumi init
+
+# 覆盖已有文件
+mutsumi init --force
+
+# 初始化个人任务
+mutsumi init --personal
+
+# 创建并注册为项目
+mutsumi init --project
+```
+
+<Aside type="tip">
+通常不需要手动运行 `mutsumi init` —— 首次运行 `mutsumi` 时引导向导会自动处理文件创建。
+</Aside>
+
+---
 
 ## mutsumi setup
 
-配置 Agent 集成。
+配置 AI Agent 集成。
 
 ```bash
-mutsumi setup                       # 列出可用 Agent
-mutsumi setup --agent claude-code   # Claude Code 集成
-mutsumi setup --agent codex-cli     # Codex CLI 集成
-mutsumi setup --agent custom        # 输出 prompt 到标准输出
+mutsumi setup [选项]
 ```
 
-## mutsumi config
+| 选项 | 短写 | 类型 | 可选值 | 默认 |
+|------|------|------|--------|------|
+| `--agent` | `-a` | 选择 | `claude-code`, `codex-cli`, `opencode`, `gemini-cli`, `aider`, `custom` | — |
+| `--mode` | | 选择 | `skills`, `skills+project-doc`, `snippet` | `skills` |
 
-管理配置。
+### 模式说明
+
+| 模式 | 行为 |
+|------|------|
+| `skills` | 仅在配置中记住首选 Agent。不修改任何文件。 |
+| `skills+project-doc` | 保存偏好，并将集成说明追加到 Agent 的项目文档（`CLAUDE.md`、`AGENTS.md` 等） |
+| `snippet` | 将集成 prompt 打印到标准输出，供手动粘贴。 |
+
+### 示例
 
 ```bash
-mutsumi config --edit    # 用 $EDITOR 编辑
-mutsumi config --show    # 打印当前配置
-mutsumi config --reset   # 重置为默认值
-mutsumi config --path    # 打印配置文件路径
+# 列出可用 Agent 和模式
+mutsumi setup
+
+# Skills-first（默认 — 不修改文件）
+mutsumi setup --agent claude-code
+
+# 注入项目文档到 CLAUDE.md
+mutsumi setup --agent claude-code --mode skills+project-doc
+
+# 打印 prompt 供手动使用
+mutsumi setup --agent custom --mode snippet
+
+# Gemini CLI + 项目文档注入
+mutsumi setup --agent gemini-cli --mode skills+project-doc
 ```
+
+重复运行 `skills+project-doc` 是安全的 —— 会检测已有内容，不会重复。
+
+---
 
 ## mutsumi migrate
 
@@ -107,11 +283,14 @@ mutsumi migrate [选项]
 
 | 选项 | 说明 |
 |------|------|
+| （无） | 在当前目录将 `tasks.json` 重命名为 `mutsumi.json` |
 | `--config` | 迁移配置目录（`~/.config/mutsumi/` → `~/.mutsumi/`） |
-| `--all` | 迁移任务文件和配置 |
+| `--all` | 同时迁移任务文件和配置目录 |
+
+### 示例
 
 ```bash
-# 在当前目录迁移 tasks.json → mutsumi.json
+# 迁移 tasks.json → mutsumi.json
 mutsumi migrate
 
 # 迁移配置目录
@@ -125,7 +304,7 @@ mutsumi migrate --all
 
 ## mutsumi project
 
-管理注册的项目来源。
+管理注册的项目源。
 
 ### mutsumi project add
 
@@ -133,9 +312,10 @@ mutsumi migrate --all
 mutsumi project add PATH
 ```
 
-注册一个项目目录。该目录应包含（或将包含）`mutsumi.json`。
+注册一个项目目录为数据源。该目录应包含（或将包含）`mutsumi.json`。
 
 ```bash
+mutsumi project add .
 mutsumi project add ~/projects/saas-app
 ```
 
@@ -145,7 +325,7 @@ mutsumi project add ~/projects/saas-app
 mutsumi project remove NAME
 ```
 
-从注册表中移除一个项目。
+取消注册一个项目。
 
 ```bash
 mutsumi project remove saas-app
@@ -161,17 +341,64 @@ mutsumi project list
 
 ---
 
-## mutsumi validate / schema
+## mutsumi validate
+
+校验任务文件的 schema。
 
 ```bash
-mutsumi validate         # 校验 mutsumi.json
-mutsumi schema           # 输出 JSON Schema
+mutsumi validate
 ```
+
+校验 `mutsumi.json`（或 `--path` 指定的文件）。报告缺失必填字段、无效枚举值和格式错误。
+
+### 示例
+
+```bash
+# 校验默认文件
+mutsumi validate
+
+# 校验指定文件
+mutsumi -p /path/to/mutsumi.json validate
+```
+
+---
+
+## mutsumi schema
+
+输出 `mutsumi.json` 的 JSON Schema。
+
+```bash
+mutsumi schema
+```
+
+### 示例
+
+```bash
+# 打印到终端
+mutsumi schema
+
+# 输出到文件
+mutsumi schema > schema.json
+```
+
+---
 
 ## ID 前缀匹配
 
-无需输入完整 26 位 ID，输入唯一前缀即可：
+接受 `TASK_ID` 参数的命令（`done`、`edit`、`rm`）支持前缀匹配。无需输入完整 ID：
 
 ```bash
 mutsumi done 01EX    # 如果只有一个 ID 以 "01EX" 开头则匹配
 ```
+
+前缀不唯一时，Mutsumi 会列出所有匹配项并要求你输入更长的前缀。
+
+---
+
+## 退出码
+
+| 代码 | 含义 |
+|------|------|
+| `0` | 成功 |
+| `1` | 一般错误（文件未找到、ID 不唯一等） |
+| `2` | 参数无效 |
