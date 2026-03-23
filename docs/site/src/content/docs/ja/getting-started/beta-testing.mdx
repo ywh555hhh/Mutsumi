@@ -42,15 +42,27 @@ Windows: WSL または PowerShell を使用してください。ネイティブ 
 
 ### ステップ 1: インストール
 
+<Aside type="caution">
+  v1.0.0b1 は**プレリリース版**です。パッケージマネージャはデフォルトでプレリリースをスキップします — 明示的に指定してください。
+  **Python 3.12+** が必要です。`python3 --version` で確認してください。
+</Aside>
+
 <Tabs>
   <TabItem label="uv（推奨）">
   ```bash
-  uv tool install mutsumi-tui
+  uv tool install --prerelease allow mutsumi-tui
   ```
   </TabItem>
   <TabItem label="pip">
   ```bash
-  pip install mutsumi-tui
+  pip install --pre mutsumi-tui
+  # または正確なバージョンを指定：
+  pip install mutsumi-tui==1.0.0b1
+  ```
+  </TabItem>
+  <TabItem label="pipx">
+  ```bash
+  pipx install mutsumi-tui --pip-args='--pre'
   ```
   </TabItem>
   <TabItem label="ソースから">

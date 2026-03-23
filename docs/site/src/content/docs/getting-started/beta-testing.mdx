@@ -42,15 +42,27 @@ Windows: use WSL or PowerShell. Native Windows works but isn't the primary beta 
 
 ### Step 1: Install
 
+<Aside type="caution">
+  v1.0.0b1 is a **pre-release**. Package managers skip pre-releases by default — you must opt in explicitly.
+  Requires **Python 3.12+**. Check with `python3 --version`.
+</Aside>
+
 <Tabs>
   <TabItem label="uv (recommended)">
   ```bash
-  uv tool install mutsumi-tui
+  uv tool install --prerelease allow mutsumi-tui
   ```
   </TabItem>
   <TabItem label="pip">
   ```bash
-  pip install mutsumi-tui
+  pip install --pre mutsumi-tui
+  # or pin the exact version:
+  pip install mutsumi-tui==1.0.0b1
+  ```
+  </TabItem>
+  <TabItem label="pipx">
+  ```bash
+  pipx install mutsumi-tui --pip-args='--pre'
   ```
   </TabItem>
   <TabItem label="From source">
