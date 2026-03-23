@@ -143,6 +143,7 @@ document.addEventListener('astro:after-swap', initPageBar);
             { slug: 'getting-started/installation' },
             { slug: 'getting-started/quick-start' },
             { slug: 'getting-started/agent-setup' },
+            { slug: 'getting-started/startup-flow' },
             { slug: 'getting-started/terminal-integration' },
             { slug: 'getting-started/workflow-sop' },
           ],
