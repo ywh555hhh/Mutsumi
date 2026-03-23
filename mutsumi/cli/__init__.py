@@ -2,12 +2,21 @@
 
 from __future__ import annotations
 
+import os
 from pathlib import Path
 
 import click
 
 from mutsumi import __version__
 from mutsumi.onboarding.bootstrap import detect_startup_state
+
+
+def _ensure_valid_cwd() -> None:
+    """If the current directory no longer exists, cd to ~."""
+    try:
+        Path.cwd()
+    except (FileNotFoundError, OSError):
+        os.chdir(Path.home())
 
 
 @click.group(invoke_without_command=True)
@@ -27,6 +36,7 @@ from mutsumi.onboarding.bootstrap import detect_startup_state
 @click.pass_context
 def main(ctx: click.Context, path: str | None, watch: tuple[str, ...]) -> None:
     """A silent TUI task board that watches your JSON."""
+    _ensure_valid_cwd()
     ctx.ensure_object(dict)
     ctx.obj["path"] = path
     if ctx.invoked_subcommand is None:
