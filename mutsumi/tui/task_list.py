@@ -24,7 +24,7 @@ class TaskListPanel(Widget):
     DEFAULT_CSS = """
     TaskListPanel {
         height: 1fr;
-        background: #0f0f0f;
+        background: $theme-bg;
     }
 
     TaskListPanel > VerticalScroll {

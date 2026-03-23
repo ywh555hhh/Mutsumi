@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from mutsumi.themes import load_theme, theme_to_css
+from mutsumi.themes import get_theme, load_theme
 from mutsumi.themes.builtin import BUILTIN_THEMES
 
 
@@ -49,17 +49,16 @@ class TestLoadTheme:
         theme = load_theme("nonexistent")
         assert theme.name == "monochrome-zen"
 
+    def test_load_sets_global(self) -> None:
+        load_theme("dracula")
+        assert get_theme().name == "dracula"
+        # restore default
+        load_theme("monochrome-zen")
 
-class TestThemeToCss:
-    def test_generates_css(self) -> None:
-        theme = load_theme("nord")
-        css = theme_to_css(theme)
-        assert "Screen" in css
-        assert theme.background in css
-        assert theme.accent in css
-
-    def test_all_themes_produce_valid_css(self) -> None:
-        for _name, theme in BUILTIN_THEMES.items():
-            css = theme_to_css(theme)
-            assert isinstance(css, str)
-            assert len(css) > 100
+    def test_get_theme_returns_current(self) -> None:
+        load_theme("solarized")
+        theme = get_theme()
+        assert theme.name == "solarized"
+        assert theme.accent == "#2aa198"
+        # restore default
+        load_theme("monochrome-zen")

@@ -169,9 +169,22 @@ class TestSourceRegistry:
         reg.stop_all_watchers()
         assert len(reg._watchers) == 0
 
-    def test_watcher_not_started_for_missing_file(self, tmp_path: Path) -> None:
+    def test_watcher_started_for_missing_file(self, tmp_path: Path) -> None:
+        """Watcher starts even if target file doesn't exist yet.
+
+        The parent directory exists (tmp_path), so the watcher can monitor
+        it and detect when an Agent creates the file for the first time.
+        """
         reg = SourceRegistry()
         reg.add_source("ghost", tmp_path / "nope.json")
+        reg.start_watching("ghost", lambda n: None)
+        assert "ghost" in reg._watchers
+        reg.stop_all_watchers()
+
+    def test_watcher_not_started_for_missing_parent_dir(self) -> None:
+        """Watcher should NOT start if the parent directory doesn't exist."""
+        reg = SourceRegistry()
+        reg.add_source("ghost", Path("/no/such/dir/nope.json"))
         reg.start_watching("ghost", lambda n: None)
         assert "ghost" not in reg._watchers
 

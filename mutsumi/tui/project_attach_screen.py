@@ -20,20 +20,20 @@ class ProjectAttachScreen(ModalScreen[None]):
         width: 64;
         max-width: 92%;
         height: auto;
-        background: #1a1a1a;
-        border: solid #333333;
+        background: $theme-surface;
+        border: solid $theme-border;
         padding: 1 2;
     }
 
     ProjectAttachScreen .title {
-        color: #5de4c7;
+        color: $theme-accent;
         text-style: bold;
         text-align: center;
         margin-bottom: 1;
     }
 
     ProjectAttachScreen .description {
-        color: #d0d0d0;
+        color: $theme-text;
         text-align: center;
         margin-bottom: 1;
     }

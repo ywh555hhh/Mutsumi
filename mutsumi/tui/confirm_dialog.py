@@ -9,6 +9,8 @@ from textual.message import Message
 from textual.screen import ModalScreen
 from textual.widgets import Button, Static
 
+from mutsumi.i18n import get_i18n
+
 if TYPE_CHECKING:
     from textual.app import ComposeResult
 
@@ -26,15 +28,15 @@ class ConfirmDialog(ModalScreen[bool]):
         max-width: 90%;
         height: auto;
         max-height: 10;
-        background: #1a1a1a;
-        border: solid #e06c75;
+        background: $theme-surface;
+        border: solid $theme-error;
         padding: 1 2;
     }
 
     ConfirmDialog .confirm-message {
         height: auto;
         text-align: center;
-        color: #e0e0e0;
+        color: $theme-text;
         margin-bottom: 1;
     }
 
@@ -63,15 +65,16 @@ class ConfirmDialog(ModalScreen[bool]):
         self._task_title = task_title
 
     def compose(self) -> ComposeResult:
+        t = get_i18n().t
         safe_title = self._task_title.replace("[", "\\[")
         with Vertical():
             yield Static(
-                f'Delete "{safe_title}"?',
+                f'{t("actions.confirm_delete")}\n"{safe_title}"',
                 classes="confirm-message",
             )
             with Horizontal(classes="confirm-buttons"):
-                yield Button("Delete", variant="error", id="confirm-yes")
-                yield Button("Cancel", variant="default", id="confirm-no")
+                yield Button(t("actions.delete"), variant="error", id="confirm-yes")
+                yield Button(t("actions.cancel"), variant="default", id="confirm-no")
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
         if event.button.id == "confirm-yes":

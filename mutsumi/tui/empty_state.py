@@ -9,6 +9,8 @@ from textual.message import Message
 from textual.widget import Widget
 from textual.widgets import Static
 
+from mutsumi.i18n import get_i18n
+
 if TYPE_CHECKING:
     from textual.app import ComposeResult
 
@@ -21,13 +23,13 @@ class _NewTaskButton(Static, can_focus=True):
         width: auto;
         height: 1;
         padding: 0 2;
-        color: #5de4c7;
+        color: $theme-accent;
         text-align: center;
     }
 
     _NewTaskButton:hover {
-        background: #2a2a2a;
-        color: #ffffff;
+        background: $theme-surface;
+        color: $theme-text;
     }
 
     _NewTaskButton:focus {
@@ -39,7 +41,7 @@ class _NewTaskButton(Static, can_focus=True):
         """Posted when the button is clicked or activated."""
 
     def __init__(self, **kwargs: Any) -> None:
-        super().__init__("\\[+ New Task]", **kwargs)
+        super().__init__(f"\\[+ {get_i18n().t('actions.new_task')}]", **kwargs)
 
     def on_click(self) -> None:
         self.post_message(self.Pressed())
@@ -70,7 +72,7 @@ class EmptyState(Widget):
     }
 
     EmptyState .hint {
-        color: #666666;
+        color: $theme-text-muted;
         text-align: center;
         width: auto;
         padding: 0 0 1 0;
@@ -81,11 +83,10 @@ class EmptyState(Widget):
         """Posted when user clicks the new-task button in empty state."""
 
     def compose(self) -> ComposeResult:
+        t = get_i18n().t
         with Vertical():
             yield Static(
-                "Nothing here yet.\n\n"
-                "Press [bold #5de4c7]n[/] to create a task\n"
-                "or let your Agent write mutsumi.json",
+                f"{t('empty.title')}\n\n{t('empty.hint')}",
                 classes="hint",
             )
             yield _NewTaskButton(id="empty-new-btn")

@@ -17,17 +17,22 @@ from textual.reactive import reactive
 from textual.widget import Widget
 from textual.widgets import Static
 
+from mutsumi.i18n import get_i18n
+
 if TYPE_CHECKING:
     from textual.app import ComposeResult
 
-# "all" is a synthetic scope that shows everything
-SCOPE_LABELS: dict[str, str] = {
-    "day": "Today",
-    "week": "Week",
-    "month": "Month",
-    "inbox": "Inbox",
-    "all": "All",
-}
+
+def _scope_labels() -> dict[str, str]:
+    """Build scope labels from i18n (called at render time)."""
+    t = get_i18n().t
+    return {
+        "day": t("tabs.today"),
+        "week": t("tabs.week"),
+        "month": t("tabs.month"),
+        "inbox": t("tabs.inbox"),
+        "all": t("tabs.all"),
+    }
 
 SCOPE_ORDER: list[str] = ["day", "week", "month", "inbox", "all"]
 
@@ -40,12 +45,12 @@ class _ScopeButton(Static, can_focus=True):
         width: auto;
         height: 1;
         padding: 0 1;
-        color: #555555;
+        color: $theme-text-muted;
     }
 
     _ScopeButton:hover {
-        color: #888888;
-        background: #1f1f1f;
+        color: $theme-text;
+        background: $theme-bg;
     }
 
     _ScopeButton:focus {
@@ -53,23 +58,23 @@ class _ScopeButton(Static, can_focus=True):
     }
 
     _ScopeButton.active {
-        color: #89b4fa;
+        color: $theme-accent;
         text-style: bold;
     }
 
     _ScopeButton.active:focus {
-        color: #89b4fa;
+        color: $theme-accent;
         text-style: bold reverse;
     }
     """
 
     def __init__(self, scope_key: str, **kwargs: Any) -> None:
         self.scope_key = scope_key
-        label = SCOPE_LABELS.get(scope_key, scope_key)
+        label = _scope_labels().get(scope_key, scope_key)
         super().__init__(f" {label} ", **kwargs)
 
     def set_active(self, active: bool) -> None:
-        label = SCOPE_LABELS.get(self.scope_key, self.scope_key)
+        label = _scope_labels().get(self.scope_key, self.scope_key)
         if active:
             self.update(f"\\[{label}]")
         else:
@@ -93,12 +98,12 @@ class _MainButton(Static, can_focus=True):
         width: auto;
         height: 1;
         padding: 0 1;
-        color: #5de4c7;
+        color: $theme-accent;
     }
 
     _MainButton:hover {
-        background: #1f2f2a;
-        color: #ffffff;
+        background: $theme-bg;
+        color: $theme-text;
     }
 
     _MainButton:focus {
@@ -107,7 +112,7 @@ class _MainButton(Static, can_focus=True):
     """
 
     def __init__(self, **kwargs: Any) -> None:
-        super().__init__("\u2605 Main", **kwargs)
+        super().__init__(f"\u2605 {get_i18n().t('tabs.main')}", **kwargs)
 
     def on_click(self) -> None:
         parent = self.parent
@@ -125,7 +130,7 @@ class ScopeFilter(Widget):
     ScopeFilter {
         dock: top;
         height: 1;
-        background: #111111;
+        background: $theme-surface;
     }
 
     ScopeFilter > Horizontal {
@@ -136,7 +141,7 @@ class ScopeFilter(Widget):
     ScopeFilter .scope-sep {
         width: auto;
         height: 1;
-        color: #333333;
+        color: $theme-border;
     }
     """
 

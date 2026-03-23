@@ -12,6 +12,7 @@ from textual.widget import Widget
 from textual.widgets import Input
 
 from mutsumi.core.models import Task, TaskPriority
+from mutsumi.themes import get_theme
 
 if TYPE_CHECKING:
     from textual.app import ComposeResult
@@ -23,11 +24,15 @@ PRIORITY_STARS: dict[TaskPriority, str] = {
     TaskPriority.LOW: "\u2605",
 }
 
-PRIORITY_STAR_STYLE: dict[TaskPriority, str] = {
-    TaskPriority.HIGH: "#e06c75",
-    TaskPriority.NORMAL: "#e5c07b",
-    TaskPriority.LOW: "#666666",
-}
+
+def _priority_star_style(priority: TaskPriority) -> str:
+    """Return the Rich style for a priority star from the current theme."""
+    theme = get_theme()
+    return {
+        TaskPriority.HIGH: theme.priority_high,
+        TaskPriority.NORMAL: theme.priority_normal,
+        TaskPriority.LOW: theme.priority_low,
+    }[priority]
 
 INDENT_GLYPH = "  \u2514\u2500 "
 
@@ -74,19 +79,19 @@ class TaskRow(Widget, can_focus=True):
         height: auto;
         min-height: 1;
         padding: 0 1;
-        color: #e0e0e0;
+        color: $theme-text;
     }
 
     TaskRow:focus {
-        background: #2a2a2a;
+        background: $theme-surface;
     }
 
     TaskRow:hover {
-        background: #1e1e1e;
+        background: $theme-surface;
     }
 
     TaskRow.done {
-        color: #666666;
+        color: $theme-text-muted;
     }
 
     TaskRow.dimmed {
@@ -97,8 +102,8 @@ class TaskRow(Widget, can_focus=True):
         height: 1;
         border: none;
         padding: 0;
-        background: #2a2a2a;
-        color: #e0e0e0;
+        background: $theme-surface;
+        color: $theme-text;
     }
     """
 
@@ -141,66 +146,60 @@ class TaskRow(Widget, can_focus=True):
     # --- Column renderers (formatter pipeline) ---
 
     def _render_checkbox(self, line: Text) -> None:
+        theme = get_theme()
         checkbox = "[x]" if self.toggled else "[ ]"
-        line.append(checkbox, style="#5de4c7")
-        line.append("\u2502", style="#333333")  # │ separator
+        line.append(checkbox, style=theme.accent)
+        line.append("\u2502", style=theme.border)  # │ separator
 
     def _render_title(self, line: Text) -> None:
-        due_st = _due_status(self.task_data.due_date)
-        if self.toggled:
-            title_style = "strike #666666"
-        elif due_st == "overdue":
-            title_style = "#e06c75"
-        elif due_st == "today":
-            title_style = "#e5c07b"
-        else:
-            title_style = "#e0e0e0"
-        line.append(self.task_data.title, style=title_style)
+        line.append(self.task_data.title, style=self._title_style())
 
     def _render_tags(self, line: Text) -> None:
         if self.task_data.tags:
             tags_str = ",".join(self.task_data.tags)
-            line.append(f"  {tags_str}", style="#666666")
+            line.append(f"  {tags_str}", style=get_theme().text_muted)
 
     def _render_priority(self, line: Text) -> None:
         stars = PRIORITY_STARS[self.task_data.priority]
-        star_style = PRIORITY_STAR_STYLE[self.task_data.priority]
+        star_style = _priority_star_style(self.task_data.priority)
         line.append(f" {stars}", style=star_style)
 
     def _render_due(self, line: Text) -> None:
         if self.task_data.due_date:
+            theme = get_theme()
             due_st = _due_status(self.task_data.due_date)
             if due_st == "overdue":
-                style = "#e06c75"
+                style = theme.error
             elif due_st == "today":
-                style = "#e5c07b"
+                style = theme.priority_normal
             else:
-                style = "#666666"
+                style = theme.text_muted
             line.append(f"  \u23f0{self.task_data.due_date}", style=style)
 
     def _render_effort(self, line: Text) -> None:
         effort = self.task_data.model_extra.get("effort") if self.task_data.model_extra else None
         if effort:
-            line.append(f"  [{effort}]", style="#98c379")
+            line.append(f"  [{effort}]", style=get_theme().accent)
 
     def _render_progress(self, line: Text) -> None:
         done, total = self.task_data.children_progress()
         if total > 0:
-            line.append(f"  ({done}/{total})", style="#666666")
+            line.append(f"  ({done}/{total})", style=get_theme().text_muted)
 
     # Minimum characters to show for the title before truncating suffix
     _MIN_TITLE_WIDTH = 6
 
     def _title_style(self) -> str:
         """Return the Rich style string for the title."""
+        theme = get_theme()
         due_st = _due_status(self.task_data.due_date)
         if self.toggled:
-            return "strike #666666"
+            return f"strike {theme.text_muted}"
         if due_st == "overdue":
-            return "#e06c75"
+            return theme.error
         if due_st == "today":
-            return "#e5c07b"
-        return "#e0e0e0"
+            return theme.priority_normal
+        return theme.text
 
     def render(self) -> Text:
         if self.editing:
@@ -212,7 +211,7 @@ class TaskRow(Widget, can_focus=True):
         indent_text = Text()
         if self.depth > 0:
             indent = "  " * (self.depth - 1) + INDENT_GLYPH
-            indent_text.append(indent, style="#666666")
+            indent_text.append(indent, style=get_theme().text_muted)
 
         # 2. Build checkbox
         checkbox_text = Text()
@@ -234,10 +233,11 @@ class TaskRow(Widget, can_focus=True):
 
         if "due" not in self._columns and self.task_data.due_date:
             due_st = _due_status(self.task_data.due_date)
+            theme = get_theme()
             if due_st == "overdue":
-                suffix.append("  \u26a0overdue", style="#e06c75")
+                suffix.append("  \u26a0overdue", style=theme.error)
             elif due_st == "today":
-                suffix.append("  \u2691today", style="#e5c07b")
+                suffix.append("  \u2691today", style=theme.priority_normal)
 
         # 4. Calculate title budget (1 space between separator and title)
         fixed = len(indent_text) + len(checkbox_text) + 1 + len(suffix)
@@ -252,13 +252,13 @@ class TaskRow(Widget, can_focus=True):
             # Normal: title gets remaining space
             if len(title_str) > title_budget:
                 title_text.append(title_str[: title_budget - 1], style=style)
-                title_text.append("\u2026", style="#666666")
+                title_text.append("\u2026", style=get_theme().text_muted)
             else:
                 title_text.append(title_str, style=style)
         elif title_budget > 1:
             # Very tight: show what we can
             title_text.append(title_str[: title_budget - 1], style=style)
-            title_text.append("\u2026", style="#666666")
+            title_text.append("\u2026", style=get_theme().text_muted)
         else:
             # No room at all — just truncate everything from the right
             line = Text()

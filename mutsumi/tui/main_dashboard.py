@@ -14,6 +14,7 @@ from textual.widget import Widget
 from textual.widgets import Static
 
 from mutsumi.core.models import TaskStatus
+from mutsumi.i18n import get_i18n
 
 if TYPE_CHECKING:
     from textual.app import ComposeResult
@@ -31,35 +32,35 @@ class SourceCard(Widget, can_focus=True):
         min-height: 3;
         padding: 0 1;
         margin: 0 0 1 0;
-        background: #1a1a1a;
-        border: solid #333333;
+        background: $theme-surface;
+        border: solid $theme-border;
     }
 
     SourceCard:hover {
-        border: solid #555555;
+        border: solid $theme-text-muted;
     }
 
     SourceCard:focus {
-        border: solid #5de4c7;
+        border: solid $theme-accent;
     }
 
     SourceCard .card-header {
         width: 100%;
         height: 1;
-        color: #5de4c7;
+        color: $theme-accent;
         text-style: bold;
     }
 
     SourceCard .card-progress {
         width: 100%;
         height: 1;
-        color: #888888;
+        color: $theme-text-muted;
     }
 
     SourceCard .card-tasks {
         width: 100%;
         height: auto;
-        color: #666666;
+        color: $theme-text-muted;
         padding: 0 1;
     }
     """
@@ -88,6 +89,7 @@ class SourceCard(Widget, can_focus=True):
         source = self._source
         name = source.name
         display_name = f"\u2605 {name}" if source.is_personal else name
+        t = get_i18n().t
 
         if source.error:
             yield Static(f"{display_name}  \u26a0 Error", classes="card-header")
@@ -100,7 +102,7 @@ class SourceCard(Widget, can_focus=True):
 
         tasks = source.task_file.tasks
         total = len(tasks)
-        done = sum(1 for t in tasks if t.status == TaskStatus.DONE)
+        done = sum(1 for tk in tasks if tk.status == TaskStatus.DONE)
         pending = total - done
 
         # Progress bar
@@ -111,20 +113,20 @@ class SourceCard(Widget, can_focus=True):
             bar = "\u2588" * filled + "\u2591" * (bar_width - filled)
             progress = f"{bar} {pct}% ({done}/{total})"
         else:
-            progress = "No tasks"
+            progress = t("dashboard.no_tasks")
 
-        yield Static(f"{display_name}  {pending} pending", classes="card-header")
+        yield Static(f"{display_name}  {t('dashboard.pending', count=pending)}", classes="card-header")
         yield Static(progress, classes="card-progress")
 
         # Top-N pending tasks
-        pending_tasks = [t for t in tasks if t.status != TaskStatus.DONE][:self._max_tasks]
+        pending_tasks = [tk for tk in tasks if tk.status != TaskStatus.DONE][:self._max_tasks]
         if pending_tasks:
             lines = []
-            for t in pending_tasks:
+            for tk in pending_tasks:
                 priority_marker = {"high": "!!!", "normal": "", "low": ""}
-                p = priority_marker.get(t.priority.value, "")
+                p = priority_marker.get(tk.priority.value, "")
                 prefix = f"{p} " if p else "  "
-                lines.append(f"{prefix}\u2022 {t.title}")
+                lines.append(f"{prefix}\u2022 {tk.title}")
             yield Static("\n".join(lines), classes="card-tasks")
 
     def on_click(self) -> None:
@@ -157,7 +159,7 @@ class MainDashboard(Widget):
     MainDashboard .dashboard-title {
         width: 100%;
         height: 1;
-        color: #5de4c7;
+        color: $theme-accent;
         text-style: bold;
         text-align: center;
         padding: 0 0 1 0;
@@ -191,7 +193,7 @@ class MainDashboard(Widget):
         try:
             container = self.query_one(VerticalScroll)
             container.remove_children()
-            container.mount(Static("\u2605 Dashboard", classes="dashboard-title"))
+            container.mount(Static(f"\u2605 {get_i18n().t('dashboard.title')}", classes="dashboard-title"))
             for source in self._sources:
                 container.mount(
                     SourceCard(
@@ -205,7 +207,7 @@ class MainDashboard(Widget):
 
     def compose(self) -> ComposeResult:
         with VerticalScroll():
-            yield Static("\u2605 Dashboard", classes="dashboard-title")
+            yield Static(f"\u2605 {get_i18n().t('dashboard.title')}", classes="dashboard-title")
             for source in self._sources:
                 yield SourceCard(
                     source,

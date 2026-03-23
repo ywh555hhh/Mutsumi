@@ -1,6 +1,6 @@
 [project]
 name = "mutsumi-tui"
-version = "0.5.0"
+version = "1.0.0b1"
 description = "A silent TUI task board that watches your JSON. Agent-agnostic. Layout-agnostic. Zero friction."
 readme = "README.md"
 license = "MIT"

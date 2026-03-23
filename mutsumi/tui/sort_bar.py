@@ -29,8 +29,8 @@ class SortBar(ModalScreen[None]):
     SortBar > Static {
         width: auto;
         height: 3;
-        background: #1a1a1a;
-        border: tall #333333;
+        background: $theme-surface;
+        border: tall $theme-border;
         padding: 0 2;
     }
     """

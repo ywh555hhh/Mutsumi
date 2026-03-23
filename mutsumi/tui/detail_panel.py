@@ -11,6 +11,8 @@ from textual.widget import Widget
 from textual.widgets import Static
 
 from mutsumi.core.models import Task, TaskPriority, TaskStatus
+from mutsumi.i18n import get_i18n
+from mutsumi.themes import get_theme
 
 
 def _esc(text: str) -> str:
@@ -20,11 +22,15 @@ def _esc(text: str) -> str:
 if TYPE_CHECKING:
     from textual.app import ComposeResult
 
-PRIORITY_LABELS = {
-    TaskPriority.HIGH: ("HIGH", "#e06c75"),
-    TaskPriority.NORMAL: ("NORMAL", "#e5c07b"),
-    TaskPriority.LOW: ("LOW", "#666666"),
-}
+
+def _priority_label(priority: TaskPriority) -> tuple[str, str]:
+    """Return (label, color) for a priority from current theme."""
+    theme = get_theme()
+    return {
+        TaskPriority.HIGH: ("HIGH", theme.priority_high),
+        TaskPriority.NORMAL: ("NORMAL", theme.priority_normal),
+        TaskPriority.LOW: ("LOW", theme.text_muted),
+    }[priority]
 
 
 class _ResponsiveSeparator(Widget):
@@ -34,13 +40,13 @@ class _ResponsiveSeparator(Widget):
     _ResponsiveSeparator {
         height: 1;
         padding: 0 1;
-        color: #333333;
+        color: $theme-border;
     }
     """
 
     def render(self) -> Text:
         width = self.size.width
-        return Text("\u2500" * max(width, 0), style="#333333")
+        return Text("\u2500" * max(width, 0), style=get_theme().border)
 
 
 class _PanelAction(Static):
@@ -68,8 +74,8 @@ class DetailPanel(Widget):
         width: 40%;
         max-width: 50;
         min-width: 24;
-        background: #141414;
-        border-left: solid #333333;
+        background: $theme-surface;
+        border-left: solid $theme-border;
         display: none;
     }
 
@@ -80,12 +86,12 @@ class DetailPanel(Widget):
     DetailPanel .detail-topbar {
         height: 1;
         padding: 0 1;
-        background: #1a1a1a;
+        background: $theme-surface;
     }
 
     DetailPanel .detail-topbar-title {
         width: 1fr;
-        color: #5de4c7;
+        color: $theme-accent;
         text-style: bold;
     }
 
@@ -93,60 +99,60 @@ class DetailPanel(Widget):
         width: auto;
         height: 1;
         padding: 0 1;
-        color: #666666;
+        color: $theme-text-muted;
     }
 
     DetailPanel .detail-close-btn:hover {
-        color: #e06c75;
+        color: $theme-error;
     }
 
     DetailPanel .detail-actions {
         height: 1;
         padding: 0 1;
-        background: #1a1a1a;
+        background: $theme-surface;
     }
 
     DetailPanel .detail-action-btn {
         width: auto;
         height: 1;
         padding: 0 1;
-        color: #5de4c7;
+        color: $theme-accent;
     }
 
     DetailPanel .detail-action-btn:hover {
-        background: #2a2a2a;
-        color: #ffffff;
+        background: $theme-bg;
+        color: $theme-text;
     }
 
     DetailPanel .detail-delete-btn {
         width: auto;
         height: 1;
         padding: 0 1;
-        color: #e06c75;
+        color: $theme-error;
     }
 
     DetailPanel .detail-delete-btn:hover {
-        background: #3a1a1a;
-        color: #ff8888;
+        background: $theme-bg;
+        color: $theme-error;
     }
 
     DetailPanel .detail-field {
         height: auto;
         padding: 0 1;
-        color: #e0e0e0;
+        color: $theme-text;
     }
 
     DetailPanel .detail-label {
         height: 1;
         padding: 0 1;
-        color: #666666;
+        color: $theme-text-muted;
         text-style: bold;
     }
 
     DetailPanel _ResponsiveSeparator {
         height: 1;
         padding: 0 1;
-        color: #333333;
+        color: $theme-border;
     }
 
     DetailPanel .detail-scroll {
@@ -225,6 +231,7 @@ class DetailPanel(Widget):
             return
 
         task = self._detail_task
+        t = get_i18n().t
         content = self.query_one("#detail-content", Vertical)
         content.remove_children()
 
@@ -237,37 +244,37 @@ class DetailPanel(Widget):
         content.mount(_ResponsiveSeparator())
 
         # Status
-        content.mount(Static("Status", classes="detail-label"))
-        status_text = "Done" if task.status == TaskStatus.DONE else "Pending"
+        content.mount(Static(t("detail.status"), classes="detail-label"))
+        status_text = t("detail.status_done") if task.status == TaskStatus.DONE else t("detail.status_pending")
         content.mount(Static(f"  {status_text}", classes="detail-field"))
 
         # Priority
-        content.mount(Static("Priority", classes="detail-label"))
-        plabel, pcolor = PRIORITY_LABELS[task.priority]
+        content.mount(Static(t("detail.priority"), classes="detail-label"))
+        plabel, pcolor = _priority_label(task.priority)
         content.mount(
             Static(f"  [{pcolor}]{plabel}[/]", classes="detail-field")
         )
 
         # Scope
-        content.mount(Static("Scope", classes="detail-label"))
+        content.mount(Static(t("detail.scope"), classes="detail-label"))
         content.mount(Static(f"  {task.scope.value}", classes="detail-field"))
 
         # Tags
         if task.tags:
-            content.mount(Static("Tags", classes="detail-label"))
+            content.mount(Static(t("detail.tags"), classes="detail-label"))
             content.mount(
                 Static(f"  {_esc(', '.join(task.tags))}", classes="detail-field")
             )
 
         # Due date
         if task.due_date:
-            content.mount(Static("Due", classes="detail-label"))
+            content.mount(Static(t("detail.due"), classes="detail-label"))
             content.mount(Static(f"  {task.due_date}", classes="detail-field"))
 
         # Description
         if task.description:
             content.mount(_ResponsiveSeparator())
-            content.mount(Static("Description", classes="detail-label"))
+            content.mount(Static(t("detail.description"), classes="detail-label"))
             content.mount(
                 Static(f"  {_esc(task.description)}", classes="detail-field")
             )
@@ -276,9 +283,9 @@ class DetailPanel(Widget):
         done, total = task.children_progress()
         if total > 0:
             content.mount(_ResponsiveSeparator())
-            content.mount(Static("Subtasks", classes="detail-label"))
+            content.mount(Static(t("detail.subtasks"), classes="detail-label"))
             content.mount(
-                Static(f"  {done}/{total} completed", classes="detail-field")
+                Static(f"  {t('detail.completed_count', done=done, total=total)}", classes="detail-field")
             )
             for child in task.children:
                 icon = "\\[x]" if child.is_done else "\\[ ]"
@@ -290,12 +297,12 @@ class DetailPanel(Widget):
         if task.created_at or task.completed_at:
             content.mount(_ResponsiveSeparator())
             if task.created_at:
-                content.mount(Static("Created", classes="detail-label"))
+                content.mount(Static(t("detail.created"), classes="detail-label"))
                 content.mount(
                     Static(f"  {task.created_at}", classes="detail-field")
                 )
             if task.completed_at:
-                content.mount(Static("Completed", classes="detail-label"))
+                content.mount(Static(t("detail.completed"), classes="detail-label"))
                 content.mount(
                     Static(f"  {task.completed_at}", classes="detail-field")
                 )

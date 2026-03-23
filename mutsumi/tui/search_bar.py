@@ -9,6 +9,8 @@ from textual.message import Message
 from textual.widget import Widget
 from textual.widgets import Input, Static
 
+from mutsumi.i18n import get_i18n
+
 if TYPE_CHECKING:
     from textual.app import ComposeResult
     from textual.events import Key
@@ -21,7 +23,7 @@ class SearchBar(Widget):
     SearchBar {
         dock: top;
         height: 1;
-        background: #1a1a1a;
+        background: $theme-surface;
         display: none;
     }
 
@@ -37,14 +39,14 @@ class SearchBar(Widget):
     SearchBar .search-icon {
         width: 3;
         padding: 0 0 0 1;
-        color: #5de4c7;
+        color: $theme-accent;
     }
 
     SearchBar Input {
         width: 1fr;
         height: 1;
         border: none;
-        background: #1a1a1a;
+        background: $theme-surface;
     }
     """
 
@@ -61,7 +63,7 @@ class SearchBar(Widget):
     def compose(self) -> ComposeResult:
         with Horizontal():
             yield Static("/", classes="search-icon")
-            inp = Input(placeholder="Search...", id="search-input")
+            inp = Input(placeholder=get_i18n().t("search.placeholder"), id="search-input")
             inp.can_focus = False  # disabled until show() is called
             yield inp
 

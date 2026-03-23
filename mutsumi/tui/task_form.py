@@ -14,6 +14,8 @@ if TYPE_CHECKING:
 
     from mutsumi.core.models import Task
 
+from mutsumi.i18n import get_i18n
+
 
 class TaskForm(ModalScreen[None]):
     """Modal form for creating or editing a task."""
@@ -28,8 +30,8 @@ class TaskForm(ModalScreen[None]):
         max-width: 90%;
         height: auto;
         max-height: 80%;
-        background: #1a1a1a;
-        border: solid #333333;
+        background: $theme-surface;
+        border: solid $theme-border;
         padding: 1 2;
     }
 
@@ -37,13 +39,13 @@ class TaskForm(ModalScreen[None]):
         height: 1;
         text-align: center;
         text-style: bold;
-        color: #5de4c7;
+        color: $theme-accent;
         margin-bottom: 1;
     }
 
     TaskForm Label {
         height: 1;
-        color: #e0e0e0;
+        color: $theme-text;
         margin-top: 1;
     }
 
@@ -104,58 +106,59 @@ class TaskForm(ModalScreen[None]):
     def compose(self) -> ComposeResult:
         task = self._editing_task
         is_edit = task is not None
+        t = get_i18n().t
         if self._parent_id:
-            form_title = "Add Subtask"
+            form_title = t("actions.new_task")
         elif is_edit:
-            form_title = "Edit Task"
+            form_title = t("actions.edit_task")
         else:
-            form_title = "New Task"
+            form_title = t("actions.new_task")
 
         with VerticalScroll():
             yield Static(form_title, classes="form-title")
 
-            yield Label("Title")
+            yield Label(t("form.title_label"))
             yield Input(
                 value=task.title if task else "",
-                placeholder="Task title...",
+                placeholder=t("form.title_placeholder"),
                 id="form-title",
             )
 
-            yield Label("Priority")
+            yield Label(t("form.priority_label"))
             yield Select(
                 [(p, p) for p in ("high", "normal", "low")],
                 value=task.priority.value if task else "normal",
                 id="form-priority",
             )
 
-            yield Label("Scope")
+            yield Label(t("form.scope_label"))
             yield Select(
                 [(s, s) for s in ("day", "week", "month", "inbox")],
                 value=task.scope.value if task else self._default_scope,
                 id="form-scope",
             )
 
-            yield Label("Tags (comma-separated)")
+            yield Label(t("form.tags_label"))
             yield Input(
                 value=", ".join(task.tags) if task else "",
                 placeholder="tag1, tag2",
                 id="form-tags",
             )
 
-            yield Label("Description")
+            yield Label(t("form.description_label"))
             yield Input(
                 value=task.description or "" if task else "",
-                placeholder="Optional description...",
+                placeholder="...",
                 id="form-description",
             )
 
             with Horizontal(classes="form-buttons"):
                 yield Button(
-                    "Save" if is_edit else "Create",
+                    t("actions.save") if is_edit else t("actions.create"),
                     variant="primary",
                     id="form-submit",
                 )
-                yield Button("Cancel", variant="default", id="form-cancel")
+                yield Button(t("actions.cancel"), variant="default", id="form-cancel")
 
     def on_mount(self) -> None:
         """Auto-focus the title input when the form opens."""

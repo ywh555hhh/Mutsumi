@@ -9,6 +9,7 @@ from textual.screen import ModalScreen
 from textual.widgets import Static
 
 from mutsumi.config.keybindings import get_keybindings
+from mutsumi.themes import get_theme
 from mutsumi.tui.key_manager import get_key_sequences
 
 if TYPE_CHECKING:
@@ -79,8 +80,8 @@ class HelpScreen(ModalScreen[None]):
         width: 60;
         max-width: 90%;
         max-height: 80%;
-        background: #1a1a1a;
-        border: tall #333333;
+        background: $theme-surface;
+        border: tall $theme-border;
         padding: 1 2;
         overflow-y: auto;
     }
@@ -136,18 +137,19 @@ class HelpScreen(ModalScreen[None]):
 
         # Build output
         result = Text()
-        result.append(f"  Mutsumi Help  ({self._preset} preset)\n", style="bold #5de4c7")
-        result.append("  Press Escape or ? to close\n\n", style="#666666")
+        theme = get_theme()
+        result.append(f"  Mutsumi Help  ({self._preset} preset)\n", style=f"bold {theme.accent}")
+        result.append("  Press Escape or ? to close\n\n", style=theme.text_muted)
 
         for category in _CATEGORY_ORDER:
             items = categorized.get(category, [])
             if not items:
                 continue
 
-            result.append(f"  {category}\n", style="bold underline #e0e0e0")
+            result.append(f"  {category}\n", style=f"bold underline {theme.text}")
             for key_display, label in items:
-                result.append(f"    {key_display:>14}  ", style="#5de4c7")
-                result.append(f"{label}\n", style="#e0e0e0")
+                result.append(f"    {key_display:>14}  ", style=theme.accent)
+                result.append(f"{label}\n", style=theme.text)
             result.append("\n")
 
         return result

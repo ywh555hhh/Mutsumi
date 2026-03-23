@@ -27,17 +27,33 @@ class _DebouncedHandler(FileSystemEventHandler):
         self._timer: threading.Timer | None = None
         self._lock = threading.Lock()
 
+    def _matches_target(self, path_str: str) -> bool:
+        """Check if a path matches the target file."""
+        return Path(path_str).resolve() == self._target
+
     def on_modified(self, event: FileSystemEvent) -> None:
         if event.is_directory:
             return
-        src = Path(str(event.src_path)).resolve()
-        if src != self._target:
-            return
-        self._schedule()
+        if self._matches_target(str(event.src_path)):
+            self._schedule()
 
     def on_created(self, event: FileSystemEvent) -> None:
-        # Handle atomic writes (temp + rename shows as create)
-        self.on_modified(event)
+        if event.is_directory:
+            return
+        if self._matches_target(str(event.src_path)):
+            self._schedule()
+
+    def on_moved(self, event: FileSystemEvent) -> None:
+        """Handle atomic writes that appear as rename/move events.
+
+        os.replace() uses rename(2) which watchdog may report as a
+        FileMovedEvent. Check if the destination matches the target.
+        """
+        if event.is_directory:
+            return
+        dest = getattr(event, "dest_path", None)
+        if dest is not None and self._matches_target(str(dest)):
+            self._schedule()
 
     def _schedule(self) -> None:
         with self._lock:
@@ -52,7 +68,12 @@ class _DebouncedHandler(FileSystemEventHandler):
 
 
 class TaskFileWatcher:
-    """Watches tasks.json for changes and calls back on modifications."""
+    """Watches a task file's parent directory for changes.
+
+    Starts watching the parent directory immediately — the target file
+    does NOT need to exist yet. This allows detecting when an Agent
+    creates the file for the first time.
+    """
 
     def __init__(self, path: Path, callback: Callable[[], Any]) -> None:
         self._path = path.resolve()
@@ -61,12 +82,18 @@ class TaskFileWatcher:
         self._handler = _DebouncedHandler(self._path, self._callback)
 
     def start(self) -> None:
-        """Start watching the file's parent directory."""
+        """Start watching the file's parent directory.
+
+        The parent directory must exist, but the target file itself
+        does not need to exist — we'll detect its creation.
+        """
         if self._observer is not None:
             return
+        watch_dir = self._path.parent
+        if not watch_dir.exists():
+            return
         self._observer = Observer()
-        watch_dir = str(self._path.parent)
-        self._observer.schedule(self._handler, watch_dir, recursive=False)
+        self._observer.schedule(self._handler, str(watch_dir), recursive=False)
         self._observer.daemon = True
         self._observer.start()
 

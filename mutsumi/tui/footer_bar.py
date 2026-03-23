@@ -11,6 +11,9 @@ from textual.reactive import reactive
 from textual.widget import Widget
 from textual.widgets import Static
 
+from mutsumi.i18n import get_i18n
+from mutsumi.themes import get_theme
+
 if TYPE_CHECKING:
     from textual.app import ComposeResult
     from textual.events import Resize
@@ -25,13 +28,15 @@ class BarMode(StrEnum):
     NOTIFICATION = auto()
 
 
-_MODE_STYLES: dict[BarMode, tuple[str, str]] = {
-    # (label, color)
-    BarMode.NORMAL: ("NORMAL", "#666666"),
-    BarMode.SEARCH: ("SEARCH", "#5de4c7"),
-    BarMode.CONFIRM: ("CONFIRM", "#e06c75"),
-    BarMode.NOTIFICATION: ("NORMAL", "#666666"),
-}
+def _mode_style(mode: BarMode) -> tuple[str, str]:
+    """Return (label, color) for a footer bar mode from current theme."""
+    theme = get_theme()
+    return {
+        BarMode.NORMAL: ("NORMAL", theme.text_muted),
+        BarMode.SEARCH: ("SEARCH", theme.accent),
+        BarMode.CONFIRM: ("CONFIRM", theme.error),
+        BarMode.NOTIFICATION: ("NORMAL", theme.text_muted),
+    }[mode]
 
 
 class _ClickableAction(Static):
@@ -42,12 +47,12 @@ class _ClickableAction(Static):
         width: auto;
         height: 1;
         padding: 0 1;
-        color: #5de4c7;
+        color: $theme-accent;
     }
 
     _ClickableAction:hover {
-        background: #2a2a2a;
-        color: #ffffff;
+        background: $theme-bg;
+        color: $theme-text;
     }
     """
 
@@ -78,7 +83,7 @@ class FooterBar(Widget):
     FooterBar {
         dock: bottom;
         height: 2;
-        background: #1a1a1a;
+        background: $theme-surface;
     }
 
     FooterBar > Horizontal {
@@ -89,20 +94,20 @@ class FooterBar(Widget):
     FooterBar .stats {
         width: 1fr;
         padding: 0 1;
-        color: #e0e0e0;
+        color: $theme-text;
     }
 
     FooterBar .hint-bar {
         height: 1;
         width: 100%;
         padding: 0 1;
-        color: #555555;
+        color: $theme-text-muted;
     }
 
     FooterBar .mode-badge {
         width: auto;
         padding: 0 1;
-        color: #666666;
+        color: $theme-text-muted;
     }
     """
 
@@ -143,7 +148,12 @@ class FooterBar(Widget):
             yield Static("NORMAL", classes="mode-badge", id="mode-badge")
 
     def _format_stats(self) -> str:
-        base = f"{self._total} tasks \u00b7 {self._done} done \u00b7 {self._pending} pending"
+        t = get_i18n().t
+        base = (
+            f"{t('status.tasks', count=self._total)} \u00b7 "
+            f"{t('status.done', count=self._done)} \u00b7 "
+            f"{t('status.pending', count=self._pending)}"
+        )
         if self._notification_mode == "badge" and self._overdue > 0:
             base += f" \u00b7 \\[{self._overdue} overdue]"
         return base
@@ -170,7 +180,7 @@ class FooterBar(Widget):
         """Update badge text and color when mode changes."""
         try:
             badge = self.query_one("#mode-badge", Static)
-            label, color = _MODE_STYLES[new_mode]
+            label, color = _mode_style(new_mode)
             badge.update(label)
             badge.styles.color = color
         except Exception:

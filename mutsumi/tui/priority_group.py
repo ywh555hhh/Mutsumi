@@ -10,6 +10,7 @@ from textual.widget import Widget
 from textual.widgets import Static
 
 from mutsumi.core.models import Task, TaskPriority
+from mutsumi.themes import get_theme
 from mutsumi.tui.task_row import TaskRow
 
 if TYPE_CHECKING:
@@ -23,11 +24,15 @@ PRIORITY_LABELS: dict[TaskPriority, str] = {
     TaskPriority.LOW: "LOW",
 }
 
-PRIORITY_HEADER_STYLE: dict[TaskPriority, str] = {
-    TaskPriority.HIGH: "#e06c75",
-    TaskPriority.NORMAL: "#e0e0e0",
-    TaskPriority.LOW: "#666666",
-}
+
+def _priority_header_style(priority: TaskPriority) -> str:
+    """Return the Rich style for a priority group header from current theme."""
+    theme = get_theme()
+    return {
+        TaskPriority.HIGH: theme.priority_high,
+        TaskPriority.NORMAL: theme.text,
+        TaskPriority.LOW: theme.text_muted,
+    }[priority]
 
 MAX_NESTING_DEPTH = 3
 
@@ -39,15 +44,15 @@ class PriorityGroupHeader(Widget, can_focus=True):
     PriorityGroupHeader {
         height: 1;
         padding: 0 1;
-        color: #666666;
+        color: $theme-text-muted;
     }
 
     PriorityGroupHeader:hover {
-        background: #1e1e1e;
+        background: $theme-surface;
     }
 
     PriorityGroupHeader:focus {
-        background: #2a2a2a;
+        background: $theme-surface;
     }
     """
 
@@ -59,7 +64,7 @@ class PriorityGroupHeader(Widget, can_focus=True):
 
     def render(self) -> Text:
         label = PRIORITY_LABELS[self.priority]
-        style = PRIORITY_HEADER_STYLE[self.priority]
+        style = _priority_header_style(self.priority)
         icon = "\u25b6" if self.collapsed else "\u25bc"
         # Fill remaining width with ─
         prefix = f"{icon} {label} "

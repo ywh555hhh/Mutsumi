@@ -38,3 +38,47 @@ def test_startup_state_attach_mode_shape() -> None:
         project_registered=False,
     )
     assert state.mode == "attach_needed"
+
+
+def test_onboarding_finished_message_shape() -> None:
+    from mutsumi.tui.onboarding_screen import OnboardingScreen
+
+    msg = OnboardingScreen.Finished(
+        selections={
+            "language": "zh",
+            "keybindings": "vim",
+            "theme": "nord",
+            "workspace_mode": "personal+project",
+            "preferred_agent": "claude-code",
+        },
+        skipped=False,
+    )
+    assert msg.selections["preferred_agent"] == "claude-code"
+    assert not msg.skipped
+
+
+def test_onboarding_finished_skip_message() -> None:
+    from mutsumi.tui.onboarding_screen import OnboardingScreen
+
+    msg = OnboardingScreen.Finished(
+        selections={"language": "en", "keybindings": "arrows", "theme": "monochrome-zen",
+                     "workspace_mode": "personal-only", "preferred_agent": "none"},
+        skipped=True,
+    )
+    assert msg.skipped
+    assert msg.selections["preferred_agent"] == "none"
+
+
+def test_onboarding_default_selections_no_git() -> None:
+    from mutsumi.tui.onboarding_screen import OnboardingScreen
+
+    screen = OnboardingScreen(MutsumiConfig(), is_git_repo=False)
+    assert screen._selections["workspace_mode"] == "personal-only"
+    assert screen._selections["preferred_agent"] == "none"
+
+
+def test_onboarding_default_selections_git_repo() -> None:
+    from mutsumi.tui.onboarding_screen import OnboardingScreen
+
+    screen = OnboardingScreen(MutsumiConfig(), is_git_repo=True)
+    assert screen._selections["workspace_mode"] == "personal+project"

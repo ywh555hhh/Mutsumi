@@ -41,14 +41,14 @@ from mutsumi.core.writer import (
     save_task_file,
     update_task,
 )
-from mutsumi.i18n import init_i18n
+from mutsumi.i18n import get_i18n, init_i18n
 from mutsumi.onboarding.bootstrap import project_tasks_path
 from mutsumi.onboarding.files import (
     ensure_personal_task_file,
     ensure_project_task_file,
     register_project,
 )
-from mutsumi.themes import load_theme, theme_to_css
+from mutsumi.themes import get_theme, load_theme
 from mutsumi.tui.confirm_bar import ConfirmBar
 from mutsumi.tui.confirm_dialog import ConfirmDialog
 from mutsumi.tui.detail_panel import DetailPanel
@@ -152,9 +152,8 @@ class MutsumiApp(App[None]):
         # Apply keybindings from config (with optional user overrides)
         self._bindings_list = get_keybindings(config.keybindings, config.key_overrides or None)
 
-        # Apply theme
-        theme = load_theme(config.theme)
-        self._theme_css = theme_to_css(theme)
+        # Apply theme (sets global singleton, get_css_variables reads it)
+        load_theme(config.theme)
 
         # Key manager for multi-key sequences
         self._keybinding_preset = config.keybindings
@@ -293,11 +292,20 @@ class MutsumiApp(App[None]):
             return ""
 
     def get_css_variables(self) -> dict[str, str]:
-        return super().get_css_variables()
-
-    @property
-    def css(self) -> str:
-        return self.DEFAULT_CSS + self._theme_css + self._custom_css
+        theme = get_theme()
+        return {
+            **super().get_css_variables(),
+            "theme-bg": theme.background,
+            "theme-surface": theme.surface,
+            "theme-border": theme.border,
+            "theme-text": theme.text,
+            "theme-text-muted": theme.text_muted,
+            "theme-accent": theme.accent,
+            "theme-error": theme.error,
+            "theme-priority-high": theme.priority_high,
+            "theme-priority-normal": theme.priority_normal,
+            "theme-priority-low": theme.priority_low,
+        }
 
     def compose(self) -> ComposeResult:
         source_names = self._source_registry.source_names
@@ -417,7 +425,7 @@ class MutsumiApp(App[None]):
             self.task_file = None
         except json.JSONDecodeError as e:
             self.task_file = None
-            self._show_error_banner(f"Invalid tasks.json: {e}")
+            self._show_error_banner(get_i18n().t("errors.json_invalid"))
             await self._render_current_tab()
             return
         except Exception as e:
@@ -458,7 +466,7 @@ class MutsumiApp(App[None]):
         except Exception:
             if width < 40:
                 warning = Static(
-                    "\u26a0 Terminal too narrow — resize to 40+ columns",
+                    f"\u26a0 {get_i18n().t('errors.terminal_narrow')}",
                     classes="narrow-warning",
                     id="narrow-warning",
                 )
@@ -562,14 +570,29 @@ class MutsumiApp(App[None]):
         return bool(task.description and query in task.description.lower())
 
     def _write_back(self) -> None:
-        """Atomically write the current task_file back to disk."""
+        """Atomically write the current task_file back to disk.
+
+        Sets _self_writing flag and keeps it True for longer than the
+        watcher's debounce window (0.1s) to prevent self-triggered reloads.
+        """
+        import threading
+
         if self.task_file is None:
             return
         self._self_writing = True
         try:
             save_task_file(self.task_file, self.tasks_path)
-        finally:
+        except Exception:
             self._self_writing = False
+            raise
+
+        # Keep flag True past the debounce window (0.1s) + safety margin
+        def _reset_flag() -> None:
+            self._self_writing = False
+
+        timer = threading.Timer(0.3, _reset_flag)
+        timer.daemon = True
+        timer.start()
 
     def _log_event(self, event_type: str, **data: str | int | list[str] | None) -> None:
         """Log an event if event logger is available."""
@@ -697,15 +720,16 @@ class MutsumiApp(App[None]):
         await self._render_current_tab()
 
     async def on_onboarding_screen_finished(self, event: OnboardingScreen.Finished) -> None:
-        """Persist first-run onboarding choices and continue startup."""
+        """Persist first-run onboarding choices, hot-reload, and continue startup."""
         selections = event.selections
         if not event.skipped:
             self._config.language = selections.get("language", self._config.language)
             self._config.keybindings = selections.get("keybindings", self._config.keybindings)
             self._config.theme = selections.get("theme", self._config.theme)
-            self._config.agent_integration_mode = selections.get(
-                "agent_integration_mode",
-                self._config.agent_integration_mode,
+
+            preferred_agent = selections.get("preferred_agent", "none")
+            self._config.preferred_agent = (
+                preferred_agent if preferred_agent != "none" else None
             )
             self._config.onboarding_completed = True
 
@@ -719,10 +743,42 @@ class MutsumiApp(App[None]):
                 register_project(self._config, project_path.parent)
             save_config(self._config)
 
+            # Hot-reload i18n
+            init_i18n(self._config.language)
+
+            # Hot-reload theme (load_theme sets global singleton, refresh_css re-reads variables)
+            load_theme(self._config.theme)
+            self.refresh_css()
+
+            # Hot-reload keybindings
+            self._bindings_list = get_keybindings(
+                self._config.keybindings,
+                self._config.key_overrides or None,
+            )
+            self._keybinding_preset = self._config.keybindings
+            self._key_manager = KeyManager(get_key_sequences(self._config.keybindings))
+
+            # Install skills for selected agent
+            if preferred_agent and preferred_agent != "none":
+                from mutsumi.core.skill_installer import install_for_agent
+
+                try:
+                    install_for_agent(preferred_agent)
+                except (ValueError, OSError):
+                    pass
+
         self._source_registry = SourceRegistry()
         self._build_sources_from_config(self._config, None)
-        self._active_source = self._source_registry.source_names[0]
+        source_names = self._source_registry.source_names
+        self._active_source = source_names[0]
         self._default_scope = self._config.default_scope
+
+        # Rebuild HeaderBar tabs and ScopeFilter for the new source layout
+        header = self.query_one(HeaderBar)
+        header.set_sources(source_names)
+        scope_filter = self.query_one(ScopeFilter)
+        scope_filter.set_show_main_button(len(source_names) > 1)
+
         await self._initialize_main_view()
 
     async def on_project_attach_screen_resolved(self, event: ProjectAttachScreen.Resolved) -> None:
@@ -741,7 +797,14 @@ class MutsumiApp(App[None]):
             save_config(self._config)
             self._source_registry = SourceRegistry()
             self._build_sources_from_config(self._config, None)
-            self._active_source = self._source_registry.source_names[0]
+            source_names = self._source_registry.source_names
+            self._active_source = source_names[0]
+
+            # Rebuild HeaderBar tabs and ScopeFilter for the new source layout
+            header = self.query_one(HeaderBar)
+            header.set_sources(source_names)
+            scope_filter = self.query_one(ScopeFilter)
+            scope_filter.set_show_main_button(len(source_names) > 1)
 
         await self._initialize_main_view()
 

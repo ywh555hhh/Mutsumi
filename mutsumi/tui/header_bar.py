@@ -16,19 +16,24 @@ from textual.widget import Widget
 from textual.widgets import Static
 
 from mutsumi.core.models import TaskScope
+from mutsumi.i18n import get_i18n
 
 if TYPE_CHECKING:
     from textual.app import ComposeResult
     from textual.events import Resize
 
-# Legacy scope tab support (single-source mode)
-TAB_LABELS: dict[TaskScope, str] = {
-    TaskScope.DAY: "Today",
-    TaskScope.WEEK: "Week",
-    TaskScope.MONTH: "Month",
-    TaskScope.INBOX: "Inbox",
-}
 
+def _tab_labels() -> dict[TaskScope, str]:
+    """Build scope tab labels from i18n (called at render time)."""
+    t = get_i18n().t
+    return {
+        TaskScope.DAY: t("tabs.today"),
+        TaskScope.WEEK: t("tabs.week"),
+        TaskScope.MONTH: t("tabs.month"),
+        TaskScope.INBOX: t("tabs.inbox"),
+    }
+
+# Static order — doesn't depend on i18n
 TAB_ORDER: list[TaskScope] = [
     TaskScope.DAY,
     TaskScope.WEEK,
@@ -45,12 +50,12 @@ class TabButton(Static, can_focus=True):
         width: auto;
         height: 1;
         padding: 0 1;
-        color: #999999;
+        color: $theme-text-muted;
     }
 
     TabButton:hover {
-        color: #cccccc;
-        background: #222222;
+        color: $theme-text;
+        background: $theme-surface;
     }
 
     TabButton:focus {
@@ -58,18 +63,17 @@ class TabButton(Static, can_focus=True):
     }
 
     TabButton.active {
-        color: #5de4c7;
+        color: $theme-accent;
         text-style: bold;
-        background: #1f2f2a;
+        background: $theme-bg;
     }
 
     TabButton.active:hover {
-        color: #5de4c7;
-        background: #253530;
+        color: $theme-accent;
     }
 
     TabButton.active:focus {
-        color: #5de4c7;
+        color: $theme-accent;
         text-style: bold reverse;
     }
     """
@@ -92,7 +96,7 @@ class TabButton(Static, can_focus=True):
 
     @staticmethod
     def _scope_label(scope: TaskScope, active: bool = False) -> str:
-        name = TAB_LABELS.get(scope, "")
+        name = _tab_labels().get(scope, "")
         return f"\\[{name}]" if active else f" {name} "
 
     @staticmethod
@@ -125,7 +129,7 @@ class HeaderBar(Widget):
     HeaderBar {
         dock: top;
         height: 1;
-        background: #0e0e0e;
+        background: $theme-surface;
     }
 
     HeaderBar > Horizontal {
@@ -137,7 +141,7 @@ class HeaderBar(Widget):
         width: 1fr;
         text-align: right;
         padding: 0 1;
-        color: #666666;
+        color: $theme-text-muted;
     }
     """
 
@@ -168,10 +172,28 @@ class HeaderBar(Widget):
         return self._multi_source
 
     def set_sources(self, source_names: list[str]) -> None:
-        """Update the source tab list dynamically."""
+        """Update the source tab list dynamically and rebuild tabs."""
         self._source_names = source_names
         self._multi_source = len(source_names) > 1
-        # Re-compose would be ideal but for now this is called before mount
+        # Rebuild tabs if already mounted
+        try:
+            container = self.query_one(Horizontal)
+        except Exception:
+            return  # Not yet mounted
+        container.remove_children()
+        if self._multi_source:
+            for name in self._source_names:
+                display_name = f"\u2605 {get_i18n().t('tabs.main')}" if name == "main" else name
+                btn = TabButton(
+                    source_name=name,
+                    display_name=display_name,
+                )
+                container.mount(btn)
+        else:
+            for scope in TAB_ORDER:
+                btn = TabButton(scope)
+                container.mount(btn)
+        container.mount(Static("mutsumi", classes="title"))
 
     def compose(self) -> ComposeResult:
         with Horizontal():
@@ -179,7 +201,7 @@ class HeaderBar(Widget):
                 # Multi-source: show source tabs
                 for name in self._source_names:
                     is_active = name == self.active_source
-                    display_name = "\u2605 Main" if name == "main" else name
+                    display_name = f"\u2605 {get_i18n().t('tabs.main')}" if name == "main" else name
                     btn = TabButton(
                         source_name=name,
                         display_name=display_name,

@@ -27,14 +27,14 @@ class ConfirmBar(Widget, can_focus=True):
     ConfirmBar {
         dock: bottom;
         height: 1;
-        background: #2a1a1a;
+        background: $theme-surface;
         display: none;
     }
 
     ConfirmBar .prompt {
         width: 1fr;
         padding: 0 1;
-        color: #e06c75;
+        color: $theme-error;
     }
     """
 

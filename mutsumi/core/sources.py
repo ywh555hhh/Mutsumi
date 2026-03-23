@@ -86,12 +86,19 @@ class SourceRegistry:
     def start_watching(
         self, name: str, callback: Callable[[str], None],
     ) -> None:
-        """Start file-watching for a source. Callback receives source name."""
+        """Start file-watching for a source. Callback receives source name.
+
+        The target file does NOT need to exist — the watcher monitors the
+        parent directory and will detect file creation by an external Agent.
+        The parent directory must exist, though.
+        """
         source = self._sources.get(name)
-        if source is None or not source.path.exists():
+        if source is None:
             return
         if name in self._watchers:
             return  # already watching
+        if not source.path.parent.exists():
+            return  # parent dir doesn't exist, can't watch
 
         def _on_change() -> None:
             callback(name)
