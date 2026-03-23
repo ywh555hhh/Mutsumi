@@ -2,13 +2,16 @@
 
 from __future__ import annotations
 
-from pathlib import Path
+from typing import TYPE_CHECKING
 from unittest.mock import patch
 
 from mutsumi.config import reset_config
 from mutsumi.config.settings import MutsumiConfig, ProjectEntry
 from mutsumi.onboarding.bootstrap import detect_startup_state, project_tasks_path
 from mutsumi.onboarding.files import ensure_project_task_file, register_project
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 
 class TestDetectStartupState:

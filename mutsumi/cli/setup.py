@@ -6,8 +6,8 @@ import click
 
 from mutsumi.config import get_config, save_config
 from mutsumi.onboarding.agent_setup import (
-    AGENT_TARGETS,
     _MARKER,
+    AGENT_TARGETS,
     apply_agent_setup,
     get_prompt_template,
     inject_project_doc,

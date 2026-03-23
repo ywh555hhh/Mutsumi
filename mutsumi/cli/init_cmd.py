@@ -5,7 +5,11 @@ from __future__ import annotations
 import click
 
 from mutsumi.core.loader import resolve_tasks_path
-from mutsumi.onboarding.files import ensure_personal_task_file, ensure_project_task_file, register_project
+from mutsumi.onboarding.files import (
+    ensure_personal_task_file,
+    ensure_project_task_file,
+    register_project,
+)
 
 
 @click.command("init")

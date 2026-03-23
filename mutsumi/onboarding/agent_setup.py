@@ -4,9 +4,10 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Literal
+from typing import TYPE_CHECKING, Literal
 
-from mutsumi.config.settings import MutsumiConfig
+if TYPE_CHECKING:
+    from mutsumi.config.settings import MutsumiConfig
 
 _MARKER = "## Mutsumi Task Integration"
 SetupMode = Literal["skills", "skills+project-doc", "snippet"]

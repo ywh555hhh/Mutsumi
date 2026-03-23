@@ -43,7 +43,11 @@ from mutsumi.core.writer import (
 )
 from mutsumi.i18n import init_i18n
 from mutsumi.onboarding.bootstrap import project_tasks_path
-from mutsumi.onboarding.files import ensure_personal_task_file, ensure_project_task_file, register_project
+from mutsumi.onboarding.files import (
+    ensure_personal_task_file,
+    ensure_project_task_file,
+    register_project,
+)
 from mutsumi.themes import load_theme, theme_to_css
 from mutsumi.tui.confirm_bar import ConfirmBar
 from mutsumi.tui.confirm_dialog import ConfirmDialog
@@ -709,7 +713,9 @@ class MutsumiApp(App[None]):
             if workspace_mode in {"personal-only", "personal+project"}:
                 ensure_personal_task_file()
             if workspace_mode in {"project-only", "personal+project"}:
-                project_path = ensure_project_task_file(self._startup_state.cwd if self._startup_state else None)
+                project_path = ensure_project_task_file(
+                    self._startup_state.cwd if self._startup_state else None,
+                )
                 register_project(self._config, project_path.parent)
             save_config(self._config)
 

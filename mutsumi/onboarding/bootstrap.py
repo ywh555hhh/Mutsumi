@@ -4,10 +4,12 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Literal
+from typing import TYPE_CHECKING, Literal
 
 from mutsumi.config import config_exists, get_config
-from mutsumi.config.settings import MutsumiConfig
+
+if TYPE_CHECKING:
+    from mutsumi.config.settings import MutsumiConfig
 
 StartupMode = Literal["ready", "first_run", "attach_needed"]
 
@@ -47,10 +49,7 @@ def project_tasks_path(cwd: Path | None = None) -> Path:
 def is_registered_project(config: MutsumiConfig, cwd: Path | None = None) -> bool:
     """Return True if the current directory is already registered."""
     project_dir = (cwd or Path.cwd()).resolve()
-    for project in config.projects:
-        if project.path.resolve() == project_dir:
-            return True
-    return False
+    return any(project.path.resolve() == project_dir for project in config.projects)
 
 
 def detect_startup_state(

@@ -3,13 +3,16 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import TYPE_CHECKING
 
+from textual.binding import Binding
 from textual.containers import Horizontal, Vertical
 from textual.message import Message
 from textual.screen import ModalScreen
 from textual.widgets import Button, Static
 
-from mutsumi.config.settings import MutsumiConfig
+if TYPE_CHECKING:
+    from mutsumi.config.settings import MutsumiConfig
 
 
 @dataclass(frozen=True)
@@ -82,10 +85,10 @@ class OnboardingScreen(ModalScreen[None]):
 
     BINDINGS = [
         ("escape", "skip", "Skip"),
-        ("left", "focus_prev", "Prev", False),
-        ("up", "focus_prev", "Prev", False),
-        ("right", "focus_next", "Next", False),
-        ("down", "focus_next", "Next", False),
+        Binding("left", "focus_prev", "Prev", show=False),
+        Binding("up", "focus_prev", "Prev", show=False),
+        Binding("right", "focus_next", "Next", show=False),
+        Binding("down", "focus_next", "Next", show=False),
     ]
 
     class Finished(Message):
@@ -126,7 +129,9 @@ class OnboardingScreen(ModalScreen[None]):
         self._render_step()
 
     def _build_steps(self, is_git_repo: bool) -> tuple[OnboardingStep, ...]:
-        workspace_default = "Current folder + personal tasks" if is_git_repo else "Personal tasks only"
+        workspace_default = (
+            "Current folder + personal tasks" if is_git_repo else "Personal tasks only"
+        )
         return (
             OnboardingStep(
                 key="language",

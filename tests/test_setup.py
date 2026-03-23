@@ -47,8 +47,9 @@ def test_setup_project_doc_idempotent(tmp_path: Path) -> None:
     os.chdir(tmp_path)
     try:
         runner = CliRunner()
-        runner.invoke(main, ["setup", "--agent", "claude-code", "--mode", "skills+project-doc"])
-        result2 = runner.invoke(main, ["setup", "--agent", "claude-code", "--mode", "skills+project-doc"])
+        cmd = ["setup", "--agent", "claude-code", "--mode", "skills+project-doc"]
+        runner.invoke(main, cmd)
+        result2 = runner.invoke(main, cmd)
         assert result2.exit_code == 0
         assert "Already configured" in result2.output
         content = (tmp_path / "CLAUDE.md").read_text(encoding="utf-8")
@@ -67,7 +68,8 @@ def test_setup_project_doc_appends(tmp_path: Path) -> None:
         claude_md = tmp_path / "CLAUDE.md"
         claude_md.write_text("# My Project\n\nExisting rules here.\n", encoding="utf-8")
         runner = CliRunner()
-        result = runner.invoke(main, ["setup", "--agent", "claude-code", "--mode", "skills+project-doc"])
+        cmd = ["setup", "--agent", "claude-code", "--mode", "skills+project-doc"]
+        result = runner.invoke(main, cmd)
         assert result.exit_code == 0
         content = claude_md.read_text(encoding="utf-8")
         assert "# My Project" in content
@@ -96,7 +98,8 @@ def test_setup_gemini_project_doc(tmp_path: Path) -> None:
     os.chdir(tmp_path)
     try:
         runner = CliRunner()
-        result = runner.invoke(main, ["setup", "--agent", "gemini-cli", "--mode", "skills+project-doc"])
+        cmd = ["setup", "--agent", "gemini-cli", "--mode", "skills+project-doc"]
+        result = runner.invoke(main, cmd)
         assert result.exit_code == 0
         gemini_md = tmp_path / "GEMINI.md"
         assert gemini_md.exists()

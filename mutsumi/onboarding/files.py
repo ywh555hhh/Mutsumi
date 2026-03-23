@@ -3,11 +3,14 @@
 from __future__ import annotations
 
 import json
-from pathlib import Path
+from typing import TYPE_CHECKING
 
 from mutsumi.config import save_config
 from mutsumi.config.settings import MutsumiConfig, ProjectEntry
 from mutsumi.onboarding.bootstrap import project_tasks_path
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 _TEMPLATE = {
     "version": 1,
