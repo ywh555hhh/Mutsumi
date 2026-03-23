@@ -2,13 +2,28 @@
 
 from __future__ import annotations
 
+import os
 import shutil
 from pathlib import Path
 
 import click
 
 from mutsumi.core.paths import mutsumi_config_dir, mutsumi_data_dir, mutsumi_home
-from mutsumi.core.skill_installer import SKILL_NAMES, get_agent_skill_dir, get_all_agent_names
+from mutsumi.core.skill_installer import (
+    SKILL_NAMES,
+    get_agent_skill_dir,
+    get_all_agent_names,
+)
+
+
+def _safe_cwd() -> Path:
+    """Get cwd, falling back to home if the directory no longer exists."""
+    try:
+        return Path.cwd()
+    except (FileNotFoundError, OSError):
+        home = Path.home()
+        os.chdir(home)
+        return home
 
 
 def _collect_targets(include_project: bool) -> list[tuple[str, Path]]:
@@ -37,13 +52,29 @@ def _collect_targets(include_project: bool) -> list[tuple[str, Path]]:
 
     # Project-level files in cwd
     if include_project:
-        cwd = Path.cwd()
+        cwd = _safe_cwd()
         for filename in ("mutsumi.json", "tasks.json"):
             p = cwd / filename
             if p.exists():
                 targets.append(("Project file", p))
 
     return targets
+
+
+def _cwd_inside_targets(targets: list[tuple[str, Path]]) -> bool:
+    """Check if the current working directory is inside a target."""
+    try:
+        cwd = Path.cwd().resolve()
+    except (FileNotFoundError, OSError):
+        return False
+    for _label, path in targets:
+        try:
+            resolved = path.resolve()
+            if cwd == resolved or resolved in cwd.parents:
+                return True
+        except OSError:
+            continue
+    return False
 
 
 def _remove(path: Path) -> None:
@@ -76,10 +107,21 @@ def bye(keep_project: bool, yes: bool) -> None:
         link_hint = f" → {path.resolve()}" if path.is_symlink() else ""
         click.echo(f"  {label:<20} {path}{link_hint}")
 
+    cwd_warning = _cwd_inside_targets(targets)
+    if cwd_warning:
+        click.echo(
+            "\n  Warning: your current directory is inside a target "
+            "and will be deleted.\n  cd to another directory after this."
+        )
+
     click.echo(f"\n  Total: {len(targets)} item(s)\n")
 
     if not yes:
         click.confirm("Proceed?", abort=True)
+
+    # cd to home before deleting, so cwd doesn't vanish
+    if cwd_warning:
+        os.chdir(Path.home())
 
     removed = 0
     for _label, path in targets:

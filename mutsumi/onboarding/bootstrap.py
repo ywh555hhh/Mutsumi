@@ -57,7 +57,10 @@ def detect_startup_state(
     config: MutsumiConfig | None = None,
 ) -> StartupState:
     """Detect whether startup should launch, bootstrap, or soft-attach."""
-    current_dir = (cwd or Path.cwd()).resolve()
+    try:
+        current_dir = (cwd or Path.cwd()).resolve()
+    except (FileNotFoundError, OSError):
+        current_dir = Path.home().resolve()
     current_config = config or get_config()
     config_file_exists = config_exists()
 
