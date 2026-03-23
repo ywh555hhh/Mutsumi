@@ -3,9 +3,13 @@ title: CLI Command Reference
 description: Complete reference for every Mutsumi CLI command — synced with code.
 ---
 
-{/* AUTO-GENERATED from commit 1af4b0d — DO NOT EDIT. Run: uv run python scripts/gen_docs.py */}
+{/* AUTO-GENERATED from commit fc98d58 — DO NOT EDIT. Run: uv run python scripts/gen_docs.py */}
 
 import { Aside } from '@astrojs/starlight/components';
+
+<Aside type="tip">
+This page is auto-generated from source code (commit [`fc98d58`](https://github.com/ywh555hhh/Mutsumi/commit/fc98d58)). Do not edit manually — run `uv run python scripts/gen_docs.py` to regenerate.
+</Aside>
 
 <Aside type="note">
 This reference is generated from `mutsumi --help` output. Every option, argument, and default value matches the actual code. If something doesn't match, the code is the source of truth.
@@ -233,7 +237,7 @@ In most cases you don't need `mutsumi init` — running `mutsumi` for the first 
 
 ## mutsumi setup
 
-Set up Mutsumi integration for an AI agent. Installs [Agent Skills](https://agentskills.io) into the agent's skill directory via symlinks.
+Set up Mutsumi integration for an AI agent.
 
 ```bash
 mutsumi setup [OPTIONS]
@@ -248,28 +252,9 @@ mutsumi setup [OPTIONS]
 
 | Mode | Behavior |
 |------|----------|
-| `skills` | Install 5 Mutsumi skill files (`mutsumi-manage`, `mutsumi-track`, `mutsumi-plan`, `mutsumi-report`, `mutsumi-context`) as symlinks from `~/.mutsumi/skills/` into the agent's skill directory. |
-| `skills+project-doc` | Install skills AND append a `## Mutsumi Task Integration` section to the agent's project doc (`CLAUDE.md`, `AGENTS.md`, etc.). |
-| `snippet` | Print the integration prompt to stdout for manual pasting. No files installed. |
-
-### Installed Skills
-
-| Skill | Purpose | Auto-triggered? |
-|-------|---------|-----------------|
-| `mutsumi-manage` | Task CRUD (add, edit, done, remove) | No — user asks |
-| `mutsumi-track` | Auto-update task progress while working | Yes |
-| `mutsumi-plan` | Break goals into subtasks | No — user asks |
-| `mutsumi-report` | Generate status summary | No — user asks |
-| `mutsumi-context` | Load task board context at session start | Yes |
-
-### Skill Directories
-
-| Agent | Directory |
-|-------|-----------|
-| Claude Code | `~/.claude/skills/` |
-| Codex CLI | `~/.agents/skills/` |
-| Gemini CLI | `~/.gemini/skills/` |
-| OpenCode | `~/.config/opencode/skills/` |
+| `skills` | Remember preferred agent in config only. No files modified. |
+| `skills+project-doc` | Save preference AND append integration instructions to the agent's project doc (`CLAUDE.md`, `AGENTS.md`, etc.) |
+| `snippet` | Print the integration prompt to stdout for manual pasting. |
 
 ### Examples
 
@@ -277,22 +262,20 @@ mutsumi setup [OPTIONS]
 # List available agents and modes
 mutsumi setup
 
-# Install skills for Claude Code (default mode)
+# Skills-first (default -- no files modified)
 mutsumi setup --agent claude-code
 
-# Install skills + inject project doc into CLAUDE.md
+# Inject project doc into CLAUDE.md
 mutsumi setup --agent claude-code --mode skills+project-doc
 
-# Print prompt for manual use (Aider, custom agents)
+# Print prompt for manual use
 mutsumi setup --agent custom --mode snippet
 
-# Install skills for all supported agents
-mutsumi setup --agent gemini-cli
-mutsumi setup --agent codex-cli
-mutsumi setup --agent opencode
+# Gemini CLI with project doc injection
+mutsumi setup --agent gemini-cli --mode skills+project-doc
 ```
 
-Running setup again is safe -- it replaces stale symlinks and never duplicates.
+Running `skills+project-doc` again is safe -- it detects existing sections and does not duplicate.
 
 ---
 

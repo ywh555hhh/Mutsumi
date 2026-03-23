@@ -41,13 +41,18 @@ def _git_short_hash() -> str:
 
 
 def _auto_header() -> str:
-    """Build the auto-generated header comment with commit hash."""
+    """Build the auto-generated header: hidden comment + visible Aside."""
     commit = _git_short_hash()
-    return (
-        "{/* AUTO-GENERATED from commit "
-        f"{commit}"
-        " — DO NOT EDIT. Run: uv run python scripts/gen_docs.py */}"
-    )
+    return "\n".join([
+        f"{{/* AUTO-GENERATED from commit {commit} — DO NOT EDIT. Run: uv run python scripts/gen_docs.py */}}",
+        "",
+        "import { Aside } from '@astrojs/starlight/components';",
+        "",
+        "<Aside type=\"tip\">",
+        f"This page is auto-generated from source code (commit [`{commit}`](https://github.com/ywh555hhh/Mutsumi/commit/{commit})). "
+        "Do not edit manually — run `uv run python scripts/gen_docs.py` to regenerate.",
+        "</Aside>",
+    ])
 
 
 # ══════════════════════════════════════════════════════════════════════
@@ -417,8 +422,6 @@ def render_cli() -> str:
     lines.append("---")
     lines.append("")
     lines.append(_auto_header())
-    lines.append("")
-    lines.append("import { Aside } from '@astrojs/starlight/components';")
     lines.append("")
     lines.append("<Aside type=\"note\">")
     lines.append("This reference is generated from `mutsumi --help` output. Every option, argument, and default value matches the actual code. If something doesn't match, the code is the source of truth.")
