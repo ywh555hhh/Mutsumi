@@ -423,7 +423,7 @@ class MutsumiApp(App[None]):
             self.task_file = load_task_file(self.tasks_path)
         except FileNotFoundError:
             self.task_file = None
-        except json.JSONDecodeError as e:
+        except json.JSONDecodeError:
             self.task_file = None
             self._show_error_banner(get_i18n().t("errors.json_invalid"))
             await self._render_current_tab()
@@ -762,10 +762,8 @@ class MutsumiApp(App[None]):
             if preferred_agent and preferred_agent != "none":
                 from mutsumi.core.skill_installer import install_for_agent
 
-                try:
+                with contextlib.suppress(ValueError, OSError):
                     install_for_agent(preferred_agent)
-                except (ValueError, OSError):
-                    pass
 
         self._source_registry = SourceRegistry()
         self._build_sources_from_config(self._config, None)

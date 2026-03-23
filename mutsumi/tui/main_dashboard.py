@@ -115,7 +115,8 @@ class SourceCard(Widget, can_focus=True):
         else:
             progress = t("dashboard.no_tasks")
 
-        yield Static(f"{display_name}  {t('dashboard.pending', count=pending)}", classes="card-header")
+        header_text = f"{display_name}  {t('dashboard.pending', count=pending)}"
+        yield Static(header_text, classes="card-header")
         yield Static(progress, classes="card-progress")
 
         # Top-N pending tasks
@@ -193,7 +194,8 @@ class MainDashboard(Widget):
         try:
             container = self.query_one(VerticalScroll)
             container.remove_children()
-            container.mount(Static(f"\u2605 {get_i18n().t('dashboard.title')}", classes="dashboard-title"))
+            title = f"\u2605 {get_i18n().t('dashboard.title')}"
+            container.mount(Static(title, classes="dashboard-title"))
             for source in self._sources:
                 container.mount(
                     SourceCard(

@@ -245,7 +245,9 @@ class DetailPanel(Widget):
 
         # Status
         content.mount(Static(t("detail.status"), classes="detail-label"))
-        status_text = t("detail.status_done") if task.status == TaskStatus.DONE else t("detail.status_pending")
+        done_label = t("detail.status_done")
+        pending_label = t("detail.status_pending")
+        status_text = done_label if task.status == TaskStatus.DONE else pending_label
         content.mount(Static(f"  {status_text}", classes="detail-field"))
 
         # Priority
@@ -285,7 +287,10 @@ class DetailPanel(Widget):
             content.mount(_ResponsiveSeparator())
             content.mount(Static(t("detail.subtasks"), classes="detail-label"))
             content.mount(
-                Static(f"  {t('detail.completed_count', done=done, total=total)}", classes="detail-field")
+                Static(
+                    f"  {t('detail.completed_count', done=done, total=total)}",
+                    classes="detail-field",
+                )
             )
             for child in task.children:
                 icon = "\\[x]" if child.is_done else "\\[ ]"
