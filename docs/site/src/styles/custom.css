@@ -191,10 +191,14 @@ starlight-tabs button {
   gap: 0.5rem 1.5rem;
   flex-wrap: wrap;
   align-items: center;
-  margin-top: 0.5rem;
-  margin-bottom: -0.75rem;
+  margin-top: 0.35rem;
+  margin-bottom: 0;
   font-size: var(--sl-text-xs);
   color: var(--sl-color-gray-3);
+}
+
+.sl-container > .mu-page-bar + * {
+  margin-top: 0.75rem;
 }
 
 .mu-page-bar a,

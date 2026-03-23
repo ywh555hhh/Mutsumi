@@ -198,6 +198,7 @@ document.addEventListener('astro:after-swap', initPageBar);
           zenModeSettings: {
             displayOptions: {
               showHeader: true,
+              showTableOfContents: false,
             },
             keyboardShortcut: ['Ctrl+Shift+Z'],
           },
