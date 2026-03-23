@@ -4,7 +4,7 @@
 
 **The silent task brain for the multi-threaded you.**
 
-A minimal TUI task board that watches your `tasks.json` and stays out of your way. Let your AI agent be the brain — Mutsumi is just the eyes.
+A minimal TUI task board that watches your `mutsumi.json` and stays out of your way. For older setups, Mutsumi still falls back to `tasks.json`. Let your AI agent be the brain — Mutsumi is just the eyes.
 
 ```
 ┌─────────────────────────────────────────────────────┐
@@ -34,7 +34,7 @@ A minimal TUI task board that watches your `tasks.json` and stays out of your wa
 You're running Claude Code in one terminal, Codex CLI in another, browsing Reddit, chatting on Discord — all at the same time. You need a task board that:
 
 - **Summons in < 1 second** — no loading, no login, no network
-- **Auto-refreshes** when your AI agent writes to `tasks.json`
+- **Auto-refreshes** when your AI agent writes to `mutsumi.json`
 - **Stays out of your way** — no opinions, no workflow enforcement
 - **Works with any agent** — Claude Code, Codex CLI, Gemini CLI, Aider, or a shell script
 
@@ -51,7 +51,7 @@ No Python pre-install needed — `uv` manages everything.
 
 ```bash
 # Alternative
-pipx install mutsumi
+pipx install mutsumi-tui
 
 # For hackers
 git clone https://github.com/ywh555hhh/Mutsumi.git
@@ -61,10 +61,10 @@ cd Mutsumi && uv sync && uv run mutsumi
 ## Quick Start
 
 ```bash
-# Launch the TUI (watches tasks.json in current dir)
+# Launch the TUI (prefers mutsumi.json, falls back to tasks.json)
 mutsumi
 
-# Interactive setup (one screen, all options)
+# Interactive setup
 mutsumi init
 
 # Setup agent integration
@@ -74,31 +74,32 @@ mutsumi setup --agent claude-code
 ## How It Works
 
 ```
-┌──────────────┐        ┌────────────┐        ┌──────────────┐
-│  AI Agent    │───────▶│ tasks.json │◀───────│  You (TUI)   │
-│  (Controller)│ write  │  (Model)   │ watch  │  (View)      │
-└──────────────┘        └────────────┘        └──────────────┘
+┌──────────────┐        ┌──────────────┐        ┌──────────────┐
+│  AI Agent    │───────▶│ mutsumi.json │◀───────│  You (TUI)   │
+│  (Controller)│ write  │  (Model)     │ watch  │  (View)      │
+└──────────────┘        └──────────────┘        └──────────────┘
 ```
 
-**MVC separation**: Agents write JSON. Mutsumi watches and renders. You click and it writes back. Simple.
+**MVC separation**: Agents write JSON. Mutsumi watches and renders. You click and it writes back. For legacy projects, `tasks.json` is still supported as a fallback.
 
 ## Features
 
 - **Hot-reload**: File changes re-render the TUI instantly (100ms debounce)
-- **Vim/Emacs/Arrow keybindings**: Choose your style, or define custom keys
+- **Arrows/Vim/Emacs keybindings**: `arrows` is the default preset; power users can switch styles or define custom keys
 - **4 built-in themes**: Monochrome Zen (default), Solarized, Nord, Dracula
 - **i18n**: English, Chinese, Japanese out of the box
 - **Agent-agnostic**: Any program that writes JSON is a valid controller
+- **Multi-source dashboard**: Main + Personal + project tabs with aggregated progress
 - **Zero network**: 100% local. No telemetry. No cloud. Your data stays yours.
 - **Hackable**: TOML config, custom themes, custom keybindings — mod everything
 
 ## Agent Integration
 
-Your AI agent just needs to read/write `tasks.json`:
+Your AI agent just needs to read/write `mutsumi.json`. If the project still uses `tasks.json`, Mutsumi will continue to detect it automatically.
 
 ```bash
 # One-liner: install + configure + integrate
-uv tool install mutsumi && mutsumi init --defaults && mutsumi setup --agent claude-code
+uv tool install git+https://github.com/ywh555hhh/Mutsumi.git && mutsumi init && mutsumi setup --agent claude-code
 ```
 
 Supported agents: Claude Code, Codex CLI, Gemini CLI, OpenCode, Aider, or any custom script.
@@ -137,7 +138,11 @@ bash scripts/demo.sh
 | [RFC-001: Core Architecture](docs/rfc/RFC-001-mutsumi-core.md) | Product definition & architecture |
 | [RFC-002: Installation](docs/rfc/RFC-002-installation-and-onboarding.md) | Install & onboarding experience |
 | [RFC-003: i18n Strategy](docs/rfc/RFC-003-documentation-i18n.md) | Documentation internationalization |
-| [Data Contract](docs/specs/DATA_CONTRACT.md) | `tasks.json` schema specification |
+| [RFC-004: Triple Input Parity](docs/rfc/RFC-004-triple-input-parity.md) | Keyboard / mouse / CLI parity principles |
+| [RFC-007: Multi-Source Hub](docs/rfc/RFC-007-multi-source-hub.md) | Main dashboard and multi-source architecture |
+| [RFC-008: Out-of-Box Onboarding](docs/rfc/RFC-008-out-of-box-first-run-onboarding.md) | First-run and onboarding design |
+| [RFC-009: Calendar View](docs/rfc/RFC-009-calendar-view.md) | Planned built-in calendar architecture |
+| [Data Contract](docs/specs/DATA_CONTRACT.md) | `mutsumi.json` schema and compatibility rules |
 | [Agent Protocol](docs/specs/AGENT_PROTOCOL.md) | Agent integration protocol |
 | [TUI Spec](docs/specs/TUI_SPEC.md) | TUI interaction specification |
 | [Roadmap](docs/ROADMAP.md) | Development roadmap |

@@ -2,194 +2,250 @@
 
 > **[中文版](./ROADMAP_cn.md)** | **[日本語版](./ROADMAP_ja.md)**
 
-| Status  | Living Document     |
-|---------|---------------------|
-| Date    | 2026-03-22          |
+| Status | Living Document |
+|---|---|
+| Date | 2026-03-23 |
+| Current Beta | `1.0.0b1` |
+
+---
+
+## Product State
+
+Mutsumi is currently in the **`1.0.0b1` beta** phase.
+
+What is already real in this beta:
+
+- canonical task file: `mutsumi.json`
+- legacy fallback: `tasks.json`
+- default keybinding preset: `arrows`
+- multi-source hub: Main + Personal + project tabs
+- first-run onboarding
+- skills-first agent setup
+
+What is **not** shipped yet:
+
+- built-in calendar UI
+- plugin system
+- web companion
+
+Calendar is now tracked as a planned feature via **RFC-009**.
 
 ---
 
 ## Phase Overview
 
-```
-Phase 0          Phase 1          Phase 2          Phase 3          Phase 3.5
-Foundations      Skeleton         Reactivity       CLI & Polish     Friend Beta
-────────────     ────────────     ────────────     ────────────     ────────────
-docs & specs     static TUI       hot-reload       CLI CRUD         AGENT.md
-project setup    tab switching    file watcher     i18n             setup command
-data model       task list        click → JSON     themes           tmux scripts
-                 detail panel     JSON → re-draw   config system    beta packaging
-
-Phase 5          Phase 4
-Multi-Source     Launch
-────────────     ────────────
-file rename      README
-multi-source     GIF demo
-project CLI      Product Hunt
-tab redesign     community
-dashboard
+```text
+Phase 0   Foundations
+Phase 1   Static TUI
+Phase 2   Reactivity
+Phase 3   CLI & Polish
+Phase 3.5 Friend Beta
+Phase 5   Multi-Source Hub
+Phase 8   Out-of-Box Onboarding
+Phase 9   Calendar View (planned)
+Phase 10  Launch / GA polish
 ```
 
 ---
 
 ## Phase 0: Foundations ✅
 
-**Goal**: Complete all design documents, set up project skeleton. Zero-code phase.
+**Goal**: establish the product model, specs, and initial project skeleton.
 
-- [x] Vision Document
+- [x] Vision and architecture docs
 - [x] RFC-001: Core Architecture
-- [x] Data Contract Spec (`DATA_CONTRACT.md`)
-- [x] Agent Integration Protocol (`AGENT_PROTOCOL.md`)
-- [x] TUI Specification (`TUI_SPEC.md`)
-- [x] Brand Identity (`BRAND.md`)
-- [x] Roadmap (this document)
-- [x] `uv init` project skeleton
-- [x] `pyproject.toml` dependency declaration
-- [x] Sample `tasks.json` (fixture)
-- [x] `CLAUDE.md` project-level dev conventions
-- [x] CI: GitHub Actions (lint + type check)
+- [x] Data Contract spec
+- [x] Agent Integration Protocol
+- [x] TUI spec
+- [x] Brand identity
+- [x] Roadmap
+- [x] `uv` project setup
+- [x] sample fixture task file
+- [x] project development rules (`CLAUDE.md`)
+- [x] CI baseline
 
-**Exit Criteria**: `uv run mutsumi` can launch a blank Textual window and exit cleanly.
+**Exit criteria**: `uv run mutsumi` can launch a blank Textual window cleanly.
 
 ---
 
 ## Phase 1: Skeleton ✅
 
-**Goal**: Render a static TUI that reads `tasks.json` and displays tasks, without reacting to external changes.
+**Goal**: render a static task board from local JSON.
 
-- [x] Textual App base framework (`app.py`)
-- [x] Header widget: Tab switching (Today / Week / Month / Inbox)
-- [x] TaskList widget: Group by priority
-- [x] TaskRow widget: checkbox + title + tags + priority stars
-- [x] Footer widget: Task statistics
-- [x] Data layer: pydantic model for Task schema
-- [x] Data layer: Parse `tasks.json`
-- [x] Basic keyboard navigation: `j/k` up/down, `q` quit
-- [x] Sub-task rendering: indented children (max 3 levels)
-- [x] Empty state placeholder page
+- [x] Textual app shell
+- [x] task list rendering
+- [x] priority grouping
+- [x] task row UI
+- [x] footer statistics
+- [x] task schema models
+- [x] file parsing
+- [x] basic keyboard navigation
+- [x] nested child rendering
+- [x] empty state
 
-**Exit Criteria**: Manually create a `tasks.json`, `uv run mutsumi` correctly renders all tasks.
+**Exit criteria**: a local task file renders correctly in the TUI.
 
 ---
 
 ## Phase 2: Reactivity ✅
 
-**Goal**: Implement bidirectional data flow — external JSON changes trigger TUI re-render, and TUI interactions write back to JSON.
+**Goal**: external file changes and local interactions both update the board correctly.
 
-- [x] watchdog integration: monitor `tasks.json` for changes
-- [x] Debounce mechanism (100ms)
-- [x] Hot-reload: JSON change → flicker-free TUI re-render
-- [x] Mouse click checkbox → toggle status → write back JSON
-- [x] Atomic write (temp file + `os.rename`)
-- [x] Schema validation: invalid JSON → error banner
-- [x] Error state: graceful degradation for missing/malformed files
-- [x] Detail panel: `Enter` to expand task details
-- [x] End-to-end scenario: Agent writes JSON in another terminal → TUI auto-refreshes
+- [x] watchdog file watching
+- [x] debounce
+- [x] hot reload
+- [x] checkbox click → JSON write-back
+- [x] atomic file writes
+- [x] invalid JSON → error banner
+- [x] graceful degradation
+- [x] detail panel
+- [x] end-to-end agent write → TUI refresh flow
 
-**Exit Criteria**: Record a 10-second GIF: Mutsumi running on the left, JSON being edited on the right, left side refreshes instantly.
+**Exit criteria**: the board refreshes live when the task file changes.
 
 ---
 
 ## Phase 3: CLI & Polish ✅
 
-**Goal**: Flesh out CLI sub-commands, CRUD interactions, and configuration system.
+**Goal**: provide a usable local product loop, not just a demo UI.
 
-- [x] TUI CRUD: `n` new / `e` edit / `dd` delete
-- [x] CLI: `mutsumi add` / `list` / `done` / `rm` / `edit`
-- [x] CLI: `mutsumi init` — generate template `tasks.json`
-- [x] CLI: `mutsumi validate` — validate file
-- [x] CLI: `mutsumi schema` — output JSON Schema
-- [x] Config system: `~/.config/mutsumi/config.toml`
-- [x] Theme system: 4 built-in themes + custom theme loading
-- [x] Key bindings: vim / emacs / arrow presets
-- [x] i18n: `en` + `zh` + `ja` trilingual
-- [x] Search: `/` triggers real-time search filter
-- [x] Event log: TUI actions → append to `events.jsonl`
-- [x] Multi-project: `--watch` aggregate multiple paths
-- [x] `mutsumi --version` / `--help`
+- [x] TUI CRUD
+- [x] CLI CRUD: `add`, `list`, `done`, `rm`, `edit`
+- [x] `mutsumi init`
+- [x] `mutsumi validate`
+- [x] `mutsumi schema`
+- [x] theme system
+- [x] i18n (`en`, `zh`, `ja`)
+- [x] config system
+- [x] search
+- [x] local event logging
+- [x] version / help output
 
-**Exit Criteria**: After `uv tool install mutsumi`, a new user can complete the full workflow within 2 minutes.
+**Exit criteria**: a new user can install and complete the basic local workflow quickly.
 
 ---
 
 ## Phase 3.5: Friend Beta ✅
 
-**Goal**: Prepare for small-scale friend beta — any agent can learn to control Mutsumi in 2 minutes.
+**Goal**: make agent-driven usage understandable for early testers.
 
-- [x] `AGENT.md` — one-page agent cheat sheet (schema, CLI, JSON protocol)
-- [x] `examples/` — sample `config.toml` and `tasks.json`
-- [x] `mutsumi setup --agent` — inject integration instructions into agent config files
-- [x] `scripts/tmux-dev.sh` — one-command tmux split-pane setup
-- [x] `scripts/demo.sh` — demo script showing live-reload
-- [x] Version bump to `0.4.0b1`
-- [x] README: Terminal Integration section (tmux + iTerm2)
-- [x] `pyproject.toml`: Beta classifier
+- [x] `AGENT.md`
+- [x] sample fixtures
+- [x] `mutsumi setup --agent`
+- [x] split-pane helper scripts
+- [x] demo script
+- [x] beta packaging work
+- [x] early beta docs
 
-**Exit Criteria**: A friend can `uv tool install git+...`, run `mutsumi setup --agent claude-code`, and start using Mutsumi within 2 minutes.
-
----
-
-## Phase 5: Multi-Source Hub ✅ (Current)
-
-**Goal**: Upgrade Mutsumi from a single-file task viewer to a personal command center — global personal todo + multi-project Agent dashboard + aggregated Main tab.
-
-- [x] **5a** — File rename: `tasks.json` → `mutsumi.json` with backward-compatible fallback
-- [x] **5f** — Config migration: `~/.config/mutsumi/` → `~/.mutsumi/` unified home
-- [x] **5b** — Multi-Source data layer: `SourceRegistry` managing N data sources
-- [x] **5c** — Project Registry CLI: `mutsumi project add/remove/list`
-- [x] **5d** — Tab redesign: dynamic source tabs + scope sub-filter
-- [x] **5e** — Main Dashboard: aggregated progress view across all sources
-
-**Exit Criteria**: `uv run mutsumi` with multiple registered projects shows a dashboard on the Main tab, individual source tabs with scope filtering, and all 239 tests pass.
+**Historical note**: this phase introduced the earlier friend-beta line. The current product has moved forward beyond that stage.
 
 ---
 
-## Phase 4: Launch (Next)
+## Phase 5: Multi-Source Hub ✅
 
-**Goal**: Polish all release materials and sprint for a Product Hunt launch.
+**Goal**: turn Mutsumi from a single-project viewer into a multi-source command center.
 
-- [ ] README.md: A compelling product introduction
-- [ ] README "Pro Workflow" section (Typeless voice workflow)
-- [ ] README "Layout Gallery" section (layout screenshots)
-- [ ] Record Hero GIF: Claude Code + Mutsumi split-screen collaboration
-- [ ] Record Bonus GIF: Typeless voice → Agent → Mutsumi refresh
-- [ ] Product Hunt page copy
-- [ ] Publish to PyPI as `mutsumi-tui` (`mutsumi` is taken); CLI stays `mutsumi` via `[project.scripts]`; install: `uv tool install mutsumi-tui` / `pip install mutsumi-tui`
-- [ ] GitHub Release v0.5.0
-- [ ] Hacker News / Reddit /r/commandline post
-- [ ] V2EX post
-- [ ] Community template collection: users show their tmux/zellij layouts
+- [x] rename `tasks.json` → `mutsumi.json` with compatibility fallback
+- [x] unify home directory around `~/.mutsumi/`
+- [x] multi-source registry and watchers
+- [x] project registration CLI
+- [x] source-tab redesign
+- [x] Main dashboard aggregation
 
-**Exit Criteria**: Product Hunt page is live, GitHub receives its first batch of stars.
+**Exit criteria**: Mutsumi can aggregate personal and project task files in one UI.
 
 ---
 
-## Future (Post-Launch Ideas)
+## Phase 8: Out-of-Box Onboarding ✅
 
-The following features are outside the MVP scope. Listed here for reference only.
+**Goal**: make `mutsumi` the natural entrypoint.
 
-| Feature              | Description                                              | Priority |
-|----------------------|----------------------------------------------------------|----------|
-| Plugin system        | Users can write custom view widgets                      | P2       |
-| Task templates       | Daily standup / weekly report templates                  | P2       |
-| Archive              | Auto-archive completed tasks to `archive.json`           | P2       |
-| Pomodoro timer       | Built-in Pomodoro timer linked to tasks                  | P3       |
-| Git sync             | Auto Git commit for `tasks.json`                         | P3       |
-| Calendar view        | Calendar display for tasks with `due_date`               | P3       |
-| Dashboard widgets    | Completion charts, daily trends                          | P3       |
-| Web companion        | Read-only web UI (view only, no interaction)             | P3       |
-| Taskwarrior import   | Import existing tasks from Taskwarrior                   | P3       |
-| Markdown tasks       | Support `tasks.md` as an alternative data source         | P3       |
+- [x] first-run onboarding flow
+- [x] onboarding-based preference capture
+- [x] lightweight project attach flow
+- [x] skills-first agent integration path
+- [x] auto-creation of Mutsumi-owned files when appropriate
+
+**Exit criteria**: first launch succeeds without the user needing to learn a setup graph first.
+
+---
+
+## Phase 9: Calendar View (Planned)
+
+**Goal**: add a built-in calendar surface for time-based navigation of existing tasks.
+
+Design authority:
+
+- [x] RFC-009: Calendar View
+
+Planned implementation slices:
+
+- [ ] Main-layer calendar mode
+- [ ] month / agenda foundation
+- [ ] date drill-down into task detail
+- [ ] source-aware calendar aggregation
+- [ ] lightweight date-based create/edit flows
+- [ ] richer week/day interactions
+
+Scope notes:
+
+- calendar reuses `due_date`
+- calendar does not introduce a second task model
+- calendar is planned, not shipped in `1.0.0b1`
+
+---
+
+## Phase 10: Launch / GA Polish (Next)
+
+**Goal**: polish the product, docs, packaging, and marketing surfaces for broader release.
+
+- [ ] finalize English-facing docs for the beta/GA path
+- [ ] record polished demo assets
+- [ ] publish / verify PyPI install flow for `mutsumi-tui`
+- [ ] tighten beta testing checklist and feedback loop
+- [ ] close remaining UX/documentation gaps before GA
+- [ ] prepare launch copy and release materials
+
+**Exit criteria**: installation, onboarding, agent setup, and day-to-day usage all feel coherent enough for broader public release.
+
+---
+
+## Future Ideas (Post-GA / Unscheduled)
+
+These are ideas, not committed roadmap promises.
+
+| Feature | Description | Priority |
+|---|---|---|
+| Plugin system | User-defined widgets or extensions | P2 |
+| Task templates | Reusable recurring task setups | P2 |
+| Archive | Move completed tasks out of the active file | P2 |
+| Pomodoro timer | Task-linked focus timer | P3 |
+| Git sync helper | Optional Git-based task-file workflow | P3 |
+| Dashboard widgets | Additional charts or summaries | P3 |
+| Web companion | Read-only web surface | P3 |
+| Taskwarrior import | Import from existing systems | P3 |
+| Markdown tasks | Support a markdown-based source format | P3 |
 
 ---
 
 ## Versioning Strategy
 
-| Version | Milestone                                          |
-|---------|----------------------------------------------------|
-| 0.1.0   | Phase 1 complete — static rendering usable         |
-| 0.2.0   | Phase 2 complete — hot-reload + interaction        |
-| 0.3.0   | Phase 3 complete — CLI + config complete           |
-| 0.4.0b1 | Phase 3.5 complete — Friend Beta                   |
-| 0.6.0   | Phase 5 complete — Multi-Source Hub                |
-| 0.5.0   | Phase 4 complete — Product Hunt launch build       |
-| 1.0.0   | Stable release after community feedback            |
+| Version | Meaning |
+|---|---|
+| `0.1.x` | static rendering baseline |
+| `0.2.x` | reactivity baseline |
+| `0.3.x` | CLI/config baseline |
+| `0.4.0b1` | earlier friend-beta milestone |
+| `1.0.0b1` | current integrated beta line |
+| `1.0.0` | stable release target after beta hardening |
+
+---
+
+## Beta Guidance
+
+For the current cycle, the important source of truth is:
+
+- current beta version: **`1.0.0b1`**
+- canonical task file: **`mutsumi.json`**
+- default preset: **`arrows`**
+- calendar status: **planned via RFC-009, not yet shipped**

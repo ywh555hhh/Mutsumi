@@ -1,10 +1,10 @@
 # Mutsumi Development Rules (CLAUDE.md)
 
 ## Project Overview
-Mutsumi is a minimal TUI task board that watches `tasks.json` and provides a zero-friction visual anchor for multi-threaded developers. Built with Python + Textual.
+Mutsumi is a minimal TUI task board that watches `mutsumi.json` (with `tasks.json` as a backward-compatible fallback) and provides a zero-friction visual anchor for multi-threaded developers. Built with Python + Textual.
 
 ## Architecture
-- **MVC separation**: Mutsumi is the View. AI Agents are Controllers. `tasks.json` is the Model.
+- **MVC separation**: Mutsumi is the View. AI Agents are Controllers. `mutsumi.json` is the canonical Model file, with `tasks.json` still accepted as a legacy fallback.
 - **Layout Agnostic**: Mutsumi does NOT manage window splitting. She is an independent terminal process.
 - **Agent Agnostic**: No LLM or agent dependency. Any program that writes JSON is a valid controller.
 
@@ -43,12 +43,12 @@ mutsumi/
 
 ## Rules
 1. **No network calls.** Mutsumi is 100% local. No telemetry, no API calls, no analytics.
-2. **Preserve unknown fields.** When writing `tasks.json`, never delete fields you don't recognize.
-3. **Graceful degradation.** If `tasks.json` is invalid, show error banner but don't crash.
+2. **Preserve unknown fields.** When writing `mutsumi.json` or legacy `tasks.json`, never delete fields you don't recognize.
+3. **Graceful degradation.** If the active task file is invalid, show error banner but don't crash.
 4. **No heavy dependencies.** If a pip package solves a trivial problem, write it inline instead.
 5. **Commit messages** follow conventional commits: `feat:`, `fix:`, `docs:`, `style:`, `refactor:`, `test:`, `chore:`, `i18n:`.
 6. **One concern per file.** Don't put CLI logic in TUI files or vice versa.
-7. **User data is sacred.** Never auto-delete tasks, never modify user's custom fields, never corrupt `tasks.json`.
+7. **User data is sacred.** Never auto-delete tasks, never modify user's custom fields, never corrupt `mutsumi.json` or legacy `tasks.json`.
 
 ## Testing
 - Use `pytest` for unit tests

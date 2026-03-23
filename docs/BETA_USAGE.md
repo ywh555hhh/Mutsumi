@@ -2,315 +2,363 @@
 
 > **[中文版](./BETA_USAGE_cn.md)**
 
-This is the step-by-step guide for beta testers. Follow it top to bottom.
+This is the English beta usage guide for the current **`1.0.0b1`** line.
+It is meant for internal testing and friend beta onboarding.
 
 ---
 
 ## 0. Prerequisites
 
-- macOS / Linux terminal (Windows: use WSL)
-- `uv` installed — if not:
-  ```bash
-  curl -LsSf https://astral.sh/uv/install.sh | sh
-  ```
+- macOS / Linux terminal
+- Windows users: prefer WSL for beta testing
+- Python 3.12+
+- `uv` or `pip`
+
+If `uv` is missing:
+
+```bash
+curl -LsSf https://astral.sh/uv/install.sh | sh
+```
 
 ---
 
 ## 1. Install
+
+### Option A — PyPI package
+
+```bash
+uv tool install mutsumi-tui
+# or
+pip install mutsumi-tui
+```
+
+### Option B — from source / git
 
 ```bash
 uv tool install git+https://github.com/ywh555hhh/Mutsumi.git
 ```
 
 Verify:
+
 ```bash
 mutsumi --version
-# Expected: mutsumi, version 0.4.0b1
+# Expected: mutsumi, version 1.0.0b1
 ```
 
-If you see `command not found`, ensure `~/.local/bin` is in your `PATH`:
-```bash
-export PATH="$HOME/.local/bin:$PATH"
-```
+If you see `command not found`, ensure your tool bin directory is in `PATH`.
 
 ---
 
-## 2. Initialize Config (Optional)
-
-```bash
-mutsumi init --defaults
-```
-
-This creates `~/.config/mutsumi/config.toml` with default settings:
-- Theme: `monochrome-zen`
-- Keybindings: `vim`
-- Language: `en`
-
-To customize:
-```bash
-mutsumi init --lang zh          # Chinese
-mutsumi init --lang ja          # Japanese
-```
-
-Or edit directly:
-```bash
-mutsumi config --edit           # Opens in $EDITOR
-mutsumi config --show           # Print current config
-```
-
-**Skip this step entirely if you just want defaults — Mutsumi works without any config file.**
-
----
-
-## 3. Create Your First Tasks
-
-### Option A: CLI (recommended for quick start)
+## 2. First Launch
 
 ```bash
 cd ~/your-project
+mutsumi
+```
 
+If this is your first run, Mutsumi shows onboarding.
+If you already completed onboarding, it opens directly.
+
+### What onboarding configures
+
+- language
+- keybindings
+- theme
+- workspace mode
+- optional agent integration
+
+### Current defaults
+
+- Theme: `monochrome-zen`
+- Keybindings: `arrows`
+- Language: `en`
+
+---
+
+## 3. Initialize Task Files Explicitly (Optional)
+
+You do **not** have to initialize files manually before using Mutsumi, but the CLI supports it.
+
+```bash
+mutsumi init                # create ./mutsumi.json
+mutsumi init --personal     # create ~/.mutsumi/mutsumi.json
+mutsumi init --project      # create ./mutsumi.json and register current repo
+```
+
+For older setups, Mutsumi still reads `tasks.json` automatically as a fallback.
+
+---
+
+## 4. Create Your First Tasks
+
+### Option A: CLI
+
+```bash
 mutsumi add "Fix login bug" --priority high --scope day --tags "bugfix"
 mutsumi add "Write weekly report" --priority normal --scope week --tags "life"
 mutsumi add "Update docs" --priority low --scope month --tags "docs"
 ```
 
 Verify:
+
 ```bash
 mutsumi list
-# Should show 3 tasks
-cat tasks.json
-# Should be valid JSON with 3 tasks
+mutsumi validate
 ```
 
-### Option B: Let your AI Agent create tasks
+### Option B: Let your AI agent write the file
 
-Just ask your agent:
-> "Create a tasks.json in the current directory with a few sample tasks."
+Tell the agent:
 
-The agent will write `tasks.json` directly. Mutsumi watches this file.
+> This project uses Mutsumi. Tasks should go into `./mutsumi.json`.
+> If only legacy `tasks.json` exists, use that instead.
+> Read the whole file, modify the `tasks` array, and write it back atomically.
 
-### Option C: Copy the example file
+### Option C: Create personal tasks
 
 ```bash
-# From Mutsumi source (if you cloned it)
-cp examples/tasks.json ./tasks.json
+mutsumi init --personal
 ```
+
+Then launch Mutsumi again to see the personal source in multi-source mode.
 
 ---
 
-## 4. Launch the TUI
+## 5. Launch the TUI
 
 ```bash
 mutsumi
 ```
 
-This watches `./tasks.json` in the current directory and renders the task board.
+Default file resolution:
 
-To watch a file in a different location:
+1. explicit `--path`
+2. `./mutsumi.json`
+3. `./tasks.json`
+4. default new-file target: `./mutsumi.json`
+
+To point at another file:
+
 ```bash
-mutsumi --path /path/to/tasks.json
+mutsumi --path /path/to/mutsumi.json
 ```
 
-### What You Should See
+To watch additional task files:
 
+```bash
+mutsumi --watch /path/to/project-a/mutsumi.json --watch /path/to/project-b/mutsumi.json
 ```
-[Today] Week  Month  Inbox              mutsumi
-─────────────────────────────────────────────────
-▼ HIGH ─────────────────────────────────────
-[ ] Fix login bug                  bugfix  ★★★
 
-▼ NORMAL ───────────────────────────────────
-[ ] Write weekly report            life    ★★
+---
 
-▼ LOW ──────────────────────────────────────
-[ ] Update docs                    docs    ★
+## 6. What You Should See
 
-─────────────────────────────────────────────────
+### Single-source view
+
+```text
+[Today] [Week] [Month] [Inbox]                    mutsumi ♪
+------------------------------------------------------------
+▼ HIGH
+[ ] Fix login bug                        bugfix        ★★★
+
+▼ NORMAL
+[ ] Write weekly report                  life          ★★
+
+▼ LOW
+[ ] Update docs                          docs          ★
+------------------------------------------------------------
 3 tasks · 0 done · 3 pending
 ```
 
+### Multi-source view
+
+```text
+[★ Main] [Personal] [your-project]                     mutsumi ♪
+---------------------------------------------------------------
+★ Main Dashboard
+
+★ Personal      2 pending
+  • Buy coffee beans
+  • Reply to advisor
+
+your-project    3 pending
+  • Fix login bug
+  • Update docs
+```
+
 ---
 
-## 5. Keyboard Controls
+## 7. Keyboard Controls
 
-### Navigation (vim preset — default)
+### Default preset: `arrows`
 
 | Key | Action |
-|-----|--------|
-| `j` / `k` | Move down / up |
-| `G` | Jump to bottom |
-| `gg` | Jump to top |
-| `1` `2` `3` `4` | Switch to Today / Week / Month / Inbox tab |
-| `Tab` / `Shift+Tab` | Next / Previous tab |
+|---|---|
+| `Up` / `Down` | Move selection |
+| `Home` / `End` | Jump top / bottom |
+| `Left` / `Right` | Collapse / expand |
+| `Space` | Toggle done |
+| `Enter` | Open detail panel |
+| `n` | New task |
+| `e` | Edit task |
+| `i` | Inline edit title |
+| `A` | Add subtask |
+| `Tab` / `Shift+Tab` | Next / previous source tab |
+| `1-9` | Jump to source tab |
+| `f` | Cycle scope filter |
+| `/` | Search |
+| `s` | Sort |
+| `?` | Help |
 | `q` | Quit |
 
-### Task Operations
+### Alternative presets
 
-| Key | Action |
-|-----|--------|
-| `Space` | Toggle done/pending |
-| `n` | New task (opens form) |
-| `e` | Edit task (opens form) |
-| `dd` | Delete task (confirm with `y`) |
-| `i` | Inline edit title |
-| `Enter` | Show task detail panel |
-| `Escape` | Close detail panel |
+- `vim`
+- `emacs`
 
-### Other
-
-| Key | Action |
-|-----|--------|
-| `/` | Open search bar (filter tasks by title/tag) |
-| `+` / `-` | Increase / decrease priority |
-| `J` / `K` | Move task down / up in list |
-| `h` / `l` | Collapse / expand priority group |
-| `z` | Toggle fold (show/hide subtasks) |
-| `y` | Copy task |
-| `p` | Paste task below |
-| `A` (Shift+a) | Add subtask |
-| `s` | Sort tasks |
-| `?` | Show help screen |
+These are opt-in. They are **not** the default beta preset.
 
 ### Mouse
 
-- **Click** tab buttons to switch tabs
-- **Click** a task row to select it
-- **Click** `[+New]` / `[/Search]` in footer bar
-- **Click** the checkbox area to toggle done/pending
-- **Click** the title area to open detail panel
+- click source tabs to switch sources
+- click scope chips to change the filter
+- click a task row to select it
+- click a title to open the detail panel
+- click a checkbox to toggle done
+- click footer actions such as new task or search
 
 ---
 
-## 6. tmux Split-pane Setup (Recommended)
+## 8. Agent Integration
 
-Run your agent on the left, Mutsumi on the right:
+### Option A: Skills-first setup (recommended)
 
 ```bash
-# If you cloned the repo:
-bash scripts/tmux-dev.sh
+mutsumi setup --agent claude-code
+mutsumi setup --agent codex-cli
+mutsumi setup --agent gemini-cli
+mutsumi setup --agent opencode
+```
 
-# Or manually:
+This installs bundled Mutsumi skills into the agent's skill directory.
+It does **not** modify `CLAUDE.md`, `AGENTS.md`, or similar project files.
+
+### Option B: Skills + project doc injection
+
+```bash
+mutsumi setup --agent claude-code --mode skills+project-doc
+```
+
+This installs skills and appends a Mutsumi integration snippet to the agent's project instruction file.
+
+### Option C: Manual snippet
+
+```bash
+mutsumi setup --agent aider --mode snippet
+mutsumi setup --agent custom --mode snippet
+```
+
+This prints copyable instructions.
+
+### Quick manual prompt
+
+```text
+This project uses Mutsumi for task management.
+Prefer ./mutsumi.json; use ./tasks.json only if the project is still on the legacy filename.
+Read the whole file, modify the tasks array, preserve unknown fields, and write the file back atomically.
+```
+
+---
+
+## 9. tmux / Split-pane Setup
+
+### tmux (recommended)
+
+```bash
+bash scripts/tmux-dev.sh
+```
+
+### Manual split
+
+```bash
 tmux new-session -d -s dev
-tmux split-window -h -p 30 "mutsumi"
+tmux split-window -h -p 35 "mutsumi"
 tmux select-pane -t 0
 tmux attach -t dev
 ```
 
-Now in the left pane, use your agent normally. Every time the agent writes to `tasks.json`, the right pane updates instantly.
+### iTerm2 / VS Code / Cursor
 
-### iTerm2 Alternative
+- split the terminal vertically
+- right pane: `mutsumi`
+- left pane: your agent or shell
 
-1. `Cmd+D` to split vertically
-2. Right pane: `mutsumi`
-3. Left pane: your agent / shell
-
----
-
-## 7. Agent Integration
-
-### Option A: Manual (works with any agent)
-
-Tell your agent this when starting a session:
-
-> This project uses Mutsumi for task management. Tasks live in `./tasks.json`.
-> Read the file, modify the `tasks` array, write the entire file back.
-> Required fields: `id` (unique string), `title` (string), `status` ("pending" or "done").
-> Optional: `scope` ("day"/"week"/"month"/"inbox"), `priority` ("high"/"normal"/"low"), `tags` (string[]), `description` (string).
-
-### Option B: Auto-inject (Claude Code / Codex CLI / Gemini CLI)
-
-```bash
-cd ~/your-project
-mutsumi setup --agent claude-code   # Appends rules to CLAUDE.md
-mutsumi setup --agent codex-cli     # Appends to AGENTS.md
-mutsumi setup --agent gemini-cli    # Appends to GEMINI.md
-```
-
-This appends a `## Mutsumi Task Integration` section to the agent's config file. The agent will automatically know how to read/write `tasks.json`.
-
-Verify:
-```bash
-cat CLAUDE.md   # Should contain "## Mutsumi Task Integration" at the end
-```
-
-Running setup again is safe — it won't duplicate the section.
-
-### Option C: Other agents (Aider / OpenCode / custom)
-
-```bash
-mutsumi setup --agent custom        # Prints the prompt to stdout
-```
-
-Copy the output and paste it into your agent's system prompt or config.
+Now ask the agent to add or update tasks. The TUI should refresh automatically.
 
 ---
 
-## 8. CLI Reference (Full)
+## 10. CLI Reference
 
 ```bash
-# Task CRUD
+# CRUD
 mutsumi add "title" [-P high|normal|low] [-s day|week|month|inbox] [-t "tag1,tag2"] [-d "description"]
-mutsumi done <id-prefix>            # Mark task as done
+mutsumi done <id-prefix>
 mutsumi edit <id-prefix> [--title "new"] [--priority high] [--scope week] [--tags "a,b"]
-mutsumi rm <id-prefix>              # Delete task
-mutsumi list                        # List all tasks
+mutsumi rm <id-prefix>
+mutsumi list
 
-# Setup
-mutsumi init                        # Interactive setup
-mutsumi init --defaults             # Non-interactive, all defaults
-mutsumi init --lang zh              # Set language
-mutsumi setup --agent <name>        # Agent integration
-mutsumi setup                       # List available agents
+# Setup / onboarding
+mutsumi init
+mutsumi init --personal
+mutsumi init --project
+mutsumi setup --agent <name>
+mutsumi setup --agent <name> --mode skills+project-doc
+mutsumi setup --agent <name> --mode snippet
+mutsumi project add /path/to/repo
+mutsumi project list
+mutsumi migrate
 
-# Config
-mutsumi config --edit               # Open in $EDITOR
-mutsumi config --show               # Print config
-mutsumi config --reset              # Reset to defaults
-mutsumi config --path               # Print config file path
-
-# Utility
-mutsumi validate                    # Validate tasks.json
-mutsumi schema                      # Print JSON Schema
-mutsumi --version                   # Print version
+# Validation / schema
+mutsumi validate
+mutsumi schema
+mutsumi --version
 ```
 
-**ID prefix matching**: You don't need to type the full 26-char task ID. Any unique prefix works:
-```bash
-mutsumi done 01EX    # Matches "01EXAMPLE000000000000000001" if unique
-```
+Any unique task ID prefix is usually enough for CLI commands.
 
 ---
 
-## 9. Configuration Reference
+## 11. Configuration Reference
 
-Config file: `~/.config/mutsumi/config.toml`
+Preferred config path:
+
+```text
+~/.mutsumi/config.toml
+```
+
+Legacy fallback path:
+
+```text
+~/.config/mutsumi/config.toml
+```
+
+Example:
 
 ```toml
-# Theme — "monochrome-zen" (default), "solarized", "nord", "dracula"
 theme = "monochrome-zen"
-
-# Keybindings — "vim" (default), "emacs", "arrows"
-keybindings = "vim"
-
-# Language — "en" (default), "zh", "ja"
+keybindings = "arrows"
 language = "en"
-
-# Default task file path (optional)
-# default_path = "/path/to/tasks.json"
-
-# Columns to show in task list
-columns = ["checkbox", "title", "tags", "priority"]
-
-# Event log (optional — JSONL format)
-# event_log_path = "~/.local/share/mutsumi/events.jsonl"
-
-# Custom CSS overrides (optional)
-# custom_css_path = "~/.config/mutsumi/custom.tcss"
+default_scope = "day"
+default_tab = "main"
+notification_mode = "quiet"
 ```
 
 ---
 
-## 10. tasks.json Schema
+## 12. Task File Schema
+
+Canonical filename: `mutsumi.json`
+Legacy fallback: `tasks.json`
 
 ```json
 {
@@ -324,7 +372,7 @@ columns = ["checkbox", "title", "tags", "priority"]
       "priority": "normal",
       "tags": ["dev", "urgent"],
       "children": [],
-      "created_at": "2026-03-21T08:00:00Z",
+      "created_at": "2026-03-23T08:00:00Z",
       "due_date": "2026-03-25",
       "completed_at": null,
       "description": "Optional description"
@@ -333,62 +381,44 @@ columns = ["checkbox", "title", "tags", "priority"]
 }
 ```
 
-| Field | Required | Type | Values |
-|-------|----------|------|--------|
-| `id` | yes | string | Unique, 26-char recommended |
-| `title` | yes | string | Task title |
-| `status` | yes | string | `"pending"` or `"done"` |
-| `scope` | no | string | `"day"` `"week"` `"month"` `"inbox"` (default: `"inbox"`) |
-| `priority` | no | string | `"high"` `"normal"` `"low"` (default: `"normal"`) |
-| `tags` | no | string[] | Arbitrary tags |
-| `children` | no | Task[] | Nested subtasks (same schema) |
-| `due_date` | no | string | ISO date `"2026-03-25"` |
-| `description` | no | string | Longer description |
-| `created_at` | no | string | ISO datetime |
-| `completed_at` | no | string | ISO datetime, set when done |
-
-**Rule**: Unknown fields are preserved — Mutsumi never deletes fields it doesn't recognize.
+Unknown fields are preserved.
 
 ---
 
-## 11. Uninstall
-
-```bash
-uv tool uninstall mutsumi
-rm -rf ~/.config/mutsumi/           # Config (optional)
-rm -rf ~/.local/share/mutsumi/      # Logs (optional)
-# tasks.json is YOUR data — keep or delete manually
-```
-
----
-
-## 12. Troubleshooting
+## 13. Troubleshooting
 
 ### `mutsumi` command not found
-```bash
-export PATH="$HOME/.local/bin:$PATH"
-# Add to ~/.bashrc or ~/.zshrc to persist
-```
 
-### TUI shows "Nothing here yet" but tasks.json has tasks
-Check which tab you're on — tasks are filtered by scope. Press `2` for Week, `3` for Month, `4` for Inbox.
+Ensure your tool bin directory is in `PATH`.
 
-### Agent changes don't show up in TUI
-- Ensure the agent writes to the same `tasks.json` path Mutsumi is watching
-- Check that the JSON is valid: `mutsumi validate`
+### TUI shows nothing but the file exists
 
-### Theme / keybindings not applied
-- Run `mutsumi config --show` to verify config is loaded
-- Config location: `~/.config/mutsumi/config.toml`
+- check which source tab you are on
+- check the active scope filter
+- run `mutsumi validate`
 
----
+### Agent changes do not appear
 
-## 13. Feedback
+- ensure the agent writes to the same file Mutsumi is watching
+- prefer `mutsumi.json`
+- if the repo still uses legacy `tasks.json`, ensure that is the watched file
+- validate the file with `mutsumi validate`
 
-File issues or feedback at: https://github.com/ywh555hhh/Mutsumi/issues
+### Theme or keybindings are not applied
 
-Or reach out directly to Wayne.
+- run `mutsumi config --show` if available in your workflow
+- verify `~/.mutsumi/config.toml`
+- remember the default keybinding preset is `arrows`
 
 ---
 
-*mutsumi — "harmony, closeness". She doesn't tell you what to do. She just waits quietly.*
+## 14. Current Beta Positioning
+
+For the current beta line:
+
+- version string is **`1.0.0b1`**
+- canonical task file is **`mutsumi.json`**
+- legacy fallback is **`tasks.json`**
+- default preset is **`arrows`**
+- multi-source dashboard is already part of the shipped beta surface
+- calendar is a planned feature, not a shipped beta view yet

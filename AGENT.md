@@ -4,107 +4,188 @@
 
 ## Quick Start
 
-Mutsumi is a TUI that watches `./tasks.json` and re-renders on every change.
-Your job: read/write that file. Mutsumi handles the display.
+Mutsumi is a local TUI that watches the active task file and re-renders on save.
+
+- **Canonical project file:** `./mutsumi.json`
+- **Legacy fallback:** `./tasks.json`
+- **Preferred workflow:** use the `mutsumi` CLI when possible
+- **Direct JSON is allowed:** read the whole file, update it, write it back atomically
+
+If both files are absent, new projects should create **`mutsumi.json`**.
+
+## Task File Discovery
+
+Mutsumi resolves the active file in this order:
+
+1. Explicit CLI `--path`
+2. `./mutsumi.json`
+3. `./tasks.json` (backward-compatible fallback)
+4. Default target for new projects: `./mutsumi.json`
 
 ## Schema
 
-| Field          | Type       | Required | Default     | Values / Notes                              |
-|----------------|------------|----------|-------------|---------------------------------------------|
-| `id`           | string     | **Yes**  | —           | Unique, e.g. UUIDv7 / ULID / any string    |
-| `title`        | string     | **Yes**  | —           | ≤ 120 chars recommended                     |
-| `status`       | string     | **Yes**  | `"pending"` | `"pending"` or `"done"` only                |
-| `scope`        | string     | No       | `"inbox"`   | `"day"` / `"week"` / `"month"` / `"inbox"`  |
-| `priority`     | string     | No       | `"normal"`  | `"high"` / `"normal"` / `"low"`             |
-| `tags`         | string[]   | No       | `[]`        | Free-form labels                            |
-| `children`     | Task[]     | No       | `[]`        | Nested subtasks (same schema, max 3 levels) |
-| `due_date`     | string     | No       | —           | ISO 8601 date, e.g. `"2026-03-25"`          |
-| `description`  | string     | No       | —           | Markdown supported                          |
-| `created_at`   | string     | No       | auto        | ISO 8601 timestamp                          |
-| `completed_at` | string     | No       | —           | Auto-filled when status → done              |
+| Field | Type | Required | Default | Notes |
+|---|---|---:|---|---|
+| `id` | string | Yes | — | Unique ID, UUIDv7 recommended |
+| `title` | string | Yes | — | Task title |
+| `status` | string | Yes | `"pending"` | `"pending"` or `"done"` |
+| `scope` | string | No | `"inbox"` | `"day"`, `"week"`, `"month"`, `"inbox"` |
+| `priority` | string | No | `"normal"` | `"high"`, `"normal"`, `"low"` |
+| `tags` | string[] | No | `[]` | Free-form labels |
+| `children` | Task[] | No | `[]` | Recursive subtasks |
+| `due_date` | string | No | — | ISO date, e.g. `"2026-03-25"` |
+| `description` | string | No | — | Longer text |
+| `created_at` | string | No | auto | ISO timestamp |
+| `completed_at` | string | No | — | Set when status becomes `done` |
+
+## Behavioral Rules
+
+1. **Preserve unknown fields.** Never delete fields you do not recognize.
+2. **Write the whole file.** Do not attempt partial in-place edits.
+3. **Use atomic writes.** Temp file + rename/replace.
+4. **Prefer `mutsumi.json`.** Only use `tasks.json` when the project is still on the legacy filename.
+5. **Keep enums valid.**
+   - `status`: `pending` / `done`
+   - `priority`: `high` / `normal` / `low`
+   - `scope`: `day` / `week` / `month` / `inbox`
 
 ## CLI Commands
 
 ```bash
 mutsumi add "title" --priority high --scope day --tags "dev,urgent"
-mutsumi done <id-prefix>          # Mark task as done (prefix match)
+mutsumi done <id-prefix>
 mutsumi edit <id-prefix> --title "new title" --priority low
-mutsumi rm <id-prefix>            # Delete task
-mutsumi list                      # List all tasks as table
-mutsumi validate                  # Validate tasks.json
-mutsumi schema                    # Print JSON Schema
-mutsumi init                      # Create template tasks.json
+mutsumi rm <id-prefix>
+mutsumi list
+mutsumi validate
+mutsumi schema
+mutsumi init                  # create ./mutsumi.json
+mutsumi init --personal       # create ~/.mutsumi/mutsumi.json
+mutsumi init --project        # create ./mutsumi.json and register current repo
+mutsumi setup --agent claude-code
+mutsumi project add /path/to/repo
+mutsumi migrate
 ```
 
 ## Direct JSON Protocol
 
-When writing `tasks.json` directly (without CLI):
+When working without the CLI:
 
-1. **Read** the entire `./tasks.json`
-2. **Modify** the `tasks` array (add, remove, or update items)
-3. **Write the ENTIRE file** back — never partial writes
-4. **Atomic write**: write to a temp file first, then `os.rename()` to `tasks.json`
-5. **Generate a unique ID** for every new task (UUID, ULID, or any unique string)
+1. Detect the active file (`mutsumi.json` first, `tasks.json` fallback)
+2. Read the entire JSON object
+3. Modify the `tasks` array
+4. Write the **entire file** back atomically
+5. Keep all unknown top-level and task-level fields intact
 
-File format:
+File shape:
+
 ```json
 {
   "version": 1,
-  "tasks": [ ... ]
+  "tasks": [
+    {
+      "id": "01JQ8X7K3M0000000000000001",
+      "title": "Refactor auth module",
+      "status": "pending",
+      "scope": "day",
+      "priority": "high",
+      "tags": ["dev", "backend"],
+      "children": []
+    }
+  ]
 }
 ```
 
-## Examples
+## Minimal Python Example
 
-### Add a task (JSON)
-```json
-{
-  "id": "task-001",
-  "title": "Refactor Auth module",
-  "status": "pending",
-  "scope": "day",
-  "priority": "high",
-  "tags": ["dev", "backend"],
-  "children": []
+```python
+from __future__ import annotations
+
+import json
+import os
+import tempfile
+from pathlib import Path
+
+
+def resolve_task_file() -> Path:
+    preferred = Path("mutsumi.json")
+    legacy = Path("tasks.json")
+    if preferred.exists():
+        return preferred
+    if legacy.exists():
+        return legacy
+    return preferred
+
+
+path = resolve_task_file()
+
+data = {"version": 1, "tasks": []}
+if path.exists():
+    data = json.loads(path.read_text(encoding="utf-8"))
+
+new_task = {
+    "id": "task-001",
+    "title": "Write weekly report",
+    "status": "pending",
+    "scope": "week",
+    "priority": "normal",
+    "tags": ["life"],
+    "children": [],
 }
+data.setdefault("tasks", []).append(new_task)
+
+with tempfile.NamedTemporaryFile("w", dir=".", suffix=".tmp", delete=False, encoding="utf-8") as tmp:
+    json.dump(data, tmp, ensure_ascii=False, indent=2)
+    tmp_path = Path(tmp.name)
+
+os.replace(tmp_path, path)
 ```
-
-### Mark a task as done (JSON)
-```json
-{
-  "id": "task-001",
-  "status": "done",
-  "completed_at": "2026-03-22T15:30:00Z"
-}
-```
-
-### Add a task (CLI)
-```bash
-mutsumi add "Refactor Auth module" -P high -s day -t "dev,backend"
-```
-
-### Complete a task (CLI)
-```bash
-mutsumi done task-001
-```
-
-## Rules
-
-1. **Preserve unknown fields** — if a task has fields you don't recognize, keep them as-is
-2. **Status values** — only `"pending"` and `"done"` are valid
-3. **Unique IDs** — every task must have a unique `id`; use UUIDv7, ULID, or any unique string
-4. **Don't delete the file** — always overwrite, never delete and recreate
-5. **version field** — always include `"version": 1` at the root level
-6. **Encoding** — UTF-8, no BOM
 
 ## Agent Integration Setup
 
 ```bash
-# Inject Mutsumi instructions into your agent's config:
-mutsumi setup --agent claude-code   # → appends to CLAUDE.md
-mutsumi setup --agent codex-cli     # → appends to AGENTS.md
-mutsumi setup --agent gemini-cli    # → appends to GEMINI.md
-mutsumi setup --agent opencode      # → appends to opencode.md
-mutsumi setup --agent aider         # → prints to stdout
-mutsumi setup --agent custom        # → prints to stdout
+# Install Mutsumi skills into the agent's skill directory
+mutsumi setup --agent claude-code
+mutsumi setup --agent codex-cli
+mutsumi setup --agent gemini-cli
+mutsumi setup --agent opencode
+
+# Install skills AND append project instructions to CLAUDE.md / AGENTS.md / etc.
+mutsumi setup --agent claude-code --mode skills+project-doc
+
+# Print a manual snippet for unsupported agents
+mutsumi setup --agent aider --mode snippet
+mutsumi setup --agent custom --mode snippet
 ```
+
+### Mode Summary
+
+- `skills` — install bundled `SKILL.md` packages only
+- `skills+project-doc` — install skills and append a project snippet to the agent doc
+- `snippet` — print copyable instructions to stdout
+
+## Event Log
+
+If event logging is enabled, Mutsumi appends JSONL records to the platform data directory.
+By default this is typically:
+
+```text
+~/.local/share/mutsumi/events.jsonl
+```
+
+Example records:
+
+```jsonl
+{"timestamp":"2026-03-23T10:00:00+00:00","type":"task_added","task_id":"01JQ...","title":"Write tests"}
+{"timestamp":"2026-03-23T10:02:00+00:00","type":"task_toggled","task_id":"01JQ..."}
+{"timestamp":"2026-03-23T10:05:00+00:00","type":"priority_changed","task_id":"01JQ..."}
+```
+
+## Safe Defaults for Agents
+
+- Prefer `mutsumi.json`
+- Use the CLI when the task is simple CRUD
+- If writing JSON directly, use atomic replace
+- Preserve unknown fields exactly
+- Do not silently delete user tasks
+- Run `mutsumi validate` after large edits if you are unsure
