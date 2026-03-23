@@ -2,10 +2,15 @@
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 from textual.containers import Horizontal, Vertical
 from textual.message import Message
 from textual.screen import ModalScreen
 from textual.widgets import Button, Static
+
+if TYPE_CHECKING:
+    from textual.app import ComposeResult
 
 
 class ProjectAttachScreen(ModalScreen[None]):
@@ -57,7 +62,7 @@ class ProjectAttachScreen(ModalScreen[None]):
             self.action = action
             super().__init__()
 
-    def compose(self):
+    def compose(self) -> ComposeResult:
         with Vertical():
             yield Static("This folder looks like a project", classes="title")
             yield Static(

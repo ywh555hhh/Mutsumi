@@ -11,6 +11,8 @@ from textual.screen import ModalScreen
 from textual.widgets import Button, RadioButton, RadioSet, Static
 
 if TYPE_CHECKING:
+    from textual.app import ComposeResult
+
     from mutsumi.config.settings import MutsumiConfig
 
 # ── Setting definitions ─────────────────────────────────────────────
@@ -141,7 +143,7 @@ class OnboardingScreen(ModalScreen[None]):
             "preferred_agent": "none",
         }
 
-    def compose(self):  # noqa: ANN201 — Textual signature
+    def compose(self) -> ComposeResult:
         with Vertical():
             yield Static("Welcome to Mutsumi", classes="ob-title")
             yield Static(
