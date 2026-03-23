@@ -1497,6 +1497,131 @@ GENERATORS: dict[str, tuple[str, object]] = {
 
 _AUTO_HEADER_PREFIX = "{/* AUTO-GENERATED from commit "
 
+# ── i18n Aside injection for zh-cn / ja ──────────────────────────────
+
+_I18N_ASIDE_MARKER = "{/* AUTO-GENERATED"
+
+_I18N_ASIDE: dict[str, str] = {
+    "zh-cn": (
+        '<Aside type="tip">\n'
+        "本页内容基于英文版自动生成（commit [`{commit}`](https://github.com/ywh555hhh/Mutsumi/commit/{commit})）。"
+        "翻译可能滞后，权威参考请查阅 [English 版本](/reference/{slug}/)。\n"
+        "</Aside>"
+    ),
+    "ja": (
+        '<Aside type="tip">\n'
+        "このページは英語版から自動生成されたものです（commit [`{commit}`](https://github.com/ywh555hhh/Mutsumi/commit/{commit})）。"
+        "翻訳が遅れている場合があります。正確な情報は [English 版](/reference/{slug}/) をご参照ください。\n"
+        "</Aside>"
+    ),
+}
+
+# Files to inject i18n aside into (same 4 as EN)
+_I18N_FILES = [
+    "cli-commands.mdx",
+    "task-schema.mdx",
+    "config-reference.mdx",
+    "keybinding-reference.mdx",
+]
+
+
+def _inject_i18n_aside(locale: str, check_only: bool) -> list[str]:
+    """Inject or update the auto-generated Aside in i18n reference files.
+
+    Returns list of stale/updated file descriptions.
+    """
+    commit = _git_short_hash()
+    locale_dir = DOCS_OUT.parent / locale / "reference"
+    results: list[str] = []
+
+    if not locale_dir.exists():
+        return results
+
+    for filename in _I18N_FILES:
+        filepath = locale_dir / filename
+        if not filepath.exists():
+            continue
+
+        content = filepath.read_text(encoding="utf-8")
+        slug = filename.replace(".mdx", "")
+        aside_text = _I18N_ASIDE[locale].format(commit=commit, slug=slug)
+        header_comment = f"{{/* AUTO-GENERATED from commit {commit} */}}"
+
+        # Check if already has our marker
+        if _I18N_ASIDE_MARKER in content:
+            # Replace existing block: find from marker to </Aside>
+            lines = content.splitlines()
+            new_lines: list[str] = []
+            skip = False
+            for line in lines:
+                if line.startswith(_I18N_ASIDE_MARKER):
+                    skip = True
+                    continue
+                if skip and line.strip() == "</Aside>":
+                    skip = False
+                    continue
+                if skip:
+                    continue
+                new_lines.append(line)
+            content = "\n".join(new_lines)
+
+        # Insert after frontmatter closing ---
+        lines = content.splitlines()
+        insert_idx = -1
+        frontmatter_count = 0
+        for i, line in enumerate(lines):
+            if line.strip() == "---":
+                frontmatter_count += 1
+                if frontmatter_count == 2:
+                    insert_idx = i + 1
+                    break
+
+        if insert_idx < 0:
+            continue
+
+        # Build injection block
+        inject_lines = [
+            "",
+            header_comment,
+            "",
+            "import { Aside } from '@astrojs/starlight/components';",
+            "",
+            aside_text,
+        ]
+
+        # Remove existing import { Aside } if present (avoid duplicate)
+        filtered = []
+        for i, line in enumerate(lines):
+            if i > insert_idx - 1 and line.strip() == "import { Aside } from '@astrojs/starlight/components';":
+                continue
+            filtered.append(line)
+        lines = filtered
+
+        # Recalculate insert_idx after filtering
+        frontmatter_count = 0
+        for i, line in enumerate(lines):
+            if line.strip() == "---":
+                frontmatter_count += 1
+                if frontmatter_count == 2:
+                    insert_idx = i + 1
+                    break
+
+        new_content = "\n".join(lines[:insert_idx] + inject_lines + lines[insert_idx:]) + "\n"
+
+        # Normalize trailing whitespace
+        if not content.endswith("\n"):
+            content += "\n"
+
+        if check_only:
+            existing = filepath.read_text(encoding="utf-8")
+            if _strip_header_line(existing) != _strip_header_line(new_content):
+                results.append(f"  STALE: {locale}/{filename}")
+        else:
+            filepath.write_text(new_content, encoding="utf-8")
+            results.append(f"  Injected: {locale}/{filename}")
+
+    return results
+
 
 def _strip_header_line(text: str) -> str:
     """Remove the AUTO-GENERATED header line for content comparison.
@@ -1545,7 +1670,15 @@ def main() -> None:
             print("All reference docs are up to date.")
             sys.exit(0)
     else:
-        print(f"\nDone. {len(GENERATORS)} files written to {DOCS_OUT}/")
+        # Inject i18n Aside into zh-cn and ja
+        for locale in ("zh-cn", "ja"):
+            results = _inject_i18n_aside(locale, check_only=False)
+            for msg in results:
+                print(msg)
+
+        total = len(GENERATORS)
+        print(f"\nDone. {total} EN files written to {DOCS_OUT}/")
+        print("i18n Aside injected into zh-cn/ and ja/ reference files.")
 
 
 if __name__ == "__main__":

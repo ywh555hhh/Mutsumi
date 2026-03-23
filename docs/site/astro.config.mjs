@@ -191,6 +191,7 @@ document.addEventListener('astro:after-swap', initPageBar);
         starlightLinksValidator({
           errorOnRelativeLinks: false,
           errorOnFallbackPages: false,
+          exclude: ['/reference/{cli-commands,task-schema,config-reference,keybinding-reference}/'],
         }),
         starlightViewModes({
           zenModeSettings: {
