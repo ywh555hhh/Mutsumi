@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import TYPE_CHECKING, Literal
 
@@ -45,6 +45,14 @@ AGENT_TARGETS: dict[str, str | None] = {
     "custom": None,
 }
 
+# Agents that support the Agent Skills standard (SKILL.md injection)
+SKILL_CAPABLE_AGENTS: set[str] = {
+    "claude-code",
+    "codex-cli",
+    "gemini-cli",
+    "opencode",
+}
+
 
 @dataclass(frozen=True)
 class AgentSetupResult:
@@ -56,6 +64,7 @@ class AgentSetupResult:
     target_file: Path | None = None
     wrote_project_doc: bool = False
     printed_snippet: bool = False
+    installed_skills: list[Path] = field(default_factory=list)
 
 
 def get_prompt_template() -> str:
@@ -90,18 +99,35 @@ def inject_project_doc(path: Path) -> bool:
     return True
 
 
+def install_skills_for_agent(agent: str) -> list[Path]:
+    """Install Mutsumi skill files into an agent's skill directory.
+
+    Returns list of installed paths, or empty list if agent doesn't
+    support skills.
+    """
+    if agent not in SKILL_CAPABLE_AGENTS:
+        return []
+
+    from mutsumi.core.skill_installer import install_for_agent
+
+    return install_for_agent(agent)
+
+
 def apply_agent_setup(config: MutsumiConfig, agent: str, mode: SetupMode) -> AgentSetupResult:
     """Apply setup state to config and describe required side effects."""
     config.preferred_agent = agent
     config.agent_integration_mode = mode
 
     target_file = get_target_file(agent)
+
     if mode == "skills":
+        installed = install_skills_for_agent(agent)
         return AgentSetupResult(
             mode=mode,
             preferred_agent=agent,
             config_mode=mode,
             target_file=target_file,
+            installed_skills=installed,
         )
     if mode == "snippet":
         return AgentSetupResult(
@@ -111,10 +137,13 @@ def apply_agent_setup(config: MutsumiConfig, agent: str, mode: SetupMode) -> Age
             target_file=target_file,
             printed_snippet=True,
         )
+    # skills+project-doc: install skills AND inject project doc
+    installed = install_skills_for_agent(agent)
     return AgentSetupResult(
         mode=mode,
         preferred_agent=agent,
         config_mode=mode,
         target_file=target_file,
         wrote_project_doc=target_file is not None,
+        installed_skills=installed,
     )

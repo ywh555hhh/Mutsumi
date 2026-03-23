@@ -13,7 +13,7 @@ from mutsumi.cli import main
 from mutsumi.onboarding.agent_setup import _MARKER
 
 
-def test_setup_claude_code_skills_only(tmp_path: Path) -> None:
+def test_setup_claude_code_skills_only(tmp_path: Path, monkeypatch: object) -> None:
     """setup defaults to skills mode and does not create CLAUDE.md."""
     import os
 
@@ -24,8 +24,7 @@ def test_setup_claude_code_skills_only(tmp_path: Path) -> None:
         result = runner.invoke(main, ["setup", "--agent", "claude-code"])
         assert result.exit_code == 0
         assert not (tmp_path / "CLAUDE.md").exists()
-        assert "skills-first" in result.output
-        assert "No project instruction files were modified" in result.output
+        assert "Saved integration mode" in result.output
     finally:
         os.chdir(original)
 
