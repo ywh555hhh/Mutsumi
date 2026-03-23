@@ -146,6 +146,7 @@ document.addEventListener('astro:after-swap', initPageBar);
             { slug: 'getting-started/startup-flow' },
             { slug: 'getting-started/terminal-integration' },
             { slug: 'getting-started/workflow-sop' },
+          { slug: 'getting-started/beta-testing', badge: { text: 'Beta', variant: 'caution' } },
           ],
         },
         {

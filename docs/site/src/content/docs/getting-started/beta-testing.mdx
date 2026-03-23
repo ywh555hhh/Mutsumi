@@ -1,0 +1,262 @@
+---
+title: Beta Testing Guide
+description: Internal beta testing guide for Mutsumi v1.0.0-beta.1 — two aha moments to validate.
+---
+
+import { Steps, Tabs, TabItem, Aside, Card, CardGrid } from '@astrojs/starlight/components';
+
+<Aside type="caution">
+This page is for **invited beta testers only**. Mutsumi v1.0.0 has not been publicly released yet. Thank you for helping us test!
+</Aside>
+
+## What You're Testing
+
+Two experiences — we call them **aha moments** — must feel magical before we ship v1.0.0. Your job is to try them and tell us if they land.
+
+<CardGrid>
+  <Card title="Aha 1: Out-of-the-Box" icon="rocket">
+    One command to install, 3-second onboarding, you're in. Total time budget: **under 60 seconds**.
+  </Card>
+  <Card title="Aha 2: Agent Live Sync" icon="random">
+    Talk to your AI agent casually, Mutsumi updates in real time. Magic moment: **under 30 seconds**.
+  </Card>
+</CardGrid>
+
+---
+
+## Aha 1: Out-of-the-Box
+
+**Goal**: From zero to seeing your first task on screen — no docs, no config, no YAML.
+
+### Prerequisites
+
+| Requirement | How to check |
+|---|---|
+| macOS / Linux terminal | `uname` |
+| Python 3.12+ | `python3 --version` |
+| `uv` or `pip` | `uv --version` or `pip --version` |
+
+<Aside type="note">
+Windows: use WSL or PowerShell. Native Windows works but isn't the primary beta target.
+</Aside>
+
+### Step 1: Install
+
+<Tabs>
+  <TabItem label="uv (recommended)">
+  ```bash
+  uv tool install mutsumi-tui
+  ```
+  </TabItem>
+  <TabItem label="pip">
+  ```bash
+  pip install mutsumi-tui
+  ```
+  </TabItem>
+  <TabItem label="From source">
+  ```bash
+  uv tool install git+https://github.com/ywh555hhh/Mutsumi.git
+  ```
+  </TabItem>
+</Tabs>
+
+Verify:
+
+```bash
+mutsumi --version   # → mutsumi, version 1.0.0b1
+mutsumi --help      # → shows subcommands
+```
+
+### Step 2: First launch
+
+```bash
+cd ~/some-project
+mutsumi
+```
+
+You should see a **single-page onboarding screen**:
+
+```
+┌─────────────────────────────────────────────────────────┐
+│               Welcome to Mutsumi                        │
+│                                                         │
+│  Language       ● English  ○ 中文  ○ 日本語             │
+│  Keybindings    ● Arrows  ○ Vim  ○ Emacs                │
+│  Theme          ● Monochrome Zen  ○ Nord  ○ Dracula     │
+│  Workspace      ● Personal + Project                    │
+│  Agent          ○ Claude Code  ○ Codex CLI  ● Skip      │
+│                                                         │
+│           [Start Mutsumi]           [Skip]               │
+└─────────────────────────────────────────────────────────┘
+```
+
+<Aside type="tip">
+Try selecting **中文 + Nord + Vim** to verify that language, theme, and keybindings all apply instantly.
+</Aside>
+
+### Step 3: Create your first task
+
+After onboarding you land on an empty board. Click **[+ New Task]** or press <kbd>n</kbd>, type a title, and hit Create.
+
+### Checklist
+
+| # | What to check | Expected |
+|---|---|---|
+| 1 | Install command works | No compilation, pure Python |
+| 2 | `mutsumi --version` | `1.0.0b1` |
+| 3 | First launch shows onboarding | Single page, not multi-step wizard |
+| 4 | All 5 settings visible at once | Language, Keybindings, Theme, Workspace, Agent |
+| 5 | Select 中文 → Start | UI immediately shows Chinese |
+| 6 | Select Nord → Start | Colors change instantly |
+| 7 | Click Skip | Enters TUI with defaults, no crash |
+| 8 | Second launch skips onboarding | Direct to TUI |
+| 9 | Empty state has [+ New Task] | Clickable button |
+| 10 | Press `?` | Shows help screen |
+
+**Pass condition**: Zero-to-first-task in under 60 seconds, no documentation needed.
+
+---
+
+## Aha 2: Agent Live Sync
+
+**Goal**: You talk to your AI agent, it writes JSON, Mutsumi updates before the agent finishes its response.
+
+### Setup: Split terminal
+
+You need two panes side by side:
+
+```
+┌──────────────────────────┬──────────────────────────┐
+│                          │                          │
+│   AI Agent               │   Mutsumi TUI            │
+│   (Claude Code, etc.)    │                          │
+│                          │                          │
+└──────────────────────────┴──────────────────────────┘
+```
+
+<Tabs>
+  <TabItem label="tmux">
+  ```bash
+  tmux new-session -d -s dev
+  tmux split-window -h -p 35 "mutsumi"
+  tmux select-pane -t 0
+  tmux attach -t dev
+  ```
+  </TabItem>
+  <TabItem label="iTerm2">
+  Press <kbd>Cmd+D</kbd> to split. Right pane: `mutsumi`. Left pane: your agent.
+  </TabItem>
+  <TabItem label="VS Code / Cursor">
+  Split the terminal panel. Right: `mutsumi`. Left: your agent.
+  </TabItem>
+</Tabs>
+
+### Skill injection
+
+Tell your agent about Mutsumi's JSON protocol:
+
+```bash
+mutsumi setup --agent claude-code    # or codex-cli, gemini-cli, opencode
+```
+
+<Aside>
+If you selected an agent during onboarding, this was already done automatically.
+</Aside>
+
+### The core loop: Talk → Write → See
+
+Try these conversations with your agent:
+
+<Steps>
+
+1. **Add a task casually**
+
+   ```
+   You: "帮我加个 todo，明天交周报"
+   ```
+
+   Agent writes to `mutsumi.json`. Mutsumi detects the change and shows the new task — no restart, no flicker.
+
+2. **Batch add**
+
+   ```
+   You: "把这三个 bug 加进去：登录页白屏、支付超时、头像上传失败，都是 high priority"
+   ```
+
+   All 3 tasks appear after a single re-render.
+
+3. **Mark done**
+
+   ```
+   You: "登录页白屏修好了，标记完成"
+   ```
+
+   Checkbox updates, task grays out.
+
+4. **Edit fields**
+
+   ```
+   You: "把支付超时的优先级降到 normal，加个 tag 叫 backend"
+   ```
+
+   Priority stars and tags update instantly.
+
+</Steps>
+
+### Reverse direction
+
+The sync is **bidirectional**. Toggle a checkbox in Mutsumi → `mutsumi.json` updates → agent can read the latest state.
+
+### Checklist
+
+| # | What to check | Expected |
+|---|---|---|
+| 1 | Agent adds 1 task | Appears within 1 second |
+| 2 | Agent adds 3 tasks at once | All 3 appear, single re-render |
+| 3 | Agent marks task done | Checkbox + strikethrough update |
+| 4 | Agent edits priority | Stars change immediately |
+| 5 | Agent writes invalid JSON | Error banner, no crash |
+| 6 | Agent fixes JSON | Error clears, tasks reappear |
+| 7 | No flicker during updates | Cursor position preserved |
+| 8 | Toggle done in TUI | JSON file updates, agent can see it |
+
+**Pass condition**: Tasks appear on screen before the agent finishes printing its response. Your reaction: "that's it?" (in a good way).
+
+---
+
+## Reporting Feedback
+
+Copy this template and send it to Wayne:
+
+```markdown
+## Environment
+- OS:
+- Terminal:
+- Python version:
+- Install method: uv / pip / source
+- Agent (if testing Aha 2):
+
+## Aha 1 (Out-of-the-Box)
+- Install time:
+- Onboarding: smooth / had issues
+- First task created: yes / no
+- Overall feeling (1-5):
+- Issues:
+
+## Aha 2 (Agent Live Sync)
+- Agent used:
+- Split pane setup: tmux / iTerm2 / VS Code / other
+- Add task via agent: worked / failed
+- Hot-reload speed: instant / noticeable delay / broken
+- Overall feeling (1-5):
+- Issues:
+
+## General
+- Would you use this daily? yes / maybe / no
+- What surprised you (good or bad)?
+- What's missing?
+```
+
+<Aside type="tip">
+File issues directly at [github.com/ywh555hhh/Mutsumi/issues](https://github.com/ywh555hhh/Mutsumi/issues) with the **beta** label.
+</Aside>

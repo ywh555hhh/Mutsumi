@@ -1,0 +1,262 @@
+---
+title: "ベータテストガイド"
+description: "Mutsumi v1.0.0-beta.1 内部テストガイド — 2 つの aha moment を検証。"
+---
+
+import { Steps, Tabs, TabItem, Aside, Card, CardGrid } from '@astrojs/starlight/components';
+
+<Aside type="caution">
+このページは**招待されたベータテスター専用**です。Mutsumi v1.0.0 はまだ公開リリースされていません。テストにご協力いただきありがとうございます！
+</Aside>
+
+## テスト内容
+
+2 つの体験 — **aha moment** と呼んでいます — がリリース前に完璧である必要があります。試して、感想を教えてください。
+
+<CardGrid>
+  <Card title="Aha 1: すぐに使える" icon="rocket">
+    1 コマンドでインストール、3 秒のオンボーディング、即スタート。目標タイム：**60 秒以内**。
+  </Card>
+  <Card title="Aha 2: Agent リアルタイム同期" icon="random">
+    AI Agent に気軽に話しかけると、Mutsumi がリアルタイムで更新。マジックモーメント：**30 秒以内**。
+  </Card>
+</CardGrid>
+
+---
+
+## Aha 1: すぐに使える
+
+**目標**: ゼロから最初のタスクが画面に表示されるまで — ドキュメント不要、設定ファイル不要、YAML 不要。
+
+### 前提条件
+
+| 要件 | 確認方法 |
+|---|---|
+| macOS / Linux ターミナル | `uname` |
+| Python 3.12+ | `python3 --version` |
+| `uv` または `pip` | `uv --version` or `pip --version` |
+
+<Aside type="note">
+Windows: WSL または PowerShell を使用してください。ネイティブ Windows は動作しますが、ベータテストの主要対象ではありません。
+</Aside>
+
+### ステップ 1: インストール
+
+<Tabs>
+  <TabItem label="uv（推奨）">
+  ```bash
+  uv tool install mutsumi-tui
+  ```
+  </TabItem>
+  <TabItem label="pip">
+  ```bash
+  pip install mutsumi-tui
+  ```
+  </TabItem>
+  <TabItem label="ソースから">
+  ```bash
+  uv tool install git+https://github.com/ywh555hhh/Mutsumi.git
+  ```
+  </TabItem>
+</Tabs>
+
+確認:
+
+```bash
+mutsumi --version   # → mutsumi, version 1.0.0b1
+mutsumi --help      # → サブコマンド一覧を表示
+```
+
+### ステップ 2: 初回起動
+
+```bash
+cd ~/some-project
+mutsumi
+```
+
+**シングルページのオンボーディング画面**が表示されるはずです：
+
+```
+┌─────────────────────────────────────────────────────────┐
+│               Welcome to Mutsumi                        │
+│                                                         │
+│  Language       ● English  ○ 中文  ○ 日本語             │
+│  Keybindings    ● Arrows  ○ Vim  ○ Emacs                │
+│  Theme          ● Monochrome Zen  ○ Nord  ○ Dracula     │
+│  Workspace      ● Personal + Project                    │
+│  Agent          ○ Claude Code  ○ Codex CLI  ● Skip      │
+│                                                         │
+│           [Start Mutsumi]           [Skip]               │
+└─────────────────────────────────────────────────────────┘
+```
+
+<Aside type="tip">
+**日本語 + Nord + Vim** を選択して、言語・テーマ・キーバインドがすべて即座に適用されるか確認してみてください。
+</Aside>
+
+### ステップ 3: 最初のタスクを作成
+
+オンボーディング後、空のボードが表示されます。**[+ New Task]** をクリックするか <kbd>n</kbd> を押して、タイトルを入力し、Create をクリック。
+
+### チェックリスト
+
+| # | 確認項目 | 期待される結果 |
+|---|---|---|
+| 1 | インストールコマンドが動く | 純 Python、コンパイル不要 |
+| 2 | `mutsumi --version` | `1.0.0b1` |
+| 3 | 初回起動でオンボーディング表示 | シングルページ、ウィザードではない |
+| 4 | 5 つの設定が全て見える | 言語、キーバインド、テーマ、ワークスペース、Agent |
+| 5 | 日本語を選択 → Start | UI が即座に日本語に |
+| 6 | Nord を選択 → Start | 色が即座に変わる |
+| 7 | Skip をクリック | デフォルト設定で TUI に入る、クラッシュなし |
+| 8 | 2 回目の起動 | オンボーディングをスキップ |
+| 9 | 空の状態に [+ New Task] | クリック可能なボタン |
+| 10 | `?` を押す | ヘルプ画面を表示 |
+
+**合格条件**: ゼロから最初のタスクまで 60 秒以内。ドキュメントを読む必要なし。
+
+---
+
+## Aha 2: Agent リアルタイム同期
+
+**目標**: AI Agent に気軽に話しかけ、Agent が JSON を書き、Agent が応答を打ち終わる前に Mutsumi が更新される。
+
+### 準備: 分割ターミナル
+
+2 つのペインを並べて表示：
+
+```
+┌──────────────────────────┬──────────────────────────┐
+│                          │                          │
+│   AI Agent               │   Mutsumi TUI            │
+│   (Claude Code など)     │                          │
+│                          │                          │
+└──────────────────────────┴──────────────────────────┘
+```
+
+<Tabs>
+  <TabItem label="tmux">
+  ```bash
+  tmux new-session -d -s dev
+  tmux split-window -h -p 35 "mutsumi"
+  tmux select-pane -t 0
+  tmux attach -t dev
+  ```
+  </TabItem>
+  <TabItem label="iTerm2">
+  <kbd>Cmd+D</kbd> で分割。右ペイン: `mutsumi`。左ペイン: Agent。
+  </TabItem>
+  <TabItem label="VS Code / Cursor">
+  ターミナルパネルを分割。右: `mutsumi`。左: Agent。
+  </TabItem>
+</Tabs>
+
+### スキル注入
+
+Agent に Mutsumi の JSON プロトコルを教えます：
+
+```bash
+mutsumi setup --agent claude-code    # または codex-cli, gemini-cli, opencode
+```
+
+<Aside>
+オンボーディングで Agent を選択していた場合、この手順は自動的に完了しています。
+</Aside>
+
+### コアループ: 話す → 書く → 見る
+
+Agent に以下のような会話を試してください：
+
+<Steps>
+
+1. **気軽にタスクを追加**
+
+   ```
+   あなた:「todo を追加して、明日レポート提出」
+   ```
+
+   Agent が `mutsumi.json` に書き込み。Mutsumi が変更を検知し、新しいタスクが表示されます — 再起動なし、ちらつきなし。
+
+2. **一括追加**
+
+   ```
+   あなた:「この 3 つのバグを追加して：ログイン画面の白画面、決済タイムアウト、アバターアップロード失敗。全部 high priority で」
+   ```
+
+   3 つのタスクが一度に表示されます。
+
+3. **完了にする**
+
+   ```
+   あなた:「ログイン画面の白画面は修正済み、完了にして」
+   ```
+
+   チェックボックスが更新され、タスクがグレーアウト。
+
+4. **フィールドを編集**
+
+   ```
+   あなた:「決済タイムアウトの優先度を normal に下げて、backend タグを追加して」
+   ```
+
+   優先度の星とタグが即座に更新されます。
+
+</Steps>
+
+### 逆方向の同期
+
+同期は**双方向**です。Mutsumi でチェックを切り替え → `mutsumi.json` が更新 → Agent が最新状態を読み取れます。
+
+### チェックリスト
+
+| # | 確認項目 | 期待される結果 |
+|---|---|---|
+| 1 | Agent が 1 つのタスクを追加 | 1 秒以内に表示 |
+| 2 | Agent が 3 つを一括追加 | 全て表示、1 回の再描画 |
+| 3 | Agent がタスクを完了 | チェックボックス + 取り消し線更新 |
+| 4 | Agent が優先度を変更 | 星が即座に変化 |
+| 5 | Agent が無効な JSON を書き込む | エラーバナー表示、クラッシュなし |
+| 6 | Agent が JSON を修正 | エラー消失、タスク復活 |
+| 7 | 更新中にちらつきなし | カーソル位置が保持される |
+| 8 | TUI で完了をトグル | JSON ファイル更新、Agent が読み取れる |
+
+**合格条件**: Agent が応答を打ち終わる前にタスクが画面に表示される。あなたの反応:「もうそれだけ？」（褒め言葉として）。
+
+---
+
+## フィードバック方法
+
+以下のテンプレートをコピーして Wayne に送ってください：
+
+```markdown
+## 環境
+- OS:
+- ターミナル:
+- Python バージョン:
+- インストール方法: uv / pip / ソース
+- Agent（Aha 2 をテストした場合）:
+
+## Aha 1（すぐに使える）
+- インストール時間:
+- オンボーディング: スムーズ / 問題あり
+- 最初のタスク作成: 成功 / 失敗
+- 全体的な感想（1-5）:
+- 問題点:
+
+## Aha 2（Agent リアルタイム同期）
+- 使用した Agent:
+- 分割方法: tmux / iTerm2 / VS Code / その他
+- Agent でタスク追加: 成功 / 失敗
+- ホットリロード速度: 即時 / 遅延あり / 動作せず
+- 全体的な感想（1-5）:
+- 問題点:
+
+## 全般
+- 毎日使いますか？ はい / たぶん / いいえ
+- 驚いたこと（良い意味でも悪い意味でも）？
+- 足りないもの？
+```
+
+<Aside type="tip">
+[github.com/ywh555hhh/Mutsumi/issues](https://github.com/ywh555hhh/Mutsumi/issues) で直接 issue を作成することもできます。**beta** ラベルを付けてください。
+</Aside>

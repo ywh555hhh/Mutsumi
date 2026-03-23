@@ -1,0 +1,262 @@
+---
+title: 内测指南
+description: Mutsumi v1.0.0-beta.1 内测指南 — 两个核心体验验证。
+---
+
+import { Steps, Tabs, TabItem, Aside, Card, CardGrid } from '@astrojs/starlight/components';
+
+<Aside type="caution">
+本页面仅面向**受邀内测人员**。Mutsumi v1.0.0 尚未公开发布。感谢你帮助测试！
+</Aside>
+
+## 你在测试什么
+
+两个体验 — 我们称之为**爽点（aha moment）** — 必须让人觉得「这也太丝滑了吧」，我们才会发布 v1.0.0。你的任务就是试一遍，告诉我们是否达标。
+
+<CardGrid>
+  <Card title="爽点 1：开箱即用" icon="rocket">
+    一条命令安装，3 秒 onboarding，直接进入。时间预算：**60 秒以内**。
+  </Card>
+  <Card title="爽点 2：Agent 实时同步" icon="random">
+    随口跟 Agent 说句话，Mutsumi 实时更新。魔法时刻：**30 秒以内**。
+  </Card>
+</CardGrid>
+
+---
+
+## 爽点 1：开箱即用
+
+**目标**：从零到看到自己的第一个任务 — 不用翻文档，不用写配置，不用 YAML。
+
+### 前置条件
+
+| 要求 | 检查方式 |
+|---|---|
+| macOS / Linux 终端 | `uname` |
+| Python 3.12+ | `python3 --version` |
+| `uv` 或 `pip` | `uv --version` 或 `pip --version` |
+
+<Aside type="note">
+Windows 用户：请使用 WSL 或 PowerShell。原生 Windows 可以用，但不是本次内测的主要目标。
+</Aside>
+
+### 第一步：安装
+
+<Tabs>
+  <TabItem label="uv（推荐）">
+  ```bash
+  uv tool install mutsumi-tui
+  ```
+  </TabItem>
+  <TabItem label="pip">
+  ```bash
+  pip install mutsumi-tui
+  ```
+  </TabItem>
+  <TabItem label="从源码">
+  ```bash
+  uv tool install git+https://github.com/ywh555hhh/Mutsumi.git
+  ```
+  </TabItem>
+</Tabs>
+
+验证：
+
+```bash
+mutsumi --version   # → mutsumi, version 1.0.0b1
+mutsumi --help      # → 显示子命令列表
+```
+
+### 第二步：首次启动
+
+```bash
+cd ~/some-project
+mutsumi
+```
+
+你应该看到一个**单页 onboarding 界面**：
+
+```
+┌─────────────────────────────────────────────────────────┐
+│               Welcome to Mutsumi                        │
+│                                                         │
+│  Language       ● English  ○ 中文  ○ 日本語             │
+│  Keybindings    ● Arrows  ○ Vim  ○ Emacs                │
+│  Theme          ● Monochrome Zen  ○ Nord  ○ Dracula     │
+│  Workspace      ● Personal + Project                    │
+│  Agent          ○ Claude Code  ○ Codex CLI  ● Skip      │
+│                                                         │
+│           [Start Mutsumi]           [Skip]               │
+└─────────────────────────────────────────────────────────┘
+```
+
+<Aside type="tip">
+试试选择 **中文 + Nord + Vim**，验证语言、主题、快捷键是否全部即时生效。
+</Aside>
+
+### 第三步：创建你的第一个任务
+
+onboarding 完成后你会看到一个空看板。点击 **[+ New Task]** 或按 <kbd>n</kbd>，输入标题，点 Create。
+
+### 检查清单
+
+| # | 检查项 | 预期结果 |
+|---|---|---|
+| 1 | 安装命令正常 | 纯 Python，无需编译 |
+| 2 | `mutsumi --version` | `1.0.0b1` |
+| 3 | 首次启动显示 onboarding | 单页表单，不是多步向导 |
+| 4 | 5 个设置项全部可见 | 语言、快捷键、主题、工作区、Agent |
+| 5 | 选中文 → Start | UI 立即变成中文 |
+| 6 | 选 Nord → Start | 颜色立即变化 |
+| 7 | 点 Skip | 默认设置进入 TUI，不崩溃 |
+| 8 | 第二次启动跳过 onboarding | 直接进 TUI |
+| 9 | 空状态有 [+ New Task] | 可点击的按钮 |
+| 10 | 按 `?` | 显示帮助页面 |
+
+**通过标准**：从零到第一个任务，60 秒以内，不需要翻任何文档。
+
+---
+
+## 爽点 2：Agent 实时同步
+
+**目标**：你随口跟 Agent 说话，Agent 写 JSON，Mutsumi 在 Agent 还没打完回复时就已经更新了。
+
+### 准备：分屏终端
+
+你需要左右两个窗格：
+
+```
+┌──────────────────────────┬──────────────────────────┐
+│                          │                          │
+│   AI Agent               │   Mutsumi TUI            │
+│   (Claude Code 等)       │                          │
+│                          │                          │
+└──────────────────────────┴──────────────────────────┘
+```
+
+<Tabs>
+  <TabItem label="tmux">
+  ```bash
+  tmux new-session -d -s dev
+  tmux split-window -h -p 35 "mutsumi"
+  tmux select-pane -t 0
+  tmux attach -t dev
+  ```
+  </TabItem>
+  <TabItem label="iTerm2">
+  按 <kbd>Cmd+D</kbd> 分屏。右边：`mutsumi`。左边：你的 agent。
+  </TabItem>
+  <TabItem label="VS Code / Cursor">
+  拆分终端面板。右边：`mutsumi`。左边：你的 agent。
+  </TabItem>
+</Tabs>
+
+### Skill 注入
+
+让 Agent 认识 Mutsumi 的 JSON 协议：
+
+```bash
+mutsumi setup --agent claude-code    # 或 codex-cli, gemini-cli, opencode
+```
+
+<Aside>
+如果你在 onboarding 时已经选了 Agent，这步会自动完成。
+</Aside>
+
+### 核心循环：说 → 写 → 看
+
+试试这些对话：
+
+<Steps>
+
+1. **随口加个任务**
+
+   ```
+   你："帮我加个 todo，明天交周报"
+   ```
+
+   Agent 写入 `mutsumi.json`。Mutsumi 检测到变化，新任务出现 — 无需重启，无闪烁。
+
+2. **批量添加**
+
+   ```
+   你："把这三个 bug 加进去：登录页白屏、支付超时、头像上传失败，都是 high priority"
+   ```
+
+   3 个任务一次性出现。
+
+3. **标记完成**
+
+   ```
+   你："登录页白屏修好了，标记完成"
+   ```
+
+   复选框更新，任务变灰。
+
+4. **修改字段**
+
+   ```
+   你："把支付超时的优先级降到 normal，加个 tag 叫 backend"
+   ```
+
+   优先级星星和标签立即更新。
+
+</Steps>
+
+### 反向同步
+
+同步是**双向的**。在 Mutsumi 里勾选完成 → `mutsumi.json` 更新 → Agent 可以读取最新状态。
+
+### 检查清单
+
+| # | 检查项 | 预期结果 |
+|---|---|---|
+| 1 | Agent 添加 1 个任务 | 1 秒内出现 |
+| 2 | Agent 一次加 3 个任务 | 全部出现，一次重渲染 |
+| 3 | Agent 标记完成 | 复选框 + 删除线更新 |
+| 4 | Agent 改优先级 | 星星立即变化 |
+| 5 | Agent 写入无效 JSON | 显示错误横幅，不崩溃 |
+| 6 | Agent 修复 JSON | 错误消失，任务恢复 |
+| 7 | 更新过程无闪烁 | 光标位置保持不变 |
+| 8 | 在 TUI 中勾选完成 | JSON 文件更新，Agent 可以读到 |
+
+**通过标准**：任务在 Agent 还没打完回复时就出现了。你的反应：「哦这也太爽了吧」。
+
+---
+
+## 反馈方式
+
+复制下面的模板发给 Wayne：
+
+```markdown
+## 环境
+- 操作系统：
+- 终端：
+- Python 版本：
+- 安装方式：uv / pip / 源码
+- Agent（如果测试了爽点 2）：
+
+## 爽点 1（开箱即用）
+- 安装耗时：
+- Onboarding：顺畅 / 有问题
+- 第一个任务创建成功：是 / 否
+- 整体感受（1-5）：
+- 问题：
+
+## 爽点 2（Agent 实时同步）
+- 使用的 Agent：
+- 分屏方式：tmux / iTerm2 / VS Code / 其他
+- 通过 Agent 加任务：成功 / 失败
+- 热重载速度：即时 / 有明显延迟 / 不工作
+- 整体感受（1-5）：
+- 问题：
+
+## 总体
+- 你会每天用吗？会 / 可能 / 不会
+- 什么让你惊喜（好的或坏的）？
+- 缺少什么？
+```
+
+<Aside type="tip">
+也可以直接到 [github.com/ywh555hhh/Mutsumi/issues](https://github.com/ywh555hhh/Mutsumi/issues) 提 issue，打上 **beta** 标签。
+</Aside>
