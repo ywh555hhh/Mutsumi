@@ -12,6 +12,8 @@
 
 ---
 
+> **历史说明（2026-03-24）：** 本 RFC 反映的是较早期的 onboarding 模型，其中部分内容已被更新的产品方向替代，尤其是 RFC-008。关于当前 onboarding 与 setup 基线，请优先参考 `README.md`、`docs/BETA_USAGE.md`、`docs/specs/AGENT_PROTOCOL.md` 和 RFC-008。
+
 ## 1. 摘要
 
 本 RFC 定义用户如何安装、配置和开始使用 Mutsumi。核心原则是**"脆爽"** — 每一步都要零摩擦：一条命令安装，一个屏幕配置，一秒钟启动。

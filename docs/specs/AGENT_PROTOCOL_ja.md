@@ -1,9 +1,9 @@
 # Mutsumi Agent 連携プロトコル
 
-| バージョン | 0.1.0              |
-|-----------|---------------------|
-| ステータス | ドラフト             |
-| 日付       | 2026-03-21          |
+| バージョン | 1.0 |
+|---|---|
+| ステータス | ドラフト |
+| 日付 | 2026-03-23 |
 
 > **[English Version](./AGENT_PROTOCOL.md)** | **[中文版](./AGENT_PROTOCOL_cn.md)**
 
@@ -11,209 +11,284 @@
 
 ## 1. 概要
 
-このドキュメントは、外部 Agent（AI CLI ツール、カスタムスクリプトなど）が Mutsumi の `tasks.json` をどのように読み書きするかを定義します。
+このドキュメントは、外部 agents——AI CLI、カスタムスクリプト、または単純な shell ツール——がどのように Mutsumi と統合するかを定義します。
 
-**基本原則: Mutsumi は特定の Agent にバインドされません。JSON を正しく読み書きできるプログラムであれば、すべて正当なコントローラーです。**
+**基本原則:** Mutsumi は agent-agnostic です。タスクファイルを正しく読み書きできる任意のプログラムが controller になれます。
 
-## 2. 対応 Agent（非網羅的）
+### 1.1 アクティブファイル命名
 
-| Agent          | 種別              | 連携レベル                  |
-|----------------|-------------------|--------------------------|
-| Claude Code    | AI CLI            | ネイティブ（推奨）           |
-| Codex CLI      | AI CLI            | ネイティブ                  |
-| Gemini CLI     | AI CLI            | ネイティブ                  |
-| OpenCode       | AI CLI            | ネイティブ                  |
-| Aider          | AI CLI            | ネイティブ                  |
-| shell scripts  | カスタム           | ネイティブ                  |
-| cron jobs      | システム           | ネイティブ                  |
+- **正式なタスクファイル:** `mutsumi.json`
+- **旧フォールバック:** `tasks.json`
 
-「ネイティブ」とは、JSON ファイルの読み書きのみが必要であることを意味します — SDK やプラグインのインストールは不要です。
+新しいプロジェクトでは、agents は **`./mutsumi.json`** を対象にすべきです。
+プロジェクトがまだ `tasks.json` を使っている場合は、その旧ファイルを読み書きし続けても構いません。
+
+### 1.2 解決順序
+
+明示的なパスが指定されていない場合、Mutsumi は次のようにアクティブタスクファイルを解決します。
+
+1. CLI `--path`
+2. `./mutsumi.json`
+3. `./tasks.json`
+4. 新規プロジェクトのデフォルトターゲット: `./mutsumi.json`
+
+---
+
+## 2. サポートされる Agents
+
+| Agent | 連携レベル |
+|---|---|
+| Claude Code | Native |
+| Codex CLI | Native |
+| Gemini CLI | Native |
+| OpenCode | Native |
+| Aider | Native |
+| Custom scripts | Native |
+
+“Native” とは、ネットワークブリッジや SDK が不要で、ファイル I/O だけで十分という意味です。
+
+---
 
 ## 3. 書き込みプロトコル（Agent → Mutsumi）
 
 ### 3.1 ワークフロー
 
-```
-1. Read the current tasks.json (full content)
-2. Parse as JSON
-3. Modify the tasks array (add/update/delete)
-4. Write the ENTIRE file back (no partial writes)
-5. Mutsumi's watchdog detects change → re-renders
+```text
+1. アクティブなタスクファイルを解決する
+2. 現在の JSON オブジェクトを読む
+3. tasks 配列を変更する
+4. ファイル全体をアトミックに書き戻す
+5. Mutsumi が保存を検知して再描画する
 ```
 
 ### 3.2 ルール
 
-| ルール                          | 説明                                                                    |
-|-------------------------------|--------------------------------------------------------------------------|
-| **不明フィールドの保持**         | 認識できないフィールドを削除しないでください。そのまま保持してください              |
-| **アトミック書き込み**           | 推奨: 一時ファイルに書き込んでからリネームし、Mutsumi が書き込み途中の状態を読むのを防ぎます |
-| **有効な JSON**                | 書き込み後のファイルは有効な JSON でなければなりません                         |
-| **有効な ID の生成**            | 新規タスクの ID には UUIDv7 を使用してください。最低限、一意性を確保してください    |
-| **必須フィールド**              | すべてのタスクには `id`、`title`、`status` が必要です                       |
-| **列挙型の遵守**               | `status` は `"pending"` / `"done"` のみ使用できます                       |
+| ルール | 説明 |
+|---|---|
+| 未知フィールドを保持する | 認識できないフィールドは絶対に削除しない |
+| アトミック書き込み | temp file + `os.replace()` / rename で書く |
+| 正しい JSON | すべての書き込み後もファイルは正しい JSON でなければならない |
+| 正しい ID | 新規タスクには UUIDv7 または別の一意な文字列を使うべき |
+| 必須フィールド | すべてのタスクに `id`、`title`、`status` が必要 |
+| 列挙値準拠 | `status`: `pending` / `done`; `priority`: `high` / `normal` / `low`; `scope`: `day` / `week` / `month` / `inbox` |
 
-### 3.3 タスクの追加
+### 3.3 最小 Python 例
 
 ```python
-import json, uuid, datetime
+from __future__ import annotations
 
-# Read
-with open("tasks.json") as f:
-    data = json.load(f)
+import datetime as dt
+import json
+import os
+import tempfile
+from pathlib import Path
 
-# Add
+
+def resolve_task_file() -> Path:
+    preferred = Path("mutsumi.json")
+    legacy = Path("tasks.json")
+    if preferred.exists():
+        return preferred
+    if legacy.exists():
+        return legacy
+    return preferred
+
+
+path = resolve_task_file()
+
+data = {"version": 1, "tasks": []}
+if path.exists():
+    data = json.loads(path.read_text(encoding="utf-8"))
+
 new_task = {
-    "id": str(uuid.uuid7()),  # or any unique string
-    "title": "修复登录 Bug",
+    "id": f"task-{int(dt.datetime.now(dt.UTC).timestamp())}",
+    "title": "Fix login bug",
     "status": "pending",
     "scope": "day",
     "priority": "high",
     "tags": ["bugfix"],
-    "created_at": datetime.datetime.now(datetime.UTC).isoformat(),
-    "children": []
+    "created_at": dt.datetime.now(dt.UTC).isoformat(),
+    "children": [],
 }
-data["tasks"].append(new_task)
+data.setdefault("tasks", []).append(new_task)
 
-# Write (atomic)
-import tempfile, os
-tmp = tempfile.NamedTemporaryFile(
-    mode='w', dir='.', suffix='.tmp', delete=False
-)
-json.dump(data, tmp, ensure_ascii=False, indent=2)
-tmp.close()
-os.rename(tmp.name, "tasks.json")
+with tempfile.NamedTemporaryFile("w", dir=".", suffix=".tmp", delete=False, encoding="utf-8") as tmp:
+    json.dump(data, tmp, ensure_ascii=False, indent=2)
+    tmp_path = Path(tmp.name)
+
+os.replace(tmp_path, path)
 ```
 
-### 3.4 タスクの完了
+### 3.4 タスク完了
 
 ```python
 for task in data["tasks"]:
     if task["id"] == target_id:
         task["status"] = "done"
-        task["completed_at"] = datetime.datetime.now(datetime.UTC).isoformat()
+        task["completed_at"] = dt.datetime.now(dt.UTC).isoformat()
         break
 ```
 
-### 3.5 Agent プロンプトテンプレート
+---
 
-以下は、Agent のシステムプロンプトに埋め込むための推奨 Mutsumi 連携指示です。
+## 4. Prompt テンプレート
+
+次のスニペットは agent instruction file に安全に含められます。
 
 ```markdown
-## Task Management (Mutsumi Integration)
+## Mutsumi Task Integration
 
-You have access to a local task file at `./tasks.json`.
-When the user asks you to manage tasks, read and write this file.
+This project uses Mutsumi for task management.
+Tasks live in `./mutsumi.json` (fallback: `./tasks.json`).
 
-Schema:
-- Required fields: id (unique string), title (string), status ("pending" | "done")
-- Optional fields: scope ("day"|"week"|"month"|"inbox"), priority ("high"|"normal"|"low"), tags (string[]), children (Task[]), due_date (ISO date), description (string)
-- Preserve any fields you don't recognize — do NOT delete them
-- Use atomic write (temp file + rename) when possible
-- Generate UUIDv7 for new task IDs
-
-Example task:
-{"id":"01JQ...","title":"Fix auth","status":"pending","scope":"day","priority":"high","tags":["dev"],"children":[]}
+Rules:
+- Read the whole file before writing
+- Preserve unknown fields
+- Write the ENTIRE file back atomically
+- Required task fields: `id`, `title`, `status`
+- Valid status values: `pending`, `done`
+- Prefer `mutsumi` CLI commands for simple CRUD
 ```
 
-## 4. 読み取りプロトコル（Mutsumi → Agent）
+---
 
-### 4.1 イベントログ
+## 5. CLI 優先の統合
 
-ユーザーが TUI で操作を行うと、Mutsumi は `events.jsonl`（JSONL 形式、1行1イベント）にイベントを追記します。
+単純なタスク操作では、agents は手書きの JSON 変更よりも CLI を優先すべきです。
+
+```bash
+mutsumi add "Fix auth" --priority high --scope day --tags "dev,backend"
+mutsumi done <id-prefix>
+mutsumi edit <id-prefix> --title "New title" --priority low
+mutsumi rm <id-prefix>
+mutsumi list
+mutsumi validate
+mutsumi schema
+```
+
+利点:
+
+- schema drift のリスクが低い
+- 部分書き込みの可能性が低い
+- ファイル解決順序が一貫する（`mutsumi.json` 優先、`tasks.json` フォールバック）
+
+---
+
+## 6. イベントログ（任意）
+
+Mutsumi はローカル監査 / 履歴用途のために JSONL イベントを追記できます。
+デフォルトパスは通常次の通りです。
+
+```text
+~/.local/share/mutsumi/events.jsonl
+```
+
+### 6.1 イベント例
 
 ```jsonl
-{"ts":"2026-03-21T10:00:00Z","event":"task_completed","task_id":"01JQ...","title":"修复缓存 Bug","source":"tui"}
-{"ts":"2026-03-21T10:01:22Z","event":"task_created","task_id":"01JQ...","title":"写单元测试","source":"tui"}
-{"ts":"2026-03-21T10:05:00Z","event":"task_deleted","task_id":"01JQ...","title":"过时的任务","source":"tui"}
-{"ts":"2026-03-21T10:06:30Z","event":"task_updated","task_id":"01JQ...","changes":{"priority":"high→low"},"source":"tui"}
+{"timestamp":"2026-03-23T10:00:00+00:00","type":"task_added","task_id":"01JQ...","title":"Write tests"}
+{"timestamp":"2026-03-23T10:05:00+00:00","type":"task_edited","task_id":"01JQ...","title":"Write more tests"}
+{"timestamp":"2026-03-23T10:06:00+00:00","type":"task_deleted","task_id":"01JQ...","title":"Obsolete task"}
 ```
 
-### 4.2 イベントタイプ
+### 6.2 現在のイベント名
 
-| イベント           | フィールド                               | 説明                    |
-|-------------------|-------------------------------------------|--------------------------|
-| `task_created`    | task_id, title                            | 新規タスクが作成されました   |
-| `task_completed`  | task_id, title                            | タスクが完了にマークされました |
-| `task_deleted`    | task_id, title                            | タスクが削除されました       |
-| `task_updated`    | task_id, changes (dict)                   | タスクのフィールドが変更されました |
-| `schema_error`    | file, message                             | JSON 検証に失敗しました     |
+アプリが発行するイベント例:
 
-### 4.3 Agent による消費
+- `task_added`
+- `child_task_added`
+- `task_edited`
+- `task_deleted`
+- `task_toggled`
+- `priority_changed`
+- `task_reordered`
+- `task_pasted`
 
-Agent は以下の方法でイベントストリームを消費できます:
+イベントログは追加的なメタデータであり、task-file contract の一部ではありません。
 
-```bash
-# Real-time monitoring (shell)
-tail -f events.jsonl | jq .
+---
 
-# Reference in Agent prompt
-"Check events.jsonl for recent user actions on tasks"
+## 7. エラーハンドリング
+
+### 7.1 agent が不正な JSON を書いた場合
+
+```text
+agent writes invalid JSON
+        ↓
+Mutsumi detects file change
+        ↓
+parse fails
+        ↓
+TUI shows an error banner instead of crashing
+        ↓
+last good state remains visible until the file is fixed
 ```
 
-### 4.4 イベントログのローテーション
+### 7.2 推奨される回復フロー
 
-- デフォルトでは直近の1000イベントを保持します
-- 古いイベントは自動的に切り捨てられます
-- `config.toml` の `events.max_lines` で設定可能です
+agent が自分の書き込み成功に確信を持てない場合:
 
-## 5. スキーマディスカバリー
+1. `mutsumi validate` を実行する
+2. アクティブなタスクファイルを確認する
+3. 必要ならローカル error log を確認する（デフォルト: `~/.local/share/mutsumi/error.log`）
 
-Agent は CLI を通じて現在の JSON Schema を取得できます。
-
-```bash
-mutsumi schema
-# Outputs JSON Schema to stdout for Agent to understand the data structure
-
-mutsumi schema --format markdown
-# Outputs field descriptions in Markdown format
-```
-
-## 6. エラーハンドリング
-
-### 6.1 Agent が不正なデータを書き込んだ場合
-
-```
-Agent writes invalid JSON
-       │
-       ▼
-Mutsumi watchdog detects change
-       │
-       ▼
-Parse fails → TUI shows error banner
-       │       "tasks.json has errors, showing last valid state"
-       │
-       ▼
-Error logged to stderr + error.log
-       │
-       ▼
-Event emitted: {"event":"schema_error","file":"tasks.json","message":"..."}
-       │
-       ▼
-Agent can read error.log or events.jsonl to self-correct
-```
-
-### 6.2 自己修復プロンプト
-
-Agent プロンプトに以下を含めることを推奨します:
+### 7.3 自己修復指示
 
 ```markdown
-After writing to tasks.json, check ~/.local/share/mutsumi/error.log
-for any schema validation errors. If errors exist, fix and rewrite.
+After writing to the Mutsumi task file, run `mutsumi validate` if you are unsure the file is still valid JSON.
 ```
 
-## 7. マルチ Agent の協調
+---
 
-複数の Agent が同じ `tasks.json` を同時に操作する場合:
+## 8. Setup モード
 
-### 7.1 推奨事項
+`mutsumi setup --agent <name>` は 3 つのモードをサポートします。
 
-1. **書き込み前に読み取り** — 書き込み前に必ず最新バージョンを読み取ってください
-2. **書き込み範囲の最小化** — 自分が関心のあるタスクのみを変更し、他のタスクの順序を変更しないでください
-3. **冪等な操作** — 完了マークなどの操作は冪等であるべきです（繰り返してもエラーにならないこと）
-4. **一意の ID を使用** — UUIDv7 により、異なる Agent からの ID が衝突しないことが保証されます
+| モード | 挙動 |
+|---|---|
+| `skills` | bundled Mutsumi skills を agent の skill directory にインストール |
+| `skills+project-doc` | skills をインストールし、`CLAUDE.md`、`AGENTS.md`、`GEMINI.md`、`opencode.md` に integration snippet を追記 |
+| `snippet` | コピー可能な prompt snippet を stdout に出力 |
 
-### 7.2 競合の解決
+### 8.1 デフォルト動作
 
-Mutsumi はロック機構を提供しません。競合戦略: **Last Write Wins**（最後の書き込みが優先）。
+```bash
+mutsumi setup --agent claude-code
+```
 
-実際には、Agent の書き込みは離散的（通常は数秒から数分間隔）であるため、競合の発生確率は極めて低いです。
+これは skills だけをインストールします。
+`--mode skills+project-doc` を明示しない限り、project instruction files は**変更しません**。
+
+---
+
+## 9. マルチ Agent 協調
+
+### 9.1 同じ project file
+
+複数の agents が同じ `mutsumi.json` に触る場合:
+
+1. 常に read before write
+2. 無関係な変更を最小化する
+3. 可能な限り操作を冪等に保つ
+4. 2 つの writer が競合した場合は **last write wins** を想定する
+
+### 9.2 別の project file
+
+multi-source setup では、各 project が自分の task file を持つべきです。
+これが推奨される分離モデルです。
+
+```text
+project-a/mutsumi.json
+project-b/mutsumi.json
+~/.mutsumi/mutsumi.json   # personal tasks
+```
+
+Mutsumi は agents に単一ファイル共有を強制することなく、これらを UI 上で集約できます。
+
+---
+
+## 10. 互換性サマリー
+
+- `mutsumi.json` と旧 `tasks.json` は同じ Schema を使う
+- 新しいドキュメント、新しい例、新しいプロジェクトは `mutsumi.json` を使うべき
+- `tasks.json` は後方互換のためにのみ引き続きサポートされる

@@ -8,7 +8,7 @@
 | 著者 | Wayne (ywh) |
 | 作成日 | 2026-03-21 |
 
-[English](RFC-005-competitive-analysis.md) · [中文](RFC-005-competitive-analysis_cn.md)
+> **[English Version](./RFC-005-competitive-analysis.md)** | **[中文版](./RFC-005-competitive-analysis_cn.md)**
 
 ---
 

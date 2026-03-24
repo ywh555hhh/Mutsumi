@@ -1,9 +1,9 @@
 # Mutsumi TUI 规范
 
-| 版本   | 0.1.0              |
-|--------|---------------------|
-| 状态   | 草案                |
-| 日期   | 2026-03-21          |
+| 版本 | 1.0 |
+|---|---|
+| 状态 | 草案 |
+| 日期 | 2026-03-23 |
 
 > **[English Version](./TUI_SPEC.md)** | **[日本語版](./TUI_SPEC_ja.md)**
 
@@ -13,317 +13,396 @@
 
 ### 1.1 默认布局
 
-```
-┌─────────────────────────────────────────────────────┐
-│  [Today] [Week] [Month] [Inbox]          mutsumi ♪  │  ← 头部（1 行）
-├─────────────────────────────────────────────────────┤
-│                                                     │
-│  ▼ HIGH ─────────────────────────────────────────   │  ← 优先级分组
-│  [ ] 重构 Auth 模块                dev,backend ★★★  │  ← 任务行
-│  [x] 修复缓存穿透 Bug            bugfix       ★★★  │
-│                                                     │
-│  ▼ NORMAL ───────────────────────────────────────   │
-│  [ ] 写周报                       life         ★★   │
-│  [ ] Review PR #42                dev          ★★   │
-│    └─ [ ] 检查类型安全            (1/2)             │  ← 嵌套子任务
-│    └─ [x] 跑通测试                                  │
-│                                                     │
-│  ▼ LOW ──────────────────────────────────────────   │
-│  [ ] 更新 README                  docs         ★   │
-│                                                     │
-├─────────────────────────────────────────────────────┤
-│  6 tasks · 2 done · 4 pending              🔇 quiet │  ← 底部（1 行）
-└─────────────────────────────────────────────────────┘
-```
+在多源模式下，Mutsumi 使用动态 source tabs 和第二层 scope filter。
 
-### 1.2 响应式行为
-
-Mutsumi 自适应终端窗口大小：
-
-| 终端宽度        | 行为                                                 |
-|-----------------|------------------------------------------------------|
-| ≥ 80 列         | 完整布局：标题 + 标签 + 优先级星标                      |
-| 60-79 列        | 省略标签，仅显示标题 + 优先级                           |
-| 40-59 列        | 极简模式：仅 checkbox + 标题                           |
-| < 40 列         | 显示 "Terminal too narrow" 警告                        |
-
-### 1.3 详情面板（可展开）
-
-选中任务后按 `Enter` 或点击，底部展开详情面板：
-
-```
-├─────────────────────────────────────────────────────┤
-│  ▶ 重构 Auth 模块                                    │
-│  ─────────────────────────────────────────────────   │
-│  Status:   pending                                   │
-│  Priority: high                                      │
-│  Scope:    day                                       │
-│  Tags:     dev, backend                              │
-│  Due:      2026-03-25                                │
-│  Created:  2026-03-21 08:00                          │
-│  ─────────────────────────────────────────────────   │
-│  Description:                                        │
-│  把 session-based auth 改成 JWT，需要同时改           │
-│  middleware 和路由层。                                │
-│  ─────────────────────────────────────────────────   │
-│  Subtasks: 1/2 done                                  │
-│    [x] 安装 PyJWT                                    │
-│    [ ] 写 middleware                                 │
-├─────────────────────────────────────────────────────┤
+```text
+┌──────────────────────────────────────────────────────────────┐
+│ [★ Main] [Personal] [saas-app] [docs-site]       mutsumi ♪  │
+├──────────────────────────────────────────────────────────────┤
+│ ★ Main │ [Today] [Week] [Month] [Inbox] [All]               │
+├──────────────────────────────────────────────────────────────┤
+│                                                              │
+│  ▼ HIGH ───────────────────────────────────────────────      │
+│  [ ] Refactor auth module                 dev,backend  ★★★   │
+│  [x] Fix cache bug                        bugfix       ★★★   │
+│                                                              │
+│  ▼ NORMAL ─────────────────────────────────────────────      │
+│  [ ] Write weekly report                  life         ★★    │
+│  [ ] Review PR #42                        dev          ★★    │
+│    └─ [ ] Check type safety                               │
+│    └─ [x] Run tests                                        │
+│                                                              │
+├──────────────────────────────────────────────────────────────┤
+│  6 tasks · 2 done · 4 pending                      🔇 quiet  │
+└──────────────────────────────────────────────────────────────┘
 ```
 
-## 2. 交互
+### 1.2 Main dashboard 视图
+
+当活动 source tab 为 `Main` 时，Mutsumi 显示的是聚合 dashboard，而不是可编辑任务列表。
+
+```text
+┌──────────────────────────────────────────────────────────────┐
+│ [★ Main] [Personal] [saas-app] [docs-site]       mutsumi ♪  │
+├──────────────────────────────────────────────────────────────┤
+│                    ★ Main Dashboard                          │
+│                                                              │
+│  ★ Personal    3 pending                                     │
+│  ████████░░░░░░░░░░ 40% (2/5)                                │
+│    • Buy coffee beans                                        │
+│    • Reply to advisor                                        │
+│                                                              │
+│  saas-app     5 pending                                      │
+│  ███░░░░░░░░░░░░░░ 15% (1/7)                                 │
+│    !!! • Fix token refresh                                   │
+│    • Add rate limiting                                       │
+└──────────────────────────────────────────────────────────────┘
+```
+
+### 1.3 响应式行为
+
+| 终端宽度 | 行为 |
+|---|---|
+| `>= 80` 列 | 完整行：标题 + tags + priority |
+| `60-79` 列 | 减少元数据 |
+| `40-59` 列 | 最小行布局 |
+| `< 40` 列 | 显示终端过窄警告 |
+
+### 1.4 详情面板
+
+选中任务后按 `Enter` 或点击标题，会打开详情面板。
+
+详情面板显示：
+
+- title
+- status
+- priority
+- scope
+- tags
+- due date
+- description
+- child progress
+- created / completed timestamps
+
+同时提供可点击操作：
+
+- `[Edit]`
+- `[+Sub]`
+- `[Delete]`
+- `[x]` 关闭
+
+---
+
+## 2. 交互模型
 
 ### 2.1 鼠标
 
-| 操作                      | 行为                                                 |
-|---------------------------|------------------------------------------------------|
-| 点击 `[ ]` / `[x]`       | 切换完成状态，反写 JSON                                |
-| 点击任务行                 | 选中任务（高亮）                                       |
-| 双击标题                   | 进入行内编辑模式                                       |
-| 点击 Tab                  | 切换视图（Today/Week/Month/Inbox）                     |
-| 点击 [+New]               | 弹出新任务输入框                                       |
-| 滚轮                      | 滚动任务列表                                          |
+| 操作 | 行为 |
+|---|---|
+| 点击 checkbox | 切换 done 状态 |
+| 点击任务行 | 选中行 |
+| 点击任务标题 | 打开详情面板 |
+| 点击 source tab | 切换数据源 |
+| 点击 scope chip | 更改 scope filter |
+| 点击 footer action | 打开任务表单、搜索或排序 |
+| 点击 dashboard card | 跳转到对应 source tab |
+| 点击详情面板中的 `[+Sub]` | 打开子任务表单 |
 
 ### 2.2 键盘预设
 
-#### vim（默认）
+Mutsumi 内置三个 preset：
 
-| 按键     | 操作                                  |
-|----------|---------------------------------------|
-| `j`      | 下移光标                              |
-| `k`      | 上移光标                              |
-| `g`      | 跳到列表顶部                          |
-| `G`      | 跳到列表底部                          |
-| `Space`  | 切换完成状态                          |
-| `Enter`  | 展开/收起详情面板                      |
-| `n`      | 新建任务（弹出输入框）                  |
-| `e`      | 编辑选中任务标题                       |
-| `dd`     | 删除选中任务（需确认）                  |
-| `Tab`    | 切换到下一个视图 Tab                   |
-| `S-Tab`  | 切换到上一个视图 Tab                   |
-| `1-4`    | 快速切换到第 N 个 Tab                  |
-| `/`      | 搜索任务                              |
-| `q`      | 退出 Mutsumi                          |
-| `?`      | 显示快捷键帮助                         |
+- `arrows` —— **默认**
+- `vim`
+- `emacs`
 
-#### emacs
+#### `arrows`（默认）
 
-| 按键       | 操作                                  |
-|------------|---------------------------------------|
-| `C-n`      | 下移光标                              |
-| `C-p`      | 上移光标                              |
-| `C-Space`  | 切换完成状态                          |
-| `C-o`      | 新建任务                              |
-| `C-e`      | 编辑任务                              |
-| `C-d`      | 删除任务                              |
-| `C-q`      | 退出                                  |
+| 键位 | 操作 |
+|---|---|
+| `Up` / `Down` | 移动选中 |
+| `Home` / `End` | 跳到顶部 / 底部 |
+| `Left` / `Right` | 折叠 / 展开分组 |
+| `Shift+Up` / `Shift+Down` | 上移 / 下移任务 |
+| `Space` | 切换 done |
+| `Enter` | 显示详情 |
+| `n` | 新建任务 |
+| `e` | 编辑任务 |
+| `i` | 行内编辑标题 |
+| `A` | 添加子任务 |
+| `Tab` / `Shift+Tab` | 下一个 / 上一个 source tab |
+| `1-9` | 跳转到编号 source tab |
+| `f` | 循环切换 scope filter |
+| `/` | 搜索 |
+| `s` | 排序 |
+| `?` | 显示帮助 |
+| `q` | 退出 |
 
-#### arrow
+#### `vim`
 
-| 按键       | 操作                                          |
-|------------|-----------------------------------------------|
-| `Down`     | 下移光标                                      |
-| `Up`       | 上移光标                                      |
-| `Enter`    | 切换完成状态 / 确认编辑                        |
-| `Delete`   | 删除任务                                      |
-| `Insert`   | 新建任务                                      |
+| 键位 | 操作 |
+|---|---|
+| `j` / `k` | 移动选中 |
+| `gg` / `G` | 顶部 / 底部 |
+| `h` / `l` | 折叠 / 展开分组 |
+| `J` / `K` | 下移 / 上移任务 |
+| `dd` | 带确认删除 |
+| `Space` | 切换 done |
+| `Enter` | 显示详情 |
+| `n` / `e` / `i` | 新建 / 编辑 / 行内编辑 |
+| `A` | 添加子任务 |
+| `Tab` / `Shift+Tab` | 下一个 / 上一个 source tab |
+| `f` | 循环切换 scope filter |
+| `/` | 搜索 |
+| `?` | 帮助 |
+| `q` | 退出 |
 
-### 2.3 自定义键位
+#### `emacs`
 
-用户可在 `~/.config/mutsumi/keys/custom.toml` 中定义：
+| 键位 | 操作 |
+|---|---|
+| `Ctrl+n` / `Ctrl+p` | 移动选中 |
+| `Ctrl+a` / `Ctrl+e` | 顶部 / 底部 |
+| `Ctrl+b` / `Ctrl+f` | 折叠 / 展开分组 |
+| `Ctrl+Shift+n` / `Ctrl+Shift+p` | 移动任务 |
+| `Space` | 切换 done |
+| `Enter` | 显示详情 |
+| `n` / `e` / `i` | 新建 / 编辑 / 行内编辑 |
+| `A` | 添加子任务 |
+| `Tab` / `Shift+Tab` | 下一个 / 上一个 source tab |
+| `f` | 循环切换 scope filter |
+| `/` | 搜索 |
+| `?` | 帮助 |
+| `Ctrl+q` | 退出 |
 
-```toml
-[keys]
-move_down = "j"
-move_up = "k"
-toggle_done = "space"
-new_task = "n"
-edit_task = "e"
-delete_task = "d,d"    # 两次按键
-quit = "q"
-search = "/"
-help = "?"
-tab_next = "tab"
-tab_prev = "shift+tab"
-tab_1 = "1"
-tab_2 = "2"
-tab_3 = "3"
-tab_4 = "4"
-expand = "enter"
-top = "g"
-bottom = "shift+g"
+### 2.3 三输入等价
+
+Mutsumi 遵循产品规则：关键操作既要能通过键盘和鼠标完成，相关核心任务变更在适用时也应提供 CLI 对应方式。
+
+示例：
+
+| 能力 | 键盘 | 鼠标 | CLI |
+|---|---|---|---|
+| 创建任务 | `n` | footer action | `mutsumi add` |
+| 编辑任务 | `e` | `[Edit]` | `mutsumi edit` |
+| 删除任务 | `dd` 或删除流程 | `[Delete]` | `mutsumi rm` |
+| 切换 done | `Space` | checkbox | `mutsumi done` |
+| 校验文件 | — | — | `mutsumi validate` |
+
+---
+
+## 3. 视图与过滤器
+
+### 3.1 Source tabs
+
+Source tabs 表示数据源，而不是时间范围。
+示例：
+
+- `Main`
+- `Personal`
+- 已注册项目，如 `saas-app`
+
+### 3.2 Scope filter
+
+在可编辑 tab 内，Mutsumi 显示第二层过滤器：
+
+- `Today`
+- `Week`
+- `Month`
+- `Inbox`
+- `All`
+
+`Main` dashboard 会隐藏 scope filter。
+
+### 3.3 Scope 语义
+
+Scope 过滤使用数据契约中的 effective scope：
+
+```text
+explicit scope > due_date auto-derivation > inbox
 ```
 
-## 3. CRUD 操作
+这意味着即使没有显式设置 scope，`due_date` 也会影响列表归类位置。
 
-### 3.1 创建任务
+---
 
-触发方式：`n` 键 或 点击 [+New] 按钮
+## 4. CRUD 行为
 
-```
-┌─────────── New Task ───────────┐
-│ Title: [                     ] │
-│ Scope: (Day) Week Month Inbox  │
-│ Priority: High (Normal) Low    │
-│ Tags: [                     ]  │
-│                                │
-│        [Create]  [Cancel]      │
-└────────────────────────────────┘
-```
+### 4.1 创建任务
 
-- Title 是唯一必填项
-- Scope/Priority 默认为当前 Tab 和 Normal
-- Tags 支持逗号分隔输入
-- 创建后自动生成 UUIDv7 ID 和 created_at
+触发方式：
 
-### 3.2 编辑任务
+- 键盘：`n`
+- 鼠标：footer 新建任务操作
 
-触发方式：`e` 键 或 双击标题
+行为：
 
-- 行内编辑：标题直接在列表行内变为可编辑文本框
-- 修改后按 `Enter` 确认，`Escape` 取消
-- 修改后立即反写 JSON
+- 打开任务表单
+- `title` 为必填
+- 在适用时，scope 默认取当前过滤上下文
+- 提交后以原子方式写文件
 
-### 3.3 删除任务
+### 4.2 编辑任务
 
-触发方式：`dd` 键 或 右键菜单
+触发方式：
 
-- 弹出确认对话框（可在 config 中关闭确认）
-- 删除后从 JSON 中移除
-- 发出 `task_deleted` 事件
+- 键盘：`e`
+- 键盘行内：`i`
+- 鼠标：详情面板中的 `[Edit]`
 
-### 3.4 切换状态
+行为：
 
-触发方式：`Space` 键 或 鼠标点击 checkbox
+- 在内存中更新任务
+- 原子写回
+- 保留未知字段
 
-- `pending` → `done`：自动填充 `completed_at`
+### 4.3 删除任务
+
+触发方式：
+
+- 键盘删除流程
+- 鼠标 `[Delete]`
+
+行为：
+
+- 需要确认
+- 移除选中任务
+- 原子写回
+
+### 4.4 切换状态
+
+触发方式：
+
+- 键盘 `Space`
+- 鼠标点击 checkbox
+
+行为：
+
+- `pending` → `done`：填写 `completed_at`
 - `done` → `pending`：清除 `completed_at`
-- 即时反写 JSON，无确认步骤（追求"脆爽"）
+- 对循环任务的处理可能会根据 recurrence metadata 更新 due date
 
-## 4. 热重载
+---
 
-### 4.1 机制
+## 5. 热重载
 
-```
-watchdog (inotify/FSEvents/kqueue)
-         │
-         ▼
-  文件变化事件
-         │
-         ▼
-  debounce (100ms)  ← 防止高频写入导致抖动
-         │
-         ▼
-  re-read tasks.json
-         │
-         ▼
-  validate schema
-         │
-    ┌────┴────┐
-    ▼         ▼
-  valid    invalid
-    │         │
-    ▼         ▼
-  re-render  show error
-  TUI        banner
+### 5.1 文件监听行为
+
+Mutsumi 会独立监听每一个已注册 source file。
+
+```text
+external save
+   ↓
+watchdog event
+   ↓
+debounce
+   ↓
+re-read active source(s)
+   ↓
+re-render TUI
 ```
 
-### 4.2 Debounce
+### 5.2 多源行为
 
-- 文件变化后等待 100ms 再读取（等待写入完成）
-- 100ms 内的多次变化合并为一次重读
-- debounce 值可在 config 中调整
+- 单源模式下，只监听一个文件
+- 多源模式下，会监听所有已注册 source file
+- dashboard 统计会聚合所有已加载 source 的任务
 
-## 5. 主题系统
+### 5.3 自写入抑制
 
-### 5.1 主题文件格式
+Mutsumi 会在自己的原子写入附近抑制立即触发的自刷新，以避免冗余刷新。
+
+---
+
+## 6. 错误与空状态
+
+### 6.1 非法 JSON
+
+如果当前活动任务文件变成非法 JSON：
+
+- Mutsumi 会显示错误横幅
+- 应用不会崩溃
+- 用户可以修复文件后继续使用
+
+示例横幅：
+
+```text
+⚠ JSON is invalid — showing last valid state
+```
+
+### 6.2 文件缺失
+
+如果活动文件尚不存在：
+
+- UI 会显示可用的空状态
+- 首次写入任务时可创建文件
+- 新项目应创建 `mutsumi.json`
+
+### 6.3 空状态
+
+当当前视图中没有任务时，Mutsumi 会显示友好的空状态，并提供 `+ New Task` 操作。
+
+文案应泛指当前任务流，不应假设只有 `tasks.json`。
+
+---
+
+## 7. 主题与配置
+
+### 7.1 内置主题
+
+- `monochrome-zen` —— 默认
+- `solarized`
+- `nord`
+- `dracula`
+
+### 7.2 配置主目录
+
+首选的配置与个人数据主目录：
+
+```text
+~/.mutsumi/
+```
+
+旧配置位置仍可读取以保持兼容：
+
+```text
+~/.config/mutsumi/
+```
+
+### 7.3 键位配置
+
+默认 preset 为：
 
 ```toml
-# ~/.config/mutsumi/themes/my-theme.toml
-
-[meta]
-name = "My Custom Theme"
-author = "wayne"
-
-[colors]
-background = "#1e1e2e"
-foreground = "#cdd6f4"
-accent = "#94e2d5"
-muted = "#6c7086"
-error = "#f38ba8"
-warning = "#fab387"
-success = "#a6e3a1"
-
-[priority_colors]
-high = "#f38ba8"
-normal = "#cdd6f4"
-low = "#6c7086"
-
-[tag_colors]
-dev = "#89b4fa"
-bugfix = "#f38ba8"
-life = "#a6e3a1"
-docs = "#fab387"
-# 未匹配的 tag 使用 accent 色
+keybindings = "arrows"
 ```
 
-### 5.2 内置主题
+用户可以切换到 `vim` 或 `emacs`，并在配置中定义键位覆盖。
 
-| 主题                | 风格                                                |
-|----------------------|----------------------------------------------------|
-| `monochrome-zen`     | 极简黑白灰，accent 淡青（默认）                       |
-| `nord`               | 冷色调，克制                                        |
-| `dracula`            | 高对比，紫色调                                       |
-| `solarized`          | 暖色深底，青绿 accent                                |
+---
 
-## 6. 搜索
+## 8. 日历准备度
 
-按 `/` 进入搜索模式：
+本规范尚未定义日历 UI，但当前 TUI 语义有意保持与未来时间视图兼容。
 
-```
-┌─────────────────────────────────────────┐
-│  🔍 Search: auth mod█                   │
-├─────────────────────────────────────────┤
-│  [ ] 重构 Auth 模块          dev   ★★★  │  ← 匹配结果高亮
-│  [x] 修复 Auth token 过期    bugfix     │
-└─────────────────────────────────────────┘
-```
+现有基础包括：
 
-- 实时过滤（边输入边筛选）
-- 搜索范围：title + tags + description
-- `Escape` 退出搜索，恢复完整列表
+- 任务模型中的 `due_date`
+- 基于日期的 effective scope 推导
+- 多源聚合
+- dashboard/source 分离
+- detail panel 下钻
 
-## 7. 错误状态
+未来的 calendar view 应建立在这些语义上，而不是发明第二套任务模型。
 
-### 7.1 错误横幅
+---
 
-当 `tasks.json` 不可读或格式错误时：
+## 9. 当前 Beta 说明
 
-```
-┌─────────────────────────────────────────────────────┐
-│  ⚠ tasks.json has errors · showing last valid state  │
-│  Run `mutsumi validate` for details                  │
-├─────────────────────────────────────────────────────┤
-│  (上一次有效的任务列表)                               │
-│  ...                                                 │
-└─────────────────────────────────────────────────────┘
-```
+对于当前 beta 线：
 
-### 7.2 警告标记
-
-单个任务字段异常时，该任务行显示警告标记但仍可交互。
-
-### 7.3 空状态
-
-当 `tasks.json` 为空或没有当前 Tab 的任务时：
-
-```
-┌─────────────────────────────────────────┐
-│                                         │
-│           Nothing here yet.             │
-│       Press [n] to create a task        │
-│    or let your Agent write tasks.json   │
-│                                         │
-└─────────────────────────────────────────┘
-```
+- 规范任务文件是 `mutsumi.json`
+- 旧回退文件是 `tasks.json`
+- 默认 preset 是 `arrows`
+- multi-source dashboard 已是产品 surface 的一部分
+- calendar 是计划中的能力，还不是已 shipped 的视图

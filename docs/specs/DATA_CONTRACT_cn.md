@@ -1,189 +1,219 @@
 # Mutsumi 数据契约规范
 
-| 版本   | 0.1.0              |
-|--------|---------------------|
-| 状态   | 草案                |
-| 日期   | 2026-03-21          |
+| 版本 | 1.0 |
+|---|---|
+| 状态 | 草案 |
+| 日期 | 2026-03-23 |
 
 > **[English Version](./DATA_CONTRACT.md)** | **[日本語版](./DATA_CONTRACT_ja.md)**
 
 ---
 
-## 1. 文件结构
+## 1. 规范文件命名
 
-一个 Mutsumi 数据源是一个合法的 JSON 文件，包含一个任务数组：
+Mutsumi 以符合下述 schema 的 JSON 对象存储任务。
+
+### 1.1 首选文件名
+
+- **规范文件名：** `mutsumi.json`
+- **向后兼容回退：** `tasks.json`
+
+对于新项目和新的示例，始终使用 **`mutsumi.json`**。
+`tasks.json` 仅继续保留给旧环境兼容使用。
+
+### 1.2 文件解析顺序
+
+当未显式传入路径时，Mutsumi 按以下顺序解析当前活动任务文件：
+
+1. CLI `--path`
+2. `./mutsumi.json`
+3. `./tasks.json`
+4. 新项目默认目标：`./mutsumi.json`
+
+---
+
+## 2. 根结构
+
+一个 Mutsumi 数据源是一个包含 `tasks` 数组的合法 JSON 对象。
 
 ```json
 {
   "$schema": "https://mutsumi.dev/schema/v1.json",
   "version": 1,
   "tasks": [
-    { ... },
-    { ... }
+    { "id": "01JQ...", "title": "Refactor auth", "status": "pending" }
   ]
 }
 ```
 
-### 1.1 根字段
+### 2.1 根字段
 
-| 字段        | 类型     | 必填 | 说明                                      |
-|-------------|----------|------|------------------------------------------|
-| `$schema`   | string   | 否   | JSON Schema URL（可选，供编辑器提示）       |
-| `version`   | integer  | 是   | 数据格式版本号，当前为 `1`                  |
-| `tasks`     | array    | 是   | 任务对象数组                               |
+| 字段 | 类型 | 必填 | 说明 |
+|---|---|---:|---|
+| `$schema` | string | 否 | 可选的 schema URL，用于编辑器提示 |
+| `version` | integer | 是 | 数据格式版本，当前为 `1` |
+| `tasks` | array | 是 | 任务对象数组 |
 
-## 2. 任务对象
+### 2.2 未知根字段
 
-### 2.1 基础字段（官方定义）
+Mutsumi 在读取和写回任务文件时，会保留未知的根级字段。
 
-| 字段           | 类型       | 必填   | 默认值      | 说明                                       |
-|----------------|------------|--------|-------------|-------------------------------------------|
-| `id`           | string     | **是** | —           | UUIDv7 格式，如 `"01JQ8X7K3M..."`          |
-| `title`        | string     | **是** | —           | 任务标题，建议 ≤ 120 字符                   |
-| `status`       | string     | **是** | `"pending"` | 枚举: `"pending"`, `"done"`                |
-| `scope`        | string     | 否     | `"inbox"`   | 枚举: `"day"`, `"week"`, `"month"`, `"inbox"` |
-| `priority`     | string     | 否     | `"normal"`  | 枚举: `"high"`, `"normal"`, `"low"`        |
-| `tags`         | string[]   | 否     | `[]`        | 自定义标签数组                              |
-| `children`     | Task[]     | 否     | `[]`        | 子任务数组（递归嵌套）                       |
-| `created_at`   | string     | 否     | 自动        | ISO 8601 时间戳                            |
-| `due_date`     | string     | 否     | —           | ISO 8601 日期（如 `"2026-03-25"`）          |
-| `completed_at` | string     | 否     | —           | 完成时间，状态变为 done 时自动填充           |
-| `description`  | string     | 否     | —           | 任务详细描述（Markdown 格式）               |
+---
 
-### 2.2 自定义字段（用户自定义）
+## 3. 任务对象
 
-Mutsumi **保证**：
-- 任何不在上表中的字段会被**保留**，不会被删除或修改
-- TUI 渲染时忽略自定义字段
-- Agent 可以自由添加自定义字段用于自己的逻辑
+### 3.1 官方字段
 
-示例 — 用户添加自定义字段：
+| 字段 | 类型 | 必填 | 默认值 | 说明 |
+|---|---|---:|---|---|
+| `id` | string | 是 | — | 唯一标识符，推荐 UUIDv7 |
+| `title` | string | 是 | — | 任务标题 |
+| `status` | string | 是 | `"pending"` | `"pending"` 或 `"done"` |
+| `scope` | string | 否 | `"inbox"` | `"day"`、`"week"`、`"month"`、`"inbox"` |
+| `priority` | string | 否 | `"normal"` | `"high"`、`"normal"`、`"low"` |
+| `tags` | string[] | 否 | `[]` | 自由标签 |
+| `children` | Task[] | 否 | `[]` | 嵌套子任务 |
+| `created_at` | string | 否 | auto | ISO 8601 时间戳 |
+| `due_date` | string | 否 | — | ISO 8601 日期，例如 `"2026-03-25"` |
+| `completed_at` | string | 否 | — | 完成时间戳 |
+| `description` | string | 否 | — | 更长的说明或备注 |
+
+### 3.2 未知任务字段
+
+Mutsumi 保证：
+
+- **保留**未知任务字段
+- TUI 渲染时忽略它不理解的字段
+- agents 可以为自己的工作流添加额外元数据
+
+示例：
 
 ```json
 {
   "id": "01JQ8X7K3M0000000000000000",
-  "title": "训练模型 v2",
+  "title": "Train model v2",
   "status": "pending",
   "scope": "week",
   "priority": "high",
   "tags": ["ml"],
   "estimated_minutes": 120,
   "energy_level": "high-focus",
-  "pomodoro_count": 0,
-  "context": "需要 GPU 机器"
+  "context": "Needs GPU"
 }
 ```
 
-以上 `estimated_minutes`、`energy_level`、`pomodoro_count`、`context` 均为用户自定义字段，Mutsumi 不干预。
-
-## 3. ID 规范
-
-### 3.1 UUIDv7
-
-默认使用 UUIDv7（RFC 9562）：
-
-```
-01JQ8X7K3M0000000000000000
-├──────────┤├──────────────┤
-  时间部分       随机部分
-  (ms 精度)
-```
-
-特性：
-- 按创建时间自然排序
-- 全局唯一，无需中央分配
-- Agent 和 TUI 均可独立生成
-- 紧凑的 26 字符 Crockford Base32 编码
-
-### 3.2 备选格式（可配置）
-
-用户可在 `config.toml` 中配置不同的 ID 格式：
-
-| 格式            | 示例                                 | 适用场景       |
-|-----------------|--------------------------------------|---------------|
-| `uuidv7`        | `01JQ8X7K3M0000000000000000`         | 默认，推荐     |
-| `ulid`          | `01ARZ3NDEKTSV4RRFFQ69G5FAV`        | ULID 爱好者    |
-| `auto-increment`| `1`, `2`, `3`                        | 极简主义者     |
+---
 
 ## 4. Scope 解析
 
-### 4.1 优先级顺序
+`scope` 仍然是列表视图和过滤器使用的计划分桶。
 
+### 4.1 解析顺序
+
+```text
+explicit scope > due_date auto-derivation > fallback inbox
 ```
-手动 scope > due_date 自动推导 > fallback "inbox"
-```
 
-### 4.2 自动推导规则
+### 4.2 从 `due_date` 自动推导
 
-当任务有 `due_date` 且没有手动 `scope` 时：
+当任务存在 `due_date`，但没有有意义的显式 scope 时，Mutsumi 会根据日期推导 scope。
 
-| 条件                             | 推导出的 Scope    |
-|----------------------------------|-------------------|
-| `due_date` == 今天               | `day`             |
-| `due_date` 在本周内              | `week`            |
-| `due_date` 在本月内              | `month`           |
-| `due_date` 已过期                | `day`（升级）      |
-| `due_date` 超出本月              | `month`           |
+| 条件 | 推导出的 scope |
+|---|---|
+| `due_date` 是今天 | `day` |
+| `due_date` 早于今天 | `day` |
+| `due_date` 落在当前周内 | `week` |
+| `due_date` 落在当前月后段 | `month` |
+| `due_date` 超出当前月 | `month` |
+| `due_date` 字符串无效 | `inbox` |
 
-### 4.3 Scope Tab 语义
+### 4.3 过滤语义
 
-| Tab     | 显示内容                                             |
-|---------|------------------------------------------------------|
-| Today   | `scope == "day"` 或（自动推导为今天）                  |
-| Week    | `scope == "week"` 或（自动推导为本周）                 |
-| Month   | `scope == "month"` 或（自动推导为本月）                |
-| Inbox   | `scope == "inbox"` 或（无 scope + 无 due_date）       |
+| 过滤器 | 显示内容 |
+|---|---|
+| Today | effective scope 为 `day` 的任务 |
+| Week | effective scope 为 `week` 的任务 |
+| Month | effective scope 为 `month` 的任务 |
+| Inbox | effective scope 为 `inbox` 的任务 |
+| All | 所有任务，不论 scope |
+
+---
 
 ## 5. 嵌套
 
 ### 5.1 结构
 
-子任务通过 `children` 数组递归嵌套：
+子任务通过 `children` 字段递归嵌套。
 
 ```json
 {
   "id": "01JQ8X7K3M...",
-  "title": "重构用户系统",
+  "title": "Refactor user system",
   "status": "pending",
   "children": [
     {
       "id": "01JQ8X7K4N...",
-      "title": "设计新的数据库 schema",
+      "title": "Design schema",
       "status": "done",
       "children": []
     },
     {
       "id": "01JQ8X7K5P...",
-      "title": "实现 migration 脚本",
+      "title": "Write migration",
       "status": "pending",
-      "children": [
-        {
-          "id": "01JQ8X7K6Q...",
-          "title": "备份现有数据",
-          "status": "pending",
-          "children": []
-        }
-      ]
+      "children": []
     }
   ]
 }
 ```
 
-### 5.2 渲染规则
+### 5.2 父子规则
 
-| 嵌套深度  | 默认行为                                     | 可配置 |
-|-----------|---------------------------------------------|--------|
-| 1-3 层    | 完整渲染，缩进展示                            | —      |
-| 4+ 层     | 折叠为 "3 subtasks..."，点击展开               | 是     |
-| 无限层    | 数据层无限制，渲染层有配置上限                  | 是     |
+- 所有子任务完成 **不会** 自动完成父任务
+- TUI 可以显示如 `2/5 done` 的进度
+- Agents 可以实现自己的更高层自动化，但基础契约保持显式
 
-### 5.3 父子任务状态规则
+---
 
-- 子任务全部 `done` 时，父任务**不**自动标记为 done（用户显式控制）
-- TUI 可显示 `2/5 done` 的进度指示器
-- Agent 可以实现自己的自动完成逻辑
+## 6. 校验规则
 
-## 6. 完整示例
+### 6.1 必填字段校验
+
+任务缺少以下任一字段时即为无效：
+
+- `id`
+- `title`
+- `status`
+
+### 6.2 枚举校验
+
+支持的取值：
+
+- `status`：`pending`、`done`
+- `priority`：`high`、`normal`、`low`
+- `scope`：`day`、`week`、`month`、`inbox`
+
+### 6.3 运行时行为
+
+- 非法 JSON 会阻止文件加载
+- 在弹性加载模式下，单个非法任务可能被跳过
+- Mutsumi 会通过 UI 和日志输出报告校验问题，而不是直接崩溃
+
+---
+
+## 7. 写入语义
+
+修改任务文件的 agents 和工具应遵循以下规则：
+
+1. 读取整个文件
+2. 在内存中修改 `tasks` 数组
+3. 保留未知根字段和任务字段
+4. 以原子方式写回**整个文件**
+5. 新写入优先使用 `mutsumi.json`
+
+---
+
+## 8. 完整示例
 
 ```json
 {
@@ -192,18 +222,18 @@ Mutsumi **保证**：
   "tasks": [
     {
       "id": "01JQ8X7K3M0000000000000001",
-      "title": "重构 Auth 模块",
+      "title": "Refactor auth module",
       "status": "pending",
       "scope": "day",
       "priority": "high",
       "tags": ["dev", "backend"],
       "created_at": "2026-03-21T08:00:00Z",
       "due_date": "2026-03-21",
-      "description": "把 session-based auth 改成 JWT",
+      "description": "Replace session-based auth with JWT",
       "children": [
         {
           "id": "01JQ8X7K3M0000000000000002",
-          "title": "安装 PyJWT",
+          "title": "Install PyJWT",
           "status": "done",
           "priority": "normal",
           "tags": [],
@@ -212,7 +242,7 @@ Mutsumi **保证**：
         },
         {
           "id": "01JQ8X7K3M0000000000000003",
-          "title": "写 middleware",
+          "title": "Write middleware",
           "status": "pending",
           "priority": "normal",
           "tags": [],
@@ -222,7 +252,7 @@ Mutsumi **保证**：
     },
     {
       "id": "01JQ8X7K3M0000000000000004",
-      "title": "买咖啡豆",
+      "title": "Buy coffee beans",
       "status": "pending",
       "scope": "inbox",
       "priority": "low",
@@ -233,29 +263,10 @@ Mutsumi **保证**：
 }
 ```
 
-## 7. Schema 校验规则
+---
 
-### 7.1 严格程度级别
+## 9. 兼容性说明
 
-| 级别     | 行为                                      | 适用场景       |
-|----------|------------------------------------------|---------------|
-| `strict` | 拒绝任何非法字段/值                        | CI/CD 校验     |
-| `normal` | 跳过非法任务，渲染有效任务（默认）           | TUI 日常使用   |
-| `loose`  | 尽力渲染，未知字段静默忽略                   | 快速原型       |
-
-### 7.2 必填字段校验
-
-- `id` — 非空字符串
-- `title` — 非空字符串
-- `status` — 必须是 `"pending"` 或 `"done"`
-
-缺少以上任一字段的任务视为 **invalid**，按 strictness level 处理。
-
-### 7.3 错误报告
-
-校验错误写入 stderr 并记录到 `~/.local/share/mutsumi/error.log`：
-
-```
-[2026-03-21T10:00:00Z] WARN: Task at index 3 missing required field "id", skipped
-[2026-03-21T10:00:00Z] WARN: Task "01JQ..." has unknown status "wip", rendered with warning badge
-```
+- `mutsumi.json` 与旧的 `tasks.json` 共享**同一份 schema**
+- 文件名迁移 **不意味着** schema 迁移
+- 未来的视图，包括日历类时间视图，都应复用 `due_date` 和同一基础任务对象，而不是引入第二套任务模型

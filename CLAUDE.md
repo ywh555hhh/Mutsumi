@@ -1,5 +1,7 @@
 # Mutsumi Development Rules (CLAUDE.md)
 
+> **[中文版](./CLAUDE_cn.md)** | **[日本語版](./CLAUDE_ja.md)**
+
 ## Project Overview
 Mutsumi is a minimal TUI task board that watches `mutsumi.json` (with `tasks.json` as a backward-compatible fallback) and provides a zero-friction visual anchor for multi-threaded developers. Built with Python + Textual.
 

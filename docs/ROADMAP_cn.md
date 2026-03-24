@@ -2,194 +2,250 @@
 
 > **[English Version](./ROADMAP.md)** | **[日本語版](./ROADMAP_ja.md)**
 
-| 状态    | 动态文档                |
-|---------|------------------------|
-| 日期    | 2026-03-22             |
+| 状态 | 动态文档 |
+|---|---|
+| 日期 | 2026-03-23 |
+| 当前 Beta | `1.0.0b1` |
+
+---
+
+## 产品状态
+
+Mutsumi 当前处于 **`1.0.0b1` beta** 阶段。
+
+这个 beta 中已经真实存在的内容：
+
+- 规范任务文件：`mutsumi.json`
+- 旧回退文件：`tasks.json`
+- 默认键位预设：`arrows`
+- multi-source hub：Main + Personal + project tabs
+- 首次运行 onboarding
+- skills-first agent setup
+
+**尚未** shipped 的内容：
+
+- 内置 calendar UI
+- plugin system
+- web companion
+
+Calendar 现在通过 **RFC-009** 作为计划功能进行追踪。
 
 ---
 
 ## 阶段概览
 
-```
-Phase 0          Phase 1          Phase 2          Phase 3          Phase 3.5
-Foundations      Skeleton         Reactivity       CLI & Polish     Friend Beta
-────────────     ────────────     ────────────     ────────────     ────────────
-docs & specs     static TUI       hot-reload       CLI CRUD         AGENT.md
-project setup    tab switching    file watcher     i18n             setup command
-data model       task list        click → JSON     themes           tmux scripts
-                 detail panel     JSON → re-draw   config system    beta packaging
-
-Phase 5          Phase 4
-Multi-Source     Launch
-────────────     ────────────
-file rename      README
-multi-source     GIF demo
-project CLI      Product Hunt
-tab redesign     community
-dashboard
+```text
+Phase 0   Foundations
+Phase 1   Static TUI
+Phase 2   Reactivity
+Phase 3   CLI & Polish
+Phase 3.5 Friend Beta
+Phase 5   Multi-Source Hub
+Phase 8   Out-of-Box Onboarding
+Phase 9   Calendar View (planned)
+Phase 10  Launch / GA polish
 ```
 
 ---
 
-## Phase 0：基础设施 ✅
+## Phase 0：基础 ✅
 
-**目标**：完成所有设计文档，建立项目骨架，零代码阶段。
+**目标：** 建立产品模型、规范文档和初始项目骨架。
 
-- [x] 产品白皮书
+- [x] 愿景与架构文档
 - [x] RFC-001：核心架构
-- [x] 数据契约规范 (`DATA_CONTRACT.md`)
-- [x] Agent 集成协议 (`AGENT_PROTOCOL.md`)
-- [x] TUI 规范 (`TUI_SPEC.md`)
-- [x] 品牌标识 (`BRAND.md`)
-- [x] 路线图（本文档）
-- [x] `uv init` 项目骨架
-- [x] `pyproject.toml` 依赖声明
-- [x] 示例 `tasks.json`（fixture）
-- [x] `CLAUDE.md` 项目级开发规范
-- [x] CI：GitHub Actions（lint + 类型检查）
+- [x] Data Contract 规范
+- [x] Agent Integration Protocol
+- [x] TUI 规范
+- [x] 品牌识别
+- [x] 路线图
+- [x] `uv` 项目初始化
+- [x] 示例 fixture task file
+- [x] 项目开发规则（`CLAUDE.md`）
+- [x] CI 基线
 
-**退出标准**：`uv run mutsumi` 能启动一个空白 Textual 窗口并正常退出。
-
----
-
-## Phase 1：骨架 ✅
-
-**目标**：画出静态 TUI，能读取 `tasks.json` 并渲染，但不响应外部变化。
-
-- [x] Textual App 基础框架 (`app.py`)
-- [x] Header 组件：Tab 切换（Today / Week / Month / Inbox）
-- [x] TaskList 组件：按优先级分组渲染
-- [x] TaskRow 组件：checkbox + 标题 + 标签 + 优先级星标
-- [x] Footer 组件：任务统计
-- [x] 数据层：Task schema 的 pydantic 模型
-- [x] 数据层：读取并解析 `tasks.json`
-- [x] 基础键盘导航：`j/k` 上/下，`q` 退出
-- [x] 子任务缩进展示（最多 3 层）
-- [x] 空白提示页
-
-**退出标准**：手动创建一个 `tasks.json`，`uv run mutsumi` 能正确渲染所有任务。
+**退出标准：** `uv run mutsumi` 能干净地启动一个空白 Textual 窗口。
 
 ---
 
-## Phase 2：注入灵魂 ✅
+## Phase 1：Skeleton ✅
 
-**目标**：实现双向数据流 — 外部修改 JSON 自动重绘 + TUI 操作反写 JSON。
+**目标：** 从本地 JSON 渲染一个静态任务面板。
 
-- [x] watchdog 集成：监听 `tasks.json` 文件变化
-- [x] 防抖机制（100ms）
-- [x] 热重载：JSON 变化 → 无闪烁 TUI 重绘
-- [x] 鼠标点击 checkbox → 切换状态 → 反写 JSON
-- [x] 原子写入（临时文件 + `os.rename`）
-- [x] Schema 校验：非法 JSON → 错误提示横幅
-- [x] 错误状态：文件缺失/格式错误时优雅降级
-- [x] 详情面板：`Enter` 展开任务详情
-- [x] 端到端场景：Agent 在另一个终端写 JSON → TUI 自动刷新
+- [x] Textual app shell
+- [x] task list 渲染
+- [x] priority grouping
+- [x] task row UI
+- [x] footer statistics
+- [x] task schema models
+- [x] file parsing
+- [x] 基础键盘导航
+- [x] 嵌套子任务渲染
+- [x] 空状态
 
-**退出标准**：录制一个 10 秒 GIF：左边 Mutsumi 运行，右边手动修改 JSON，左边瞬间刷新。
-
----
-
-## Phase 3：打磨 ✅
-
-**目标**：完善 CLI 子命令、CRUD 交互、配置系统。
-
-- [x] TUI CRUD：`n` 新建 / `e` 编辑 / `dd` 删除
-- [x] CLI：`mutsumi add` / `list` / `done` / `rm` / `edit`
-- [x] CLI：`mutsumi init` — 生成模板 `tasks.json`
-- [x] CLI：`mutsumi validate` — 校验文件
-- [x] CLI：`mutsumi schema` — 输出 JSON Schema
-- [x] 配置系统：`~/.config/mutsumi/config.toml`
-- [x] 主题系统：4 个内置主题 + 自定义主题加载
-- [x] 键位预设方案：vim / emacs / 方向键
-- [x] 国际化：`en` + `zh` + `ja` 三语支持
-- [x] 搜索：`/` 触发实时搜索过滤
-- [x] 事件日志：TUI 操作 → 追加到 `events.jsonl`
-- [x] 多项目：`--watch` 多路径聚合
-- [x] `mutsumi --version` / `--help`
-
-**退出标准**：`uv tool install mutsumi` 后，新用户能在 2 分钟内跑通完整流程。
+**退出标准：** 本地任务文件能在 TUI 中正确渲染。
 
 ---
 
-## Phase 3.5：朋友内测 ✅
+## Phase 2：Reactivity ✅
 
-**目标**：准备小规模朋友内测 — 任何 Agent 都能 2 分钟内学会操控 Mutsumi。
+**目标：** 让外部文件变化和本地交互都能正确更新面板。
 
-- [x] `AGENT.md` — Agent 一页速查表（schema、CLI、JSON 协议）
-- [x] `examples/` — 示例 `config.toml` 和 `tasks.json`
-- [x] `mutsumi setup --agent` — 注入集成说明到 Agent 配置文件
-- [x] `scripts/tmux-dev.sh` — 一条命令 tmux 分屏开发
-- [x] `scripts/demo.sh` — 演示脚本展示实时刷新
-- [x] 版本升级到 `0.4.0b1`
-- [x] README：Terminal Integration 章节（tmux + iTerm2）
-- [x] `pyproject.toml`：Beta classifier
+- [x] watchdog 文件监听
+- [x] debounce
+- [x] hot reload
+- [x] checkbox click → JSON write-back
+- [x] atomic file writes
+- [x] invalid JSON → error banner
+- [x] graceful degradation
+- [x] detail panel
+- [x] 端到端 agent 写入 → TUI 刷新流程
 
-**退出标准**：朋友 `uv tool install git+...` 后，运行 `mutsumi setup --agent claude-code`，2 分钟内开始使用。
-
----
-
-## Phase 5：多源指挥中心 ✅（当前）
-
-**目标**：将 Mutsumi 从单文件任务查看器升级为个人指挥中心 — 全局个人待办 + 多项目 Agent 仪表盘 + 聚合 Main tab。
-
-- [x] **5a** — 文件重命名：`tasks.json` → `mutsumi.json`，保留向后兼容 fallback
-- [x] **5f** — 配置迁移：`~/.config/mutsumi/` → `~/.mutsumi/` 统一目录
-- [x] **5b** — 多源数据层：`SourceRegistry` 管理 N 个数据源
-- [x] **5c** — 项目注册 CLI：`mutsumi project add/remove/list`
-- [x] **5d** — Tab 重设计：动态 source tab + scope 子过滤器
-- [x] **5e** — Main 仪表盘：跨所有源的聚合进度视图
-
-**退出标准**：`uv run mutsumi` 注册多个项目后，Main tab 显示仪表盘，各源 tab 支持 scope 过滤，全部 239 个测试通过。
+**退出标准：** 当任务文件变化时，面板可以实时刷新。
 
 ---
 
-## Phase 4：包装上市（下一步）
+## Phase 3：CLI & 打磨 ✅
 
-**目标**：打磨发布物料，冲刺 Product Hunt。
+**目标：** 提供可用的本地产品闭环，而不只是 demo UI。
 
-- [ ] README.md：极具煽动性的产品介绍
-- [ ] README「Pro Workflow」章节（Typeless 语音工作流）
-- [ ] README「Layout Gallery」章节（布局截图展示）
-- [ ] 录制 Hero GIF：Claude Code + Mutsumi 分屏协作
-- [ ] 录制 Bonus GIF：Typeless 语音 → Agent → Mutsumi 刷新
-- [ ] Product Hunt 页面文案
-- [ ] 发布到 PyPI，包名 `mutsumi-tui`（`mutsumi` 已被占用）；CLI 命令仍为 `mutsumi`（通过 `[project.scripts]` 配置）；安装：`uv tool install mutsumi-tui` / `pip install mutsumi-tui`
-- [ ] GitHub Release v0.5.0
-- [ ] Hacker News / Reddit /r/commandline 发帖
-- [ ] V2EX 发帖
-- [ ] 社区模板征集：用户展示自己的 tmux/zellij 布局
+- [x] TUI CRUD
+- [x] CLI CRUD：`add`、`list`、`done`、`rm`、`edit`
+- [x] `mutsumi init`
+- [x] `mutsumi validate`
+- [x] `mutsumi schema`
+- [x] theme system
+- [x] i18n（`en`、`zh`、`ja`）
+- [x] config system
+- [x] search
+- [x] local event logging
+- [x] version / help 输出
 
-**退出标准**：Product Hunt 页面上线，GitHub 获得首批 star。
+**退出标准：** 新用户可以快速安装并完成基础本地工作流。
 
 ---
 
-## 未来（发布后的想法）
+## Phase 3.5：Friend Beta ✅
 
-以下功能不在 MVP 范围内，仅作记录。
+**目标：** 让早期测试者更容易理解 agent 驱动的使用方式。
 
-| 功能              | 描述                                              | 优先级 |
-|-------------------|--------------------------------------------------|--------|
-| 插件系统          | 用户可编写自定义视图组件                            | P2     |
-| 任务模板          | 每日 standup / 周报模板                            | P2     |
-| 归档              | 已完成任务自动归档到 `archive.json`                 | P2     |
-| 番茄钟            | 内置番茄钟，关联任务                               | P3     |
-| Git 同步          | `tasks.json` 自动 Git commit                      | P3     |
-| 日历视图          | 按日历展示有 `due_date` 的任务                      | P3     |
-| 仪表盘组件        | 完成率图表、每日趋势                               | P3     |
-| Web 伴侣界面      | 只读 Web 界面（查看不操作）                         | P3     |
-| Taskwarrior 导入  | 从 Taskwarrior 导入已有任务                        | P3     |
-| Markdown 任务     | 支持 `tasks.md` 作为可选数据源                      | P3     |
+- [x] `AGENT.md`
+- [x] 示例 fixtures
+- [x] `mutsumi setup --agent`
+- [x] split-pane helper scripts
+- [x] demo script
+- [x] beta packaging 工作
+- [x] 早期 beta 文档
+
+**历史说明：** 这个阶段引入了更早的 friend-beta 版本线。当前产品已经超出那个阶段。
+
+---
+
+## Phase 5：Multi-Source Hub ✅
+
+**目标：** 让 Mutsumi 从单项目查看器升级为多源指挥中心。
+
+- [x] 将 `tasks.json` 重命名为 `mutsumi.json`，并保留兼容回退
+- [x] 统一 home directory 到 `~/.mutsumi/`
+- [x] 多源 registry 与 watchers
+- [x] 项目注册 CLI
+- [x] source-tab 重设计
+- [x] Main dashboard 聚合
+
+**退出标准：** Mutsumi 能在一个 UI 中聚合 personal 与多个 project task files。
+
+---
+
+## Phase 8：开箱 onboarding ✅
+
+**目标：** 让 `mutsumi` 成为自然入口。
+
+- [x] 首次运行 onboarding flow
+- [x] 基于 onboarding 的偏好采集
+- [x] 轻量项目 attach flow
+- [x] skills-first agent integration path
+- [x] 在适当时自动创建 Mutsumi 自有文件
+
+**退出标准：** 首次启动成功，用户无需先学习复杂 setup graph。
+
+---
+
+## Phase 9：Calendar View（计划中）
+
+**目标：** 为现有任务增加内置 calendar surface，用于按时间导航。
+
+设计依据：
+
+- [x] RFC-009：Calendar View
+
+计划中的实现切片：
+
+- [ ] Main 层 calendar mode
+- [ ] month / agenda 基础
+- [ ] 从日期 drill-down 到任务详情
+- [ ] source-aware calendar aggregation
+- [ ] 轻量日期驱动 create/edit flow
+- [ ] 更丰富的 week/day 交互
+
+范围说明：
+
+- calendar 复用 `due_date`
+- calendar 不引入第二套任务模型
+- calendar 处于计划中，尚未在 `1.0.0b1` 中 shipped
+
+---
+
+## Phase 10：Launch / GA 打磨（下一步）
+
+**目标：** 打磨产品、文档、打包与市场呈现，为更广泛发布做准备。
+
+- [ ] 完成面向 beta/GA 路径的英文文档
+- [ ] 录制打磨过的 demo 资产
+- [ ] 发布 / 验证 `mutsumi-tui` 的 PyPI 安装流程
+- [ ] 收紧 beta 测试清单与反馈闭环
+- [ ] 在 GA 前补齐剩余 UX / 文档缺口
+- [ ] 准备 launch copy 与 release materials
+
+**退出标准：** 安装、onboarding、agent setup 与日常使用都足够连贯，可面向更广用户发布。
+
+---
+
+## 未来想法（GA 之后 / 未排期）
+
+这些只是想法，不是已承诺的 roadmap。
+
+| 功能 | 描述 | 优先级 |
+|---|---|---|
+| Plugin system | 用户自定义 widget 或扩展 | P2 |
+| Task templates | 可复用的循环任务模板 | P2 |
+| Archive | 将已完成任务移出活动文件 | P2 |
+| Pomodoro timer | 关联任务的专注计时器 | P3 |
+| Git sync helper | 可选的基于 Git 的任务文件工作流 | P3 |
+| Dashboard widgets | 额外图表或汇总 | P3 |
+| Web companion | 只读 Web 界面 | P3 |
+| Taskwarrior import | 从现有系统导入 | P3 |
+| Markdown tasks | 支持基于 Markdown 的 source format | P3 |
 
 ---
 
 ## 版本策略
 
-| 版本    | 里程碑                                          |
-|---------|------------------------------------------------|
-| 0.1.0   | Phase 1 完成 — 静态渲染可用                     |
-| 0.2.0   | Phase 2 完成 — 热重载 + 交互可用                |
-| 0.3.0   | Phase 3 完成 — CLI + 配置完整                   |
-| 0.4.0b1 | Phase 3.5 完成 — 朋友内测                        |
-| 0.6.0   | Phase 5 完成 — 多源指挥中心                       |
-| 0.5.0   | Phase 4 完成 — Product Hunt 发布版本            |
-| 1.0.0   | 社区反馈后的稳定版                               |
+| 版本 | 含义 |
+|---|---|
+| `0.1.x` | 静态渲染基线 |
+| `0.2.x` | 响应式基线 |
+| `0.3.x` | CLI / config 基线 |
+| `0.4.0b1` | 更早的 friend-beta 里程碑 |
+| `1.0.0b1` | 当前整合 beta 线 |
+| `1.0.0` | beta 加固后的稳定版目标 |
+
+---
+
+## Beta 指南
+
+对于当前周期，重要的事实源是：
+
+- 当前 beta 版本：**`1.0.0b1`**
+- 规范任务文件：**`mutsumi.json`**
+- 默认 preset：**`arrows`**
+- calendar 状态：**通过 RFC-009 规划中，尚未 shipped**

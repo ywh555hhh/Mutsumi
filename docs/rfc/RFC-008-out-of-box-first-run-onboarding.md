@@ -1,5 +1,7 @@
 # RFC-008: Out-of-Box First-Run Onboarding
 
+> **[中文版](./RFC-008-out-of-box-first-run-onboarding_cn.md)** | **[日本語版](./RFC-008-out-of-box-first-run-onboarding_ja.md)**
+
 | Field       | Value                                                  |
 |-------------|--------------------------------------------------------|
 | **RFC**     | 008                                                    |

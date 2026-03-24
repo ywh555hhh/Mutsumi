@@ -1,5 +1,7 @@
 # RFC-006: Brand & Narrative Reset — "Never Lose a Thread"
 
+> **[中文版](./RFC-006-brand-narrative-reset_cn.md)** | **[日本語版](./RFC-006-brand-narrative-reset_ja.md)**
+
 | Field       | Value                                       |
 |-------------|---------------------------------------------|
 | **RFC**     | 006                                         |

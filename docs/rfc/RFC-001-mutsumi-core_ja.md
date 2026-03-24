@@ -12,6 +12,8 @@
 
 ---
 
+> **Historical note (2026-03-24):** この RFC は Mutsumi の最初期アーキテクチャ方針を記録したものです。ここに書かれた一部の詳細は、もはや current product baseline ではありません。現在の canonical behavior については、`README.md`、`docs/specs/*.md`、`docs/ROADMAP.md`、および RFC-006 / RFC-007 / RFC-008 / RFC-009 を優先してください。
+
 ## 概要
 
 Mutsumi（若叶睦）は、**マルチスレッド型スーパー個人**のために設計されたサイレントタスク外脳です。ローカル JSON ファイルを監視することで、あらゆる AI Agent と疎結合に連携するスタンドアロンのターミナル TUI アプリケーションです。本 RFC では、Mutsumi のプロダクト境界、コアアーキテクチャ、データ契約、インタラクション仕様、および統合プロトコルを定義します。

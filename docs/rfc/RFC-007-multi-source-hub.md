@@ -1,5 +1,7 @@
 # RFC-007: Multi-Source Hub — From Tool to Command Center
 
+> **[中文版](./RFC-007-multi-source-hub_cn.md)** | **[日本語版](./RFC-007-multi-source-hub_ja.md)**
+
 | Field       | Value                                          |
 |-------------|------------------------------------------------|
 | **RFC**     | 007                                            |

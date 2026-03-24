@@ -145,7 +145,7 @@ Icons in the TUI use Unicode / Nerd Font symbols:
 The README is the core narrative for Product Hunt. More personality is welcome here:
 
 ```
-Good: "Mutsumi watches your tasks.json and re-renders instantly."
+Good: "Mutsumi watches your mutsumi.json and re-renders instantly."
 Bad:  "Mutsumi is a revolutionary AI-powered task management solution."
 
 Good: "Let your agent write the JSON. Mutsumi handles the rest."
@@ -155,7 +155,7 @@ Bad:  "Simply configure your preferred AI agent integration endpoint."
 ### 4.3 Error Messages
 
 ```
-Good: "tasks.json has errors. Showing last valid state."
+Good: "mutsumi.json has errors. Showing last valid state."
 Bad:  "FATAL: Invalid JSON format detected in configuration file."
 
 Good: "Task 'Fix auth' is missing an ID. Skipped."

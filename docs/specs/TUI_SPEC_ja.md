@@ -1,9 +1,9 @@
 # Mutsumi TUI 仕様
 
-| バージョン | 0.1.0              |
-|-----------|---------------------|
-| ステータス | ドラフト             |
-| 日付       | 2026-03-21          |
+| バージョン | 1.0 |
+|---|---|
+| ステータス | ドラフト |
+| 日付 | 2026-03-23 |
 
 > **[English Version](./TUI_SPEC.md)** | **[中文版](./TUI_SPEC_cn.md)**
 
@@ -13,317 +13,396 @@
 
 ### 1.1 デフォルトレイアウト
 
-```
-┌─────────────────────────────────────────────────────┐
-│  [Today] [Week] [Month] [Inbox]          mutsumi ♪  │  ← Header (1 line)
-├─────────────────────────────────────────────────────┤
-│                                                     │
-│  ▼ HIGH ─────────────────────────────────────────   │  ← Priority Group
-│  [ ] 重構 Auth 模块                dev,backend ★★★  │  ← Task Row
-│  [x] 修復缓存穿透 Bug            bugfix       ★★★  │
-│                                                     │
-│  ▼ NORMAL ───────────────────────────────────────   │
-│  [ ] 写周报                       life         ★★   │
-│  [ ] Review PR #42                dev          ★★   │
-│    └─ [ ] 检查类型安全            (1/2)             │  ← Nested child
-│    └─ [x] 跑通测试                                  │
-│                                                     │
-│  ▼ LOW ──────────────────────────────────────────   │
-│  [ ] 更新 README                  docs         ★   │
-│                                                     │
-├─────────────────────────────────────────────────────┤
-│  6 tasks · 2 done · 4 pending              🔇 quiet │  ← Footer (1 line)
-└─────────────────────────────────────────────────────┘
-```
+multi-source mode では、Mutsumi は動的な source tabs と第 2 レベルの scope filter を使います。
 
-### 1.2 レスポンシブ動作
-
-Mutsumi はターミナルウィンドウのサイズに適応します。
-
-| ターミナル幅    | 動作                                                          |
-|-----------------|--------------------------------------------------------------|
-| 80カラム以上     | フルレイアウト: タイトル + タグ + 優先度スター                    |
-| 60-79カラム      | タグ省略、タイトル + 優先度のみ表示                              |
-| 40-59カラム      | ミニマルモード: チェックボックス + タイトルのみ                    |
-| 40カラム未満     | 「Terminal too narrow」警告を表示                               |
-
-### 1.3 詳細パネル（展開可能）
-
-タスクを選択して `Enter`（またはクリック）を押すと、下部に詳細パネルが展開されます。
-
-```
-├─────────────────────────────────────────────────────┤
-│  ▶ 重构 Auth 模块                                    │
-│  ─────────────────────────────────────────────────   │
-│  Status:   pending                                   │
-│  Priority: high                                      │
-│  Scope:    day                                       │
-│  Tags:     dev, backend                              │
-│  Due:      2026-03-25                                │
-│  Created:  2026-03-21 08:00                          │
-│  ─────────────────────────────────────────────────   │
-│  Description:                                        │
-│  把 session-based auth 改成 JWT，需要同时改           │
-│  middleware 和路由层。                                │
-│  ─────────────────────────────────────────────────   │
-│  Subtasks: 1/2 done                                  │
-│    [x] 安装 PyJWT                                    │
-│    [ ] 写 middleware                                 │
-├─────────────────────────────────────────────────────┤
+```text
+┌──────────────────────────────────────────────────────────────┐
+│ [★ Main] [Personal] [saas-app] [docs-site]       mutsumi ♪  │
+├──────────────────────────────────────────────────────────────┤
+│ ★ Main │ [Today] [Week] [Month] [Inbox] [All]               │
+├──────────────────────────────────────────────────────────────┤
+│                                                              │
+│  ▼ HIGH ───────────────────────────────────────────────      │
+│  [ ] Refactor auth module                 dev,backend  ★★★   │
+│  [x] Fix cache bug                        bugfix       ★★★   │
+│                                                              │
+│  ▼ NORMAL ─────────────────────────────────────────────      │
+│  [ ] Write weekly report                  life         ★★    │
+│  [ ] Review PR #42                        dev          ★★    │
+│    └─ [ ] Check type safety                               │
+│    └─ [x] Run tests                                        │
+│                                                              │
+├──────────────────────────────────────────────────────────────┤
+│  6 tasks · 2 done · 4 pending                      🔇 quiet  │
+└──────────────────────────────────────────────────────────────┘
 ```
 
-## 2. インタラクション
+### 1.2 Main dashboard view
+
+アクティブな source tab が `Main` のとき、Mutsumi は編集可能な task list ではなく集約 dashboard を表示します。
+
+```text
+┌──────────────────────────────────────────────────────────────┐
+│ [★ Main] [Personal] [saas-app] [docs-site]       mutsumi ♪  │
+├──────────────────────────────────────────────────────────────┤
+│                    ★ Main Dashboard                          │
+│                                                              │
+│  ★ Personal    3 pending                                     │
+│  ████████░░░░░░░░░░ 40% (2/5)                                │
+│    • Buy coffee beans                                        │
+│    • Reply to advisor                                        │
+│                                                              │
+│  saas-app     5 pending                                      │
+│  ███░░░░░░░░░░░░░░ 15% (1/7)                                 │
+│    !!! • Fix token refresh                                   │
+│    • Add rate limiting                                       │
+└──────────────────────────────────────────────────────────────┘
+```
+
+### 1.3 レスポンシブ動作
+
+| ターミナル幅 | 動作 |
+|---|---|
+| `>= 80` cols | フル行: title + tags + priority |
+| `60-79` cols | メタデータを減らす |
+| `40-59` cols | 最小行レイアウト |
+| `< 40` cols | terminal-too-narrow 警告を表示 |
+
+### 1.4 詳細パネル
+
+タスクを選択して `Enter` を押すか、そのタイトルをクリックすると詳細パネルが開きます。
+
+詳細パネルには次が表示されます。
+
+- title
+- status
+- priority
+- scope
+- tags
+- due date
+- description
+- child progress
+- created / completed timestamps
+
+また、クリック可能な操作も提供します。
+
+- `[Edit]`
+- `[+Sub]`
+- `[Delete]`
+- 閉じるための `[x]`
+
+---
+
+## 2. インタラクションモデル
 
 ### 2.1 マウス
 
-| 操作                        | 動作                                                  |
-|---------------------------|------------------------------------------------------|
-| `[ ]` / `[x]` をクリック    | 完了ステータスを切り替え、JSON に書き戻します               |
-| タスク行をクリック            | タスクを選択します（ハイライト）                           |
-| タイトルをダブルクリック      | インライン編集モードに入ります                             |
-| タブをクリック               | ビューを切り替えます（Today/Week/Month/Inbox）            |
-| [+New] をクリック           | 新規タスク入力ダイアログを開きます                         |
-| スクロールホイール           | タスクリストをスクロールします                             |
+| 操作 | 動作 |
+|---|---|
+| checkbox をクリック | done 状態を切り替える |
+| task row をクリック | 行を選択する |
+| task title をクリック | 詳細パネルを開く |
+| source tab をクリック | source を切り替える |
+| scope chip をクリック | scope filter を変更する |
+| footer action をクリック | task form、search、sort を開く |
+| dashboard card をクリック | その source tab にジャンプする |
+| 詳細パネルの `[+Sub]` をクリック | subtask form を開く |
 
 ### 2.2 キーボードプリセット
 
-#### vim（デフォルト）
+Mutsumi には 3 つの built-in preset があります。
 
-| キー      | アクション                           |
-|----------|---------------------------------------|
-| `j`      | カーソルを下に移動                      |
-| `k`      | カーソルを上に移動                      |
-| `g`      | リストの先頭にジャンプ                   |
-| `G`      | リストの末尾にジャンプ                   |
-| `Space`  | 完了ステータスを切り替え                 |
-| `Enter`  | 詳細パネルの展開/折りたたみ              |
-| `n`      | 新規タスク（入力ダイアログを開く）        |
-| `e`      | 選択中のタスクタイトルを編集              |
-| `dd`     | 選択中のタスクを削除（確認が必要）        |
-| `Tab`    | 次のビュータブに切り替え                 |
-| `S-Tab`  | 前のビュータブに切り替え                 |
-| `1-4`    | N番目のタブにクイック切り替え             |
-| `/`      | タスクを検索                           |
-| `q`      | Mutsumi を終了                        |
-| `?`      | キーバインドヘルプを表示                 |
+- `arrows` — **デフォルト**
+- `vim`
+- `emacs`
 
-#### emacs
+#### `arrows`（デフォルト）
 
-| キー        | アクション                           |
-|------------|---------------------------------------|
-| `C-n`      | カーソルを下に移動                      |
-| `C-p`      | カーソルを上に移動                      |
-| `C-Space`  | 完了ステータスを切り替え                 |
-| `C-o`      | 新規タスク                             |
-| `C-e`      | タスクを編集                           |
-| `C-d`      | タスクを削除                           |
-| `C-q`      | 終了                                  |
+| キー | 操作 |
+|---|---|
+| `Up` / `Down` | 選択を移動 |
+| `Home` / `End` | 先頭 / 末尾へジャンプ |
+| `Left` / `Right` | グループを折りたたむ / 展開する |
+| `Shift+Up` / `Shift+Down` | タスクを上 / 下へ移動 |
+| `Space` | done を切り替える |
+| `Enter` | 詳細を表示 |
+| `n` | 新規タスク |
+| `e` | タスク編集 |
+| `i` | タイトルのインライン編集 |
+| `A` | サブタスク追加 |
+| `Tab` / `Shift+Tab` | 次 / 前の source tab |
+| `1-9` | 番号付き source tab へジャンプ |
+| `f` | scope filter を循環 |
+| `/` | 検索 |
+| `s` | ソート |
+| `?` | ヘルプ表示 |
+| `q` | 終了 |
 
-#### arrow
+#### `vim`
 
-| キー        | アクション                                     |
-|------------|-----------------------------------------------|
-| `Down`     | カーソルを下に移動                               |
-| `Up`       | カーソルを上に移動                               |
-| `Enter`    | 完了ステータスの切り替え / 編集の確定              |
-| `Delete`   | タスクを削除                                    |
-| `Insert`   | 新規タスク                                      |
+| キー | 操作 |
+|---|---|
+| `j` / `k` | 選択を移動 |
+| `gg` / `G` | 先頭 / 末尾 |
+| `h` / `l` | グループを折りたたむ / 展開する |
+| `J` / `K` | タスクを下 / 上へ移動 |
+| `dd` | 確認付き削除 |
+| `Space` | done を切り替える |
+| `Enter` | 詳細を表示 |
+| `n` / `e` / `i` | 新規 / 編集 / インライン編集 |
+| `A` | サブタスク追加 |
+| `Tab` / `Shift+Tab` | 次 / 前の source tab |
+| `f` | scope filter を循環 |
+| `/` | 検索 |
+| `?` | ヘルプ |
+| `q` | 終了 |
 
-### 2.3 カスタムキーマップ
+#### `emacs`
 
-ユーザーは `~/.config/mutsumi/keys/custom.toml` でカスタムキーバインドを定義できます。
+| キー | 操作 |
+|---|---|
+| `Ctrl+n` / `Ctrl+p` | 選択を移動 |
+| `Ctrl+a` / `Ctrl+e` | 先頭 / 末尾 |
+| `Ctrl+b` / `Ctrl+f` | グループを折りたたむ / 展開する |
+| `Ctrl+Shift+n` / `Ctrl+Shift+p` | タスクを移動 |
+| `Space` | done を切り替える |
+| `Enter` | 詳細を表示 |
+| `n` / `e` / `i` | 新規 / 編集 / インライン編集 |
+| `A` | サブタスク追加 |
+| `Tab` / `Shift+Tab` | 次 / 前の source tab |
+| `f` | scope filter を循環 |
+| `/` | 検索 |
+| `?` | ヘルプ |
+| `Ctrl+q` | 終了 |
+
+### 2.3 三入力等価
+
+Mutsumi は、主要な操作が keyboard と mouse の両方から到達可能であり、関連する core task changes には適切な CLI もあるべきという製品ルールに従います。
+
+例:
+
+| Capability | Keyboard | Mouse | CLI |
+|---|---|---|---|
+| タスク作成 | `n` | footer action | `mutsumi add` |
+| タスク編集 | `e` | `[Edit]` | `mutsumi edit` |
+| タスク削除 | `dd` または削除フロー | `[Delete]` | `mutsumi rm` |
+| done 切り替え | `Space` | checkbox | `mutsumi done` |
+| ファイル検証 | — | — | `mutsumi validate` |
+
+---
+
+## 3. ビューとフィルター
+
+### 3.1 Source tabs
+
+Source tabs は time scope ではなく data source を表します。
+例:
+
+- `Main`
+- `Personal`
+- `saas-app` のような登録済みプロジェクト
+
+### 3.2 Scope filter
+
+編集可能な tab の中では、Mutsumi は第 2 レベルの filter を表示します。
+
+- `Today`
+- `Week`
+- `Month`
+- `Inbox`
+- `All`
+
+`Main` dashboard では scope filter は表示されません。
+
+### 3.3 Scope の意味
+
+Scope filtering には data contract の effective scope を使います。
+
+```text
+explicit scope > due_date auto-derivation > inbox
+```
+
+つまり、明示 scope がなくても `due_date` が list placement に影響します。
+
+---
+
+## 4. CRUD 挙動
+
+### 4.1 タスク作成
+
+トリガー:
+
+- keyboard: `n`
+- mouse: footer の new-task action
+
+挙動:
+
+- task form を開く
+- `title` は必須
+- 適用可能な場合、scope は現在の filter context をデフォルトにする
+- submit 後、ファイルをアトミックに書く
+
+### 4.2 タスク編集
+
+トリガー:
+
+- keyboard: `e`
+- keyboard inline: `i`
+- mouse: 詳細パネルの `[Edit]`
+
+挙動:
+
+- メモリ上でタスクを更新する
+- アトミックに書き戻す
+- 未知フィールドを保持する
+
+### 4.3 タスク削除
+
+トリガー:
+
+- keyboard の削除フロー
+- mouse の `[Delete]`
+
+挙動:
+
+- 確認が必要
+- 選択中タスクを削除する
+- アトミックに書き戻す
+
+### 4.4 ステータス切り替え
+
+トリガー:
+
+- keyboard `Space`
+- mouse checkbox click
+
+挙動:
+
+- `pending` → `done`: `completed_at` を埋める
+- `done` → `pending`: `completed_at` を消す
+- recurring task の処理では recurrence metadata に従って due date が更新される場合がある
+
+---
+
+## 5. ホットリロード
+
+### 5.1 ファイル監視動作
+
+Mutsumi は登録された各 source file を独立して監視します。
+
+```text
+external save
+   ↓
+watchdog event
+   ↓
+debounce
+   ↓
+re-read active source(s)
+   ↓
+re-render TUI
+```
+
+### 5.2 マルチソース動作
+
+- single-source mode では 1 つのファイルを監視する
+- multi-source mode では、登録されたすべての source file を監視する
+- dashboard stats は読み込まれた全 source のタスクを集約する
+
+### 5.3 自己書き込み抑制
+
+Mutsumi は自分自身の atomic write の直後に発生する即時リロードを抑制し、冗長な refresh を避けます。
+
+---
+
+## 6. エラー状態と空状態
+
+### 6.1 不正な JSON
+
+アクティブな task file が不正な JSON になった場合:
+
+- Mutsumi は error banner を表示する
+- アプリはクラッシュしない
+- ユーザーはファイルを修正して継続できる
+
+例の banner:
+
+```text
+⚠ JSON is invalid — showing last valid state
+```
+
+### 6.2 ファイル欠如
+
+アクティブファイルがまだ存在しない場合:
+
+- UI は利用可能な空状態を表示する
+- 初回の書き込みで task creation がファイルを作成できる
+- 新しいプロジェクトでは `mutsumi.json` を作るべき
+
+### 6.3 空状態
+
+現在のビューにタスクが 1 つもない場合、Mutsumi は `+ New Task` アクション付きの親しみやすい空状態を表示します。
+
+文言はアクティブな task flow を汎用的に参照すべきであり、`tasks.json` だけを前提にしてはいけません。
+
+---
+
+## 7. テーマと設定
+
+### 7.1 ビルトインテーマ
+
+- `monochrome-zen` — デフォルト
+- `solarized`
+- `nord`
+- `dracula`
+
+### 7.2 設定ホーム
+
+優先される config / personal-data home:
+
+```text
+~/.mutsumi/
+```
+
+旧 config location も互換性のため引き続き読み取れます。
+
+```text
+~/.config/mutsumi/
+```
+
+### 7.3 キーバインディング設定
+
+デフォルト preset は次の通りです。
 
 ```toml
-[keys]
-move_down = "j"
-move_up = "k"
-toggle_done = "space"
-new_task = "n"
-edit_task = "e"
-delete_task = "d,d"    # chord: two key presses
-quit = "q"
-search = "/"
-help = "?"
-tab_next = "tab"
-tab_prev = "shift+tab"
-tab_1 = "1"
-tab_2 = "2"
-tab_3 = "3"
-tab_4 = "4"
-expand = "enter"
-top = "g"
-bottom = "shift+g"
+keybindings = "arrows"
 ```
 
-## 3. CRUD 操作
+ユーザーは `vim` や `emacs` に切り替えられ、config で key override も定義できます。
 
-### 3.1 タスクの作成
+---
 
-トリガー: `n` キーまたは [+New] ボタンをクリック。
+## 8. Calendar への準備
 
-```
-┌─────────── New Task ───────────┐
-│ Title: [                     ] │
-│ Scope: (Day) Week Month Inbox  │
-│ Priority: High (Normal) Low    │
-│ Tags: [                     ]  │
-│                                │
-│        [Create]  [Cancel]      │
-└────────────────────────────────┘
-```
+この仕様はまだ calendar UI を定義しませんが、現在の TUI semantics は将来の time-based view と互換になるよう意図されています。
 
-- タイトルのみが必須フィールドです
-- スコープ/優先度のデフォルトは、現在のタブと Normal です
-- タグはカンマ区切りで入力します
-- UUIDv7 ID と created_at は作成時に自動生成されます
+すでにある基盤:
 
-### 3.2 タスクの編集
+- task model の `due_date`
+- 日付に基づく effective scope derivation
+- multi-source aggregation
+- dashboard/source separation
+- detail panel drill-down
 
-トリガー: `e` キーまたはタイトルをダブルクリック。
+将来の calendar view は、別の task model を発明するのではなく、これらの semantics の上に構築されるべきです。
 
-- インライン編集: タイトルがリスト行内で直接編集可能なテキストフィールドになります
-- `Enter` で確定、`Escape` でキャンセルします
-- 変更は即座に JSON に書き戻されます
+---
 
-### 3.3 タスクの削除
+## 9. 現在の Beta ノート
 
-トリガー: `dd` キーまたはコンテキストメニュー。
+現在の beta line では:
 
-- 確認ダイアログが表示されます（設定で無効化可能）
-- 削除後、タスクは JSON から削除されます
-- `task_deleted` イベントが発行されます
-
-### 3.4 ステータスの切り替え
-
-トリガー: `Space` キーまたはチェックボックスをマウスクリック。
-
-- `pending` → `done`: `completed_at` を自動設定します
-- `done` → `pending`: `completed_at` をクリアします
-- 即座に JSON に書き戻され、確認ステップはありません（軽快な操作感）
-
-## 4. ホットリロード
-
-### 4.1 メカニズム
-
-```
-watchdog (inotify/FSEvents/kqueue)
-         │
-         ▼
-  File change event
-         │
-         ▼
-  debounce (100ms)  ← Prevent jitter from rapid writes
-         │
-         ▼
-  re-read tasks.json
-         │
-         ▼
-  validate schema
-         │
-    ┌────┴────┐
-    ▼         ▼
-  valid    invalid
-    │         │
-    ▼         ▼
-  re-render  show error
-  TUI        banner
-```
-
-### 4.2 デバウンス
-
-- ファイル変更後100ms待ってから読み取りを行います（書き込みの完了を待ちます）
-- 100ms以内の複数の変更は、1回の再読み取りにマージされます
-- デバウンス値は設定で変更可能です
-
-## 5. テーマシステム
-
-### 5.1 テーマファイル形式
-
-```toml
-# ~/.config/mutsumi/themes/my-theme.toml
-
-[meta]
-name = "My Custom Theme"
-author = "wayne"
-
-[colors]
-background = "#1e1e2e"
-foreground = "#cdd6f4"
-accent = "#94e2d5"
-muted = "#6c7086"
-error = "#f38ba8"
-warning = "#fab387"
-success = "#a6e3a1"
-
-[priority_colors]
-high = "#f38ba8"
-normal = "#cdd6f4"
-low = "#6c7086"
-
-[tag_colors]
-dev = "#89b4fa"
-bugfix = "#f38ba8"
-life = "#a6e3a1"
-docs = "#fab387"
-# Unmatched tags use accent color
-```
-
-### 5.2 ビルトインテーマ
-
-| テーマ               | 雰囲気                                               |
-|----------------------|-----------------------------------------------------|
-| `monochrome-zen`     | ミニマリストなモノクロ、ライトシアンのアクセント（デフォルト） |
-| `nord`               | 寒色系、抑制的                                        |
-| `dracula`            | ハイコントラスト、パープル寄り                            |
-| `solarized`          | 暖色ダーク、ティールアクセント                            |
-
-## 6. 検索
-
-`/` を押すと検索モードに入ります。
-
-```
-┌─────────────────────────────────────────┐
-│  🔍 Search: auth mod█                   │
-├─────────────────────────────────────────┤
-│  [ ] 重构 Auth 模块          dev   ★★★  │  ← Matching results highlighted
-│  [x] 修复 Auth token 过期    bugfix     │
-└─────────────────────────────────────────┘
-```
-
-- リアルタイムフィルタリング（入力に応じてフィルタリングされます）
-- 検索対象: タイトル + タグ + 説明
-- `Escape` で検索を終了し、完全なリストに戻ります
-
-## 7. エラー状態
-
-### 7.1 エラーバナー
-
-`tasks.json` が読み取れないか、形式が不正な場合:
-
-```
-┌─────────────────────────────────────────────────────┐
-│  ⚠ tasks.json has errors · showing last valid state  │
-│  Run `mutsumi validate` for details                  │
-├─────────────────────────────────────────────────────┤
-│  (Last valid task list)                              │
-│  ...                                                 │
-└─────────────────────────────────────────────────────┘
-```
-
-### 7.2 警告バッジ
-
-個々のタスクフィールドに異常がある場合、タスク行に警告バッジが表示されますが、操作は引き続き可能です。
-
-### 7.3 空の状態
-
-`tasks.json` が空、または現在のタブにタスクがない場合:
-
-```
-┌─────────────────────────────────────────┐
-│                                         │
-│           Nothing here yet.             │
-│       Press [n] to create a task        │
-│    or let your Agent write tasks.json   │
-│                                         │
-└─────────────────────────────────────────┘
-```
+- 正式 task file は `mutsumi.json`
+- 旧フォールバックは `tasks.json`
+- デフォルト preset は `arrows`
+- multi-source dashboard はすでに product surface の一部
+- calendar は planned capability であり、まだ shipped view ではない

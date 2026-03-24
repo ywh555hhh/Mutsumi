@@ -1,51 +1,51 @@
-# Mutsumi — Agent Cheat Sheet
+# Mutsumi — Agent チートシート
 
-> One-page reference for AI agents that manage tasks via Mutsumi.
+> Mutsumi 経由でタスクを管理する AI agents 向けの 1 ページリファレンス。
 >
-> **[中文版](./AGENT_cn.md)** | **[日本語版](./AGENT_ja.md)**
+> **[English Version](./AGENT.md)** | **[中文版](./AGENT_cn.md)**
 
 ## Quick Start
 
-Mutsumi is a local TUI that watches the active task file and re-renders on save.
+Mutsumi はローカル TUI で、現在の active task file を監視し、保存時に再描画します。
 
 - **Canonical project file:** `./mutsumi.json`
 - **Legacy fallback:** `./tasks.json`
-- **Preferred workflow:** use the `mutsumi` CLI when possible
-- **Direct JSON is allowed:** read the whole file, update it, write it back atomically
+- **Preferred workflow:** 可能なら `mutsumi` CLI を使う
+- **Direct JSON is allowed:** file 全体を読み、更新し、atomic に書き戻す
 
-If both files are absent, new projects should create **`mutsumi.json`**.
+両方の file が無い場合、新しい project では **`mutsumi.json`** を作成してください。
 
 ## Task File Discovery
 
-Mutsumi resolves the active file in this order:
+Mutsumi は active file を次の順序で解決します。
 
-1. Explicit CLI `--path`
+1. explicit CLI `--path`
 2. `./mutsumi.json`
-3. `./tasks.json` (backward-compatible fallback)
-4. Default target for new projects: `./mutsumi.json`
+3. `./tasks.json`（backward-compatible fallback）
+4. new project の default target: `./mutsumi.json`
 
 ## Schema
 
 | Field | Type | Required | Default | Notes |
 |---|---|---:|---|---|
-| `id` | string | Yes | — | Unique ID, UUIDv7 recommended |
+| `id` | string | Yes | — | Unique ID, UUIDv7 推奨 |
 | `title` | string | Yes | — | Task title |
-| `status` | string | Yes | `"pending"` | `"pending"` or `"done"` |
+| `status` | string | Yes | `"pending"` | `"pending"` または `"done"` |
 | `scope` | string | No | `"inbox"` | `"day"`, `"week"`, `"month"`, `"inbox"` |
 | `priority` | string | No | `"normal"` | `"high"`, `"normal"`, `"low"` |
 | `tags` | string[] | No | `[]` | Free-form labels |
 | `children` | Task[] | No | `[]` | Recursive subtasks |
-| `due_date` | string | No | — | ISO date, e.g. `"2026-03-25"` |
+| `due_date` | string | No | — | ISO date, 例 `"2026-03-25"` |
 | `description` | string | No | — | Longer text |
 | `created_at` | string | No | auto | ISO timestamp |
-| `completed_at` | string | No | — | Set when status becomes `done` |
+| `completed_at` | string | No | — | `done` になったとき設定 |
 
 ## Behavioral Rules
 
-1. **Preserve unknown fields.** Never delete fields you do not recognize.
-2. **Write the whole file.** Do not attempt partial in-place edits.
-3. **Use atomic writes.** Temp file + rename/replace.
-4. **Prefer `mutsumi.json`.** Only use `tasks.json` when the project is still on the legacy filename.
+1. **Preserve unknown fields.** 認識しない field を削除しない。
+2. **Write the whole file.** 部分更新ではなく file 全体を書き戻す。
+3. **Use atomic writes.** temp file + rename/replace。
+4. **Prefer `mutsumi.json`.** project が legacy filename のときだけ `tasks.json` を使う。
 5. **Keep enums valid.**
    - `status`: `pending` / `done`
    - `priority`: `high` / `normal` / `low`
@@ -71,13 +71,13 @@ mutsumi migrate
 
 ## Direct JSON Protocol
 
-When working without the CLI:
+CLI を使わない場合:
 
-1. Detect the active file (`mutsumi.json` first, `tasks.json` fallback)
-2. Read the entire JSON object
-3. Modify the `tasks` array
-4. Write the **entire file** back atomically
-5. Keep all unknown top-level and task-level fields intact
+1. active file を見つける（`mutsumi.json` 優先、`tasks.json` fallback）
+2. JSON object 全体を読む
+3. `tasks` array を修正する
+4. **entire file** を atomic に書き戻す
+5. unknown top-level fields と task-level fields を保持する
 
 File shape:
 
@@ -162,14 +162,14 @@ mutsumi setup --agent custom --mode snippet
 
 ### Mode Summary
 
-- `skills` — install bundled `SKILL.md` packages only
-- `skills+project-doc` — install skills and append a project snippet to the agent doc
-- `snippet` — print copyable instructions to stdout
+- `skills` — bundled `SKILL.md` packages だけを install
+- `skills+project-doc` — skills を install し、agent doc に project snippet を追記
+- `snippet` — コピー可能な instructions を stdout に出力
 
 ## Event Log
 
-If event logging is enabled, Mutsumi appends JSONL records to the platform data directory.
-By default this is typically:
+event logging が有効な場合、Mutsumi は JSONL records を platform data directory に追記します。
+通常の default path は次の通りです。
 
 ```text
 ~/.local/share/mutsumi/events.jsonl
@@ -185,9 +185,9 @@ Example records:
 
 ## Safe Defaults for Agents
 
-- Prefer `mutsumi.json`
-- Use the CLI when the task is simple CRUD
-- If writing JSON directly, use atomic replace
-- Preserve unknown fields exactly
-- Do not silently delete user tasks
-- Run `mutsumi validate` after large edits if you are unsure
+- `mutsumi.json` を優先する
+- simple CRUD では CLI を使う
+- JSON を直接書く場合は atomic replace を使う
+- unknown fields を正確に保持する
+- user task を黙って削除しない
+- 大きな編集後に不安なら `mutsumi validate` を実行する

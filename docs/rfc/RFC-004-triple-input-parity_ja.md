@@ -8,7 +8,7 @@
 | 著者 | Wayne (ywh) |
 | 作成日 | 2026-03-21 |
 
-[English](RFC-004-triple-input-parity.md) · [中文](RFC-004-triple-input-parity_cn.md)
+> **[English Version](./RFC-004-triple-input-parity.md)** | **[中文版](./RFC-004-triple-input-parity_cn.md)**
 
 ---
 

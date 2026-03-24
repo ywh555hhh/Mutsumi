@@ -1,6 +1,6 @@
 # Mutsumi v1.0.0 Beta — Internal Testing Playbook
 
-> **[中文版](./BETA_V1_cn.md)**
+> **[中文版](./BETA_V1_cn.md)** | **[日本語版](./BETA_V1_ja.md)**
 
 | Status | Draft — Internal Only |
 |---|---|

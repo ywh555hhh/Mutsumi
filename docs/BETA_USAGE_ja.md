@@ -1,20 +1,20 @@
-# Mutsumi Friend Beta — Usage SOP
+# Mutsumi Friend Beta — 使用 SOP
 
-> **[中文版](./BETA_USAGE_cn.md)** | **[日本語版](./BETA_USAGE_ja.md)**
+> **[English Version](./BETA_USAGE.md)** | **[中文版](./BETA_USAGE_cn.md)**
 
-This is the English beta usage guide for the current **`1.0.0b1`** line.
-It is meant for internal testing and friend beta onboarding.
+これは現在の **`1.0.0b1`** ライン向けの日本語 beta 利用ガイドです。
+内部テストおよび friend beta onboarding 用です。
 
 ---
 
-## 0. Prerequisites
+## 0. 前提条件
 
-- macOS / Linux terminal
-- Windows users: prefer WSL for beta testing
+- macOS / Linux ターミナル
+- Windows ユーザーは beta 期間中は WSL を推奨
 - Python 3.12+
-- `uv` or `pip`
+- `uv` または `pip`
 
-If `uv` is missing:
+`uv` がない場合:
 
 ```bash
 curl -LsSf https://astral.sh/uv/install.sh | sh
@@ -22,44 +22,44 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 
 ---
 
-## 1. Install
+## 1. インストール
 
 ### Option A — PyPI package
 
 ```bash
 uv tool install mutsumi-tui
-# or
+# または
 pip install mutsumi-tui
 ```
 
-### Option B — from source / git
+### Option B — source / git から
 
 ```bash
 uv tool install git+https://github.com/ywh555hhh/Mutsumi.git
 ```
 
-Verify:
+確認:
 
 ```bash
 mutsumi --version
 # Expected: mutsumi, version 1.0.0b1
 ```
 
-If you see `command not found`, ensure your tool bin directory is in `PATH`.
+`command not found` が出る場合は、tool bin directory が `PATH` に入っていることを確認してください。
 
 ---
 
-## 2. First Launch
+## 2. 初回起動
 
 ```bash
 cd ~/your-project
 mutsumi
 ```
 
-If this is your first run, Mutsumi shows onboarding.
-If you already completed onboarding, it opens directly.
+初回なら Mutsumi は onboarding を表示します。
+すでに onboarding を完了している場合は、そのまま開きます。
 
-### What onboarding configures
+### onboarding が設定するもの
 
 - language
 - keybindings
@@ -67,7 +67,7 @@ If you already completed onboarding, it opens directly.
 - workspace mode
 - optional agent integration
 
-### Current defaults
+### 現在のデフォルト
 
 - Theme: `monochrome-zen`
 - Keybindings: `arrows`
@@ -75,9 +75,9 @@ If you already completed onboarding, it opens directly.
 
 ---
 
-## 3. Initialize Task Files Explicitly (Optional)
+## 3. タスクファイルの明示的初期化（任意）
 
-You do **not** have to initialize files manually before using Mutsumi, but the CLI supports it.
+Mutsumi を使う前に手動で初期化する必要は**ありません**が、CLI で作成できます。
 
 ```bash
 mutsumi init                # create ./mutsumi.json
@@ -85,65 +85,65 @@ mutsumi init --personal     # create ~/.mutsumi/mutsumi.json
 mutsumi init --project      # create ./mutsumi.json and register current repo
 ```
 
-For older setups, Mutsumi still reads `tasks.json` automatically as a fallback.
+古いセットアップでは、Mutsumi は `tasks.json` もフォールバックとして自動で読みます。
 
 ---
 
-## 4. Create Your First Tasks
+## 4. 最初のタスクを作る
 
 ### Option A: CLI
 
 ```bash
-mutsumi add "Fix login bug" --priority high --scope day --tags "bugfix"
-mutsumi add "Write weekly report" --priority normal --scope week --tags "life"
-mutsumi add "Update docs" --priority low --scope month --tags "docs"
+mutsumi add "ログインバグを修正" --priority high --scope day --tags "bugfix"
+mutsumi add "週報を書く" --priority normal --scope week --tags "life"
+mutsumi add "ドキュメント更新" --priority low --scope month --tags "docs"
 ```
 
-Verify:
+確認:
 
 ```bash
 mutsumi list
 mutsumi validate
 ```
 
-### Option B: Let your AI agent write the file
+### Option B: AI agent に書かせる
 
-Tell the agent:
+Agent にこう伝えてください:
 
 > This project uses Mutsumi. Tasks should go into `./mutsumi.json`.
 > If only legacy `tasks.json` exists, use that instead.
 > Read the whole file, modify the `tasks` array, and write it back atomically.
 
-### Option C: Create personal tasks
+### Option C: personal tasks を作る
 
 ```bash
 mutsumi init --personal
 ```
 
-Then launch Mutsumi again to see the personal source in multi-source mode.
+その後もう一度 Mutsumi を起動すると、multi-source mode で personal source が見えるようになります。
 
 ---
 
-## 5. Launch the TUI
+## 5. TUI を起動する
 
 ```bash
 mutsumi
 ```
 
-Default file resolution:
+デフォルトのファイル解決順序:
 
 1. explicit `--path`
 2. `./mutsumi.json`
 3. `./tasks.json`
-4. default new-file target: `./mutsumi.json`
+4. new-project の default target: `./mutsumi.json`
 
-To point at another file:
+別のファイルを指定する場合:
 
 ```bash
 mutsumi --path /path/to/mutsumi.json
 ```
 
-To watch additional task files:
+追加の task file を watch する場合:
 
 ```bash
 mutsumi --watch /path/to/project-a/mutsumi.json --watch /path/to/project-b/mutsumi.json
@@ -151,7 +151,7 @@ mutsumi --watch /path/to/project-a/mutsumi.json --watch /path/to/project-b/mutsu
 
 ---
 
-## 6. What You Should See
+## 6. 表示されるもの
 
 ### Single-source view
 
@@ -159,13 +159,13 @@ mutsumi --watch /path/to/project-a/mutsumi.json --watch /path/to/project-b/mutsu
 [Today] [Week] [Month] [Inbox]                    mutsumi ♪
 ------------------------------------------------------------
 ▼ HIGH
-[ ] Fix login bug                        bugfix        ★★★
+[ ] ログインバグを修正                  bugfix        ★★★
 
 ▼ NORMAL
-[ ] Write weekly report                  life          ★★
+[ ] 週報を書く                          life          ★★
 
 ▼ LOW
-[ ] Update docs                          docs          ★
+[ ] ドキュメント更新                    docs          ★
 ------------------------------------------------------------
 3 tasks · 0 done · 3 pending
 ```
@@ -178,17 +178,17 @@ mutsumi --watch /path/to/project-a/mutsumi.json --watch /path/to/project-b/mutsu
 ★ Main Dashboard
 
 ★ Personal      2 pending
-  • Buy coffee beans
-  • Reply to advisor
+  • コーヒー豆を買う
+  • 指導教員に返信する
 
 your-project    3 pending
-  • Fix login bug
-  • Update docs
+  • ログインバグを修正
+  • ドキュメント更新
 ```
 
 ---
 
-## 7. Keyboard Controls
+## 7. キーボード操作
 
 ### Default preset: `arrows`
 
@@ -216,7 +216,7 @@ your-project    3 pending
 - `vim`
 - `emacs`
 
-These are opt-in. They are **not** the default beta preset.
+これらは opt-in であり、現在の beta の default preset ではありません。
 
 ### Mouse
 
@@ -229,9 +229,9 @@ These are opt-in. They are **not** the default beta preset.
 
 ---
 
-## 8. Agent Integration
+## 8. Agent 連携
 
-### Option A: Skills-first setup (recommended)
+### Option A: Skills-first setup（推奨）
 
 ```bash
 mutsumi setup --agent claude-code
@@ -240,8 +240,8 @@ mutsumi setup --agent gemini-cli
 mutsumi setup --agent opencode
 ```
 
-This installs bundled Mutsumi skills into the agent's skill directory.
-It does **not** modify `CLAUDE.md`, `AGENTS.md`, or similar project files.
+これは bundled Mutsumi skills を各 agent の skill directory にインストールします。
+`CLAUDE.md`、`AGENTS.md` などの project files は**変更しません**。
 
 ### Option B: Skills + project doc injection
 
@@ -249,7 +249,7 @@ It does **not** modify `CLAUDE.md`, `AGENTS.md`, or similar project files.
 mutsumi setup --agent claude-code --mode skills+project-doc
 ```
 
-This installs skills and appends a Mutsumi integration snippet to the agent's project instruction file.
+これは skills を入れ、agent の project instruction file に Mutsumi integration snippet を追加します。
 
 ### Option C: Manual snippet
 
@@ -258,7 +258,7 @@ mutsumi setup --agent aider --mode snippet
 mutsumi setup --agent custom --mode snippet
 ```
 
-This prints copyable instructions.
+これはコピー可能な instructions を出力します。
 
 ### Quick manual prompt
 
@@ -270,15 +270,15 @@ Read the whole file, modify the tasks array, preserve unknown fields, and write 
 
 ---
 
-## 9. tmux / Split-pane Setup
+## 9. tmux / split-pane セットアップ
 
-### tmux (recommended)
+### tmux（推奨）
 
 ```bash
 bash scripts/tmux-dev.sh
 ```
 
-### Manual split
+### 手動 split
 
 ```bash
 tmux new-session -d -s dev
@@ -289,15 +289,15 @@ tmux attach -t dev
 
 ### iTerm2 / VS Code / Cursor
 
-- split the terminal vertically
-- right pane: `mutsumi`
-- left pane: your agent or shell
+- ターミナルを縦分割する
+- 右ペイン: `mutsumi`
+- 左ペイン: your agent or shell
 
-Now ask the agent to add or update tasks. The TUI should refresh automatically.
+その後、agent に task の追加や更新を依頼します。TUI は自動更新されるはずです。
 
 ---
 
-## 10. CLI Reference
+## 10. CLI リファレンス
 
 ```bash
 # CRUD
@@ -324,25 +324,25 @@ mutsumi schema
 mutsumi --version
 ```
 
-Any unique task ID prefix is usually enough for CLI commands.
+CLI command では、通常は一意な task ID prefix だけで十分です。
 
 ---
 
-## 11. Configuration Reference
+## 11. 設定リファレンス
 
-Preferred config path:
+優先される設定パス:
 
 ```text
 ~/.mutsumi/config.toml
 ```
 
-Legacy fallback path:
+legacy fallback path:
 
 ```text
 ~/.config/mutsumi/config.toml
 ```
 
-Example:
+例:
 
 ```toml
 theme = "monochrome-zen"
@@ -355,10 +355,10 @@ notification_mode = "quiet"
 
 ---
 
-## 12. Task File Schema
+## 12. Task file schema
 
-Canonical filename: `mutsumi.json`
-Legacy fallback: `tasks.json`
+canonical filename: `mutsumi.json`
+legacy fallback: `tasks.json`
 
 ```json
 {
@@ -366,7 +366,7 @@ Legacy fallback: `tasks.json`
   "tasks": [
     {
       "id": "01EXAMPLE000000000000000001",
-      "title": "Task title",
+      "title": "タスクタイトル",
       "status": "pending",
       "scope": "day",
       "priority": "normal",
@@ -375,50 +375,50 @@ Legacy fallback: `tasks.json`
       "created_at": "2026-03-23T08:00:00Z",
       "due_date": "2026-03-25",
       "completed_at": null,
-      "description": "Optional description"
+      "description": "任意の説明"
     }
   ]
 }
 ```
 
-Unknown fields are preserved.
+unknown fields は保持されます。
 
 ---
 
-## 13. Troubleshooting
+## 13. トラブルシューティング
 
 ### `mutsumi` command not found
 
-Ensure your tool bin directory is in `PATH`.
+tool bin directory が `PATH` に入っていることを確認してください。
 
-### TUI shows nothing but the file exists
+### TUI が空だがファイルは存在する
 
-- check which source tab you are on
-- check the active scope filter
-- run `mutsumi validate`
+- 今どの source tab にいるか確認する
+- active scope filter を確認する
+- `mutsumi validate` を実行する
 
-### Agent changes do not appear
+### Agent の変更が反映されない
 
-- ensure the agent writes to the same file Mutsumi is watching
-- prefer `mutsumi.json`
-- if the repo still uses legacy `tasks.json`, ensure that is the watched file
-- validate the file with `mutsumi validate`
+- agent が Mutsumi が watch している同じ file に書いていることを確認する
+- `mutsumi.json` を優先する
+- repo が legacy `tasks.json` をまだ使っているなら、その file が watch 対象になっていることを確認する
+- `mutsumi validate` で検証する
 
-### Theme or keybindings are not applied
+### テーマや keybindings が適用されない
 
-- run `mutsumi config --show` if available in your workflow
-- verify `~/.mutsumi/config.toml`
-- remember the default keybinding preset is `arrows`
+- workflow に `mutsumi config --show` があるなら実行する
+- `~/.mutsumi/config.toml` を確認する
+- default keybinding preset は `arrows` であることを思い出す
 
 ---
 
-## 14. Current Beta Positioning
+## 14. 現在の Beta ポジショニング
 
-For the current beta line:
+現行 beta line では:
 
-- version string is **`1.0.0b1`**
-- canonical task file is **`mutsumi.json`**
-- legacy fallback is **`tasks.json`**
-- default preset is **`arrows`**
-- multi-source dashboard is already part of the shipped beta surface
-- calendar is a planned feature, not a shipped beta view yet
+- version string は **`1.0.0b1`**
+- canonical task file は **`mutsumi.json`**
+- legacy fallback は **`tasks.json`**
+- default preset は **`arrows`**
+- multi-source dashboard はすでに shipped beta surface に含まれる
+- calendar は planned feature であり、まだ shipped beta view ではない

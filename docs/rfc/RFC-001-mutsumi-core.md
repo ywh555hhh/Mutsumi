@@ -12,6 +12,8 @@
 
 ---
 
+> **Historical note (2026-03-24):** This RFC captures the earliest Mutsumi architecture direction. Some details here are no longer the current product baseline. For current canonical behavior, prefer `README.md`, `docs/specs/*.md`, `docs/ROADMAP.md`, and newer RFCs such as RFC-006, RFC-007, RFC-008, and RFC-009.
+
 ## Abstract
 
 Mutsumi (若叶睦) is a silent task exo-brain designed for **multi-threaded super-individuals**. She is a standalone terminal TUI application that achieves decoupled collaboration with any AI Agent by watching local JSON files. This RFC defines Mutsumi's product boundaries, core architecture, data contract, interaction specifications, and integration protocol.
