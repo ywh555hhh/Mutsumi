@@ -16,13 +16,15 @@ from __future__ import annotations
 
 from textual.binding import Binding
 
+from mutsumi.core.interaction import SemanticAction
+
 # ── Shared bindings ──────────────────────────────────────────────────
 # These don't conflict with any navigation style.
 # NOTE: 'd' and 'g' removed — handled by KeyManager multi-key sequences.
 _COMMON_BINDINGS: list[Binding] = [
     Binding("space", "toggle_done", "Toggle", show=False),
-    Binding("enter", "show_detail", "Detail", show=False),
-    Binding("escape", "close_detail", "Close", show=False),
+    Binding("enter", SemanticAction.CONFIRM.value, "Confirm", show=False),
+    Binding("escape", SemanticAction.BACK.value, "Back", show=False),
     Binding("tab", "next_tab", "Next Tab", show=False),
     Binding("shift+tab", "prev_tab", "Prev Tab", show=False),
     Binding("1", "tab_1", "Today", show=False),
@@ -34,8 +36,8 @@ _COMMON_BINDINGS: list[Binding] = [
     Binding("7", "tab_7", "Tab 7", show=False),
     Binding("8", "tab_8", "Tab 8", show=False),
     Binding("9", "tab_9", "Tab 9", show=False),
-    Binding("n", "new_task", "New", show=False),
-    Binding("e", "edit_task", "Edit", show=False),
+    Binding("n", SemanticAction.CREATE.value, "New", show=False),
+    Binding("e", SemanticAction.EDIT.value, "Edit", show=False),
     Binding("slash", "search", "Search", show=False),
     # ── New shared bindings ──
     Binding("+", "priority_up", "Priority Up", show=False),

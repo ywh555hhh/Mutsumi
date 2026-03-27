@@ -12,6 +12,7 @@ from mutsumi.config.keybindings import (
     VIM_BINDINGS,
     get_keybindings,
 )
+from mutsumi.core.interaction import SemanticAction
 
 
 class TestKeybindings:
@@ -54,12 +55,13 @@ class TestKeybindings:
     def test_get_keybindings_fallback(self) -> None:
         assert get_keybindings("unknown") == ARROW_BINDINGS
 
-    def test_new_crud_bindings(self) -> None:
-        keys = {b.key for b in VIM_BINDINGS}
-        assert "n" in keys
-        assert "e" in keys
-        # 'd' is now handled by KeyManager, not Binding
-        assert "d" not in keys
+    def test_common_semantic_bindings(self) -> None:
+        for bindings in [VIM_BINDINGS, EMACS_BINDINGS, ARROW_BINDINGS]:
+            by_key = {binding.key: binding.action for binding in bindings}
+            assert by_key["enter"] == SemanticAction.CONFIRM.value
+            assert by_key["escape"] == SemanticAction.BACK.value
+            assert by_key["n"] == SemanticAction.CREATE.value
+            assert by_key["e"] == SemanticAction.EDIT.value
 
     def test_new_action_bindings(self) -> None:
         """New bindings from Step 4 plan are present."""

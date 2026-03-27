@@ -60,6 +60,7 @@ completed_count = "{done}/{total} 已完成"
 [form]
 title_label = "标题"
 title_placeholder = "任务标题..."
+source_label = "来源 / 项目"
 priority_label = "优先级"
 scope_label = "范围"
 tags_label = "标签（逗号分隔）"

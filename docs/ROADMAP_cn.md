@@ -4,22 +4,25 @@
 
 | 状态 | 动态文档 |
 |---|---|
-| 日期 | 2026-03-23 |
-| 当前 Beta | `1.0.0b1` |
+| 日期 | 2026-03-25 |
+| 当前 Beta | `1.1.0b1` |
 
 ---
 
 ## 产品状态
 
-Mutsumi 当前处于 **`1.0.0b1` beta** 阶段。
+Mutsumi 当前处于 **`1.1.0b1` beta** 阶段。
 
 这个 beta 中已经真实存在的内容：
 
 - 规范任务文件：`mutsumi.json`
 - 旧回退文件：`tasks.json`
 - 默认键位预设：`arrows`
+- semantic-first interaction layer（`confirm` / `back` / `create` / `edit`）
+- confirm/search/detail 的分层关闭顺序
 - multi-source hub：Main + Personal + project tabs
-- 首次运行 onboarding
+- source-aware task creation（`source/project -> scope -> task fields`）
+- 首次运行 onboarding，且完成后立即热更新 preset
 - skills-first agent setup
 
 **尚未** shipped 的内容：
@@ -165,6 +168,7 @@ Phase 10  Launch / GA polish
 - [x] 轻量项目 attach flow
 - [x] skills-first agent integration path
 - [x] 在适当时自动创建 Mutsumi 自有文件
+- [x] onboarding 完成后立即热更新 theme、i18n 与 keybinding preset
 
 **退出标准：** 首次启动成功，用户无需先学习复杂 setup graph。
 
@@ -191,7 +195,7 @@ Phase 10  Launch / GA polish
 
 - calendar 复用 `due_date`
 - calendar 不引入第二套任务模型
-- calendar 处于计划中，尚未在 `1.0.0b1` 中 shipped
+- calendar 处于计划中，尚未在当前 `1.1.0b1` beta 线中 shipped
 
 ---
 
@@ -236,7 +240,8 @@ Phase 10  Launch / GA polish
 | `0.2.x` | 响应式基线 |
 | `0.3.x` | CLI / config 基线 |
 | `0.4.0b1` | 更早的 friend-beta 里程碑 |
-| `1.0.0b1` | 当前整合 beta 线 |
+| `1.0.0b1` | RFC-010 交互收敛前的整合 beta 线 |
+| `1.1.0b1` | 当前 semantic-first beta 线 |
 | `1.0.0` | beta 加固后的稳定版目标 |
 
 ---
@@ -245,7 +250,8 @@ Phase 10  Launch / GA polish
 
 对于当前周期，重要的事实源是：
 
-- 当前 beta 版本：**`1.0.0b1`**
+- 当前 beta 版本：**`1.1.0b1`**
 - 规范任务文件：**`mutsumi.json`**
 - 默认 preset：**`arrows`**
+- semantic-first interaction 已进入 beta 产品线
 - calendar 状态：**通过 RFC-009 规划中，尚未 shipped**

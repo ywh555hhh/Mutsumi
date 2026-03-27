@@ -60,6 +60,7 @@ completed_count = "{done}/{total} 完了"
 [form]
 title_label = "タイトル"
 title_placeholder = "タスクのタイトル..."
+source_label = "ソース / プロジェクト"
 priority_label = "優先度"
 scope_label = "スコープ"
 tags_label = "タグ（カンマ区切り）"

@@ -81,16 +81,17 @@ class TestOnboardingFiles:
         assert added is False
         assert entry.name == "existing"
 
-    def test_detect_state_sees_personal_file_for_known_user(self, tmp_path: Path) -> None:
-        personal_dir = tmp_path / ".mutsumi"
-        personal_dir.mkdir()
-        (personal_dir / "mutsumi.json").write_text('{"version": 1, "tasks": []}', encoding="utf-8")
+
+    def test_onboarding_completed_prevents_repeated_first_run_without_files(self, tmp_path: Path) -> None:
+        reset_config()
+        home_dir = tmp_path / ".mutsumi"
         cwd = tmp_path / "workspace"
         cwd.mkdir()
 
+        config = MutsumiConfig(onboarding_completed=True)
         with patch("mutsumi.onboarding.bootstrap.config_exists", return_value=False), \
-             patch("mutsumi.core.paths.mutsumi_home", return_value=personal_dir):
-            state = detect_startup_state(cwd=cwd, config=MutsumiConfig())
+             patch("mutsumi.core.paths.mutsumi_home", return_value=home_dir):
+            state = detect_startup_state(cwd=cwd, config=config)
 
-        assert state.personal_tasks_exists is True
         assert state.mode == "ready"
+        assert state.onboarding_completed is True

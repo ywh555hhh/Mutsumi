@@ -60,6 +60,7 @@ completed_count = "{done}/{total} completed"
 [form]
 title_label = "Title"
 title_placeholder = "Task title..."
+source_label = "Source / Project"
 priority_label = "Priority"
 scope_label = "Scope"
 tags_label = "Tags (comma-separated)"

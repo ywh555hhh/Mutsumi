@@ -17,9 +17,9 @@ In multi-source mode, Mutsumi uses dynamic source tabs plus a second-level scope
 
 ```text
 ┌──────────────────────────────────────────────────────────────┐
-│ [★ Main] [Personal] [saas-app] [docs-site]       mutsumi ♪  │
+│ [Main] [★ Personal] [saas-app] [docs-site]       mutsumi ♪  │
 ├──────────────────────────────────────────────────────────────┤
-│ ★ Main │ [Today] [Week] [Month] [Inbox] [All]               │
+│ ★ Personal │ [Today] [Week] [Month] [Inbox] [All]           │
 ├──────────────────────────────────────────────────────────────┤
 │                                                              │
 │  ▼ HIGH ───────────────────────────────────────────────      │
@@ -70,7 +70,7 @@ When the active source tab is `Main`, Mutsumi shows an aggregated dashboard inst
 
 ### 1.4 Detail panel
 
-Selecting a task and pressing `Enter` or clicking its title opens the detail panel.
+Confirming the focused task (`Enter` by default) or clicking its title opens the detail panel.
 
 The detail panel shows:
 
@@ -116,6 +116,15 @@ Mutsumi ships with three built-in presets:
 - `vim`
 - `emacs`
 
+Across all presets, the interaction model is semantic-first:
+
+- `Enter` maps to `confirm`
+- `Escape` maps to `back`
+- `n` maps to `create`
+- `e` maps to `edit`
+
+In the main task board today, `confirm` opens the focused task detail, while `back` closes the top-most open layer in this order: confirm bar, search, then detail.
+
 #### `arrows` (default)
 
 | Key | Action |
@@ -125,9 +134,10 @@ Mutsumi ships with three built-in presets:
 | `Left` / `Right` | Collapse / expand group |
 | `Shift+Up` / `Shift+Down` | Move task up / down |
 | `Space` | Toggle done |
-| `Enter` | Show detail |
-| `n` | New task |
-| `e` | Edit task |
+| `Enter` | Confirm |
+| `Escape` | Back |
+| `n` | New |
+| `e` | Edit |
 | `i` | Inline edit title |
 | `A` | Add subtask |
 | `Tab` / `Shift+Tab` | Next / previous source tab |
@@ -148,7 +158,8 @@ Mutsumi ships with three built-in presets:
 | `J` / `K` | Move task down / up |
 | `dd` | Delete with confirmation |
 | `Space` | Toggle done |
-| `Enter` | Show detail |
+| `Enter` | Confirm |
+| `Escape` | Back |
 | `n` / `e` / `i` | New / edit / inline edit |
 | `A` | Add subtask |
 | `Tab` / `Shift+Tab` | Next / previous source tab |
@@ -166,7 +177,8 @@ Mutsumi ships with three built-in presets:
 | `Ctrl+b` / `Ctrl+f` | Collapse / expand group |
 | `Ctrl+Shift+n` / `Ctrl+Shift+p` | Move task |
 | `Space` | Toggle done |
-| `Enter` | Show detail |
+| `Enter` | Confirm |
+| `Escape` | Back |
 | `n` / `e` / `i` | New / edit / inline edit |
 | `A` | Add subtask |
 | `Tab` / `Shift+Tab` | Next / previous source tab |
@@ -239,7 +251,10 @@ Behavior:
 
 - opens task form
 - `title` is required
+- when more than one writable source exists, the form exposes `source/project -> scope -> task fields`
+- otherwise the form submits to the current writable source directly
 - scope defaults to current filter context when relevant
+- subtasks stay in the parent task's source and do not expose a source selector
 - file is written atomically after submit
 
 ### 4.2 Edit task

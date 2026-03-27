@@ -17,9 +17,9 @@
 
 ```text
 ┌──────────────────────────────────────────────────────────────┐
-│ [★ Main] [Personal] [saas-app] [docs-site]       mutsumi ♪  │
+│ [Main] [★ Personal] [saas-app] [docs-site]       mutsumi ♪  │
 ├──────────────────────────────────────────────────────────────┤
-│ ★ Main │ [Today] [Week] [Month] [Inbox] [All]               │
+│ ★ Personal │ [Today] [Week] [Month] [Inbox] [All]           │
 ├──────────────────────────────────────────────────────────────┤
 │                                                              │
 │  ▼ HIGH ───────────────────────────────────────────────      │
@@ -70,7 +70,7 @@
 
 ### 1.4 详情面板
 
-选中任务后按 `Enter` 或点击标题，会打开详情面板。
+对焦任务执行确认（默认是 `Enter`）或点击其标题，会打开详情面板。
 
 详情面板显示：
 
@@ -116,6 +116,15 @@ Mutsumi 内置三个 preset：
 - `vim`
 - `emacs`
 
+所有 preset 都采用 semantic-first 交互模型：
+
+- `Enter` 映射到 `confirm`
+- `Escape` 映射到 `back`
+- `n` 映射到 `create`
+- `e` 映射到 `edit`
+
+在当前主任务面板里，`confirm` 会打开当前对焦任务的详情，而 `back` 会按这个顺序关闭最上层交互：confirm bar、search、detail。
+
 #### `arrows`（默认）
 
 | 键位 | 操作 |
@@ -125,9 +134,10 @@ Mutsumi 内置三个 preset：
 | `Left` / `Right` | 折叠 / 展开分组 |
 | `Shift+Up` / `Shift+Down` | 上移 / 下移任务 |
 | `Space` | 切换 done |
-| `Enter` | 显示详情 |
-| `n` | 新建任务 |
-| `e` | 编辑任务 |
+| `Enter` | 确认 |
+| `Escape` | 返回 |
+| `n` | 新建 |
+| `e` | 编辑 |
 | `i` | 行内编辑标题 |
 | `A` | 添加子任务 |
 | `Tab` / `Shift+Tab` | 下一个 / 上一个 source tab |
@@ -148,7 +158,8 @@ Mutsumi 内置三个 preset：
 | `J` / `K` | 下移 / 上移任务 |
 | `dd` | 带确认删除 |
 | `Space` | 切换 done |
-| `Enter` | 显示详情 |
+| `Enter` | 确认 |
+| `Escape` | 返回 |
 | `n` / `e` / `i` | 新建 / 编辑 / 行内编辑 |
 | `A` | 添加子任务 |
 | `Tab` / `Shift+Tab` | 下一个 / 上一个 source tab |
@@ -166,7 +177,8 @@ Mutsumi 内置三个 preset：
 | `Ctrl+b` / `Ctrl+f` | 折叠 / 展开分组 |
 | `Ctrl+Shift+n` / `Ctrl+Shift+p` | 移动任务 |
 | `Space` | 切换 done |
-| `Enter` | 显示详情 |
+| `Enter` | 确认 |
+| `Escape` | 返回 |
 | `n` / `e` / `i` | 新建 / 编辑 / 行内编辑 |
 | `A` | 添加子任务 |
 | `Tab` / `Shift+Tab` | 下一个 / 上一个 source tab |
@@ -239,7 +251,10 @@ explicit scope > due_date auto-derivation > inbox
 
 - 打开任务表单
 - `title` 为必填
+- 当存在多个可写 source 时，表单会显式展示 `source/project -> scope -> task fields`
+- 否则表单会直接提交到当前可写 source
 - 在适用时，scope 默认取当前过滤上下文
+- 子任务会固定写入父任务所在 source，不显示 source selector
 - 提交后以原子方式写文件
 
 ### 4.2 编辑任务

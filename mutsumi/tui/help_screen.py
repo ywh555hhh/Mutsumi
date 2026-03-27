@@ -9,6 +9,7 @@ from textual.screen import ModalScreen
 from textual.widgets import Static
 
 from mutsumi.config.keybindings import get_keybindings
+from mutsumi.core.interaction import SemanticAction
 from mutsumi.themes import get_theme
 from mutsumi.tui.key_manager import get_key_sequences
 
@@ -30,8 +31,8 @@ _ACTION_CATEGORIES: dict[str, str] = {
     "tab_3": "Tabs",
     "tab_4": "Tabs",
     # View
-    "show_detail": "View",
-    "close_detail": "View",
+    SemanticAction.CONFIRM.value: "View",
+    SemanticAction.BACK.value: "View",
     "collapse_group": "View",
     "expand_group": "View",
     "toggle_fold": "View",
@@ -39,8 +40,8 @@ _ACTION_CATEGORIES: dict[str, str] = {
     "sort": "View",
     # Actions
     "toggle_done": "Actions",
-    "new_task": "Actions",
-    "edit_task": "Actions",
+    SemanticAction.CREATE.value: "Actions",
+    SemanticAction.EDIT.value: "Actions",
     "inline_edit": "Actions",
     "delete_start": "Actions",
     "delete_confirm": "Actions",
@@ -93,7 +94,7 @@ class HelpScreen(ModalScreen[None]):
         ("question_mark", "dismiss", "Close"),
     ]
 
-    def __init__(self, preset: str = "vim") -> None:
+    def __init__(self, preset: str = "arrows") -> None:
         super().__init__()
         self._preset = preset
 

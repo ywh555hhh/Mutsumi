@@ -4,22 +4,25 @@
 
 | Status | Living Document |
 |---|---|
-| Date | 2026-03-23 |
-| Current Beta | `1.0.0b1` |
+| Date | 2026-03-25 |
+| Current Beta | `1.1.0b1` |
 
 ---
 
 ## Product State
 
-Mutsumi is currently in the **`1.0.0b1` beta** phase.
+Mutsumi is currently in the **`1.1.0b1` beta** phase.
 
 What is already real in this beta:
 
 - canonical task file: `mutsumi.json`
 - legacy fallback: `tasks.json`
 - default keybinding preset: `arrows`
+- semantic-first interaction layer (`confirm` / `back` / `create` / `edit`)
+- layered close ordering for confirm/search/detail interactions
 - multi-source hub: Main + Personal + project tabs
-- first-run onboarding
+- source-aware task creation (`source/project -> scope -> task fields`)
+- first-run onboarding with immediate preset hot-reload
 - skills-first agent setup
 
 What is **not** shipped yet:
@@ -165,6 +168,7 @@ Phase 10  Launch / GA polish
 - [x] lightweight project attach flow
 - [x] skills-first agent integration path
 - [x] auto-creation of Mutsumi-owned files when appropriate
+- [x] onboarding completion immediately hot-reloads theme, i18n, and keybinding preset
 
 **Exit criteria**: first launch succeeds without the user needing to learn a setup graph first.
 
@@ -191,7 +195,7 @@ Scope notes:
 
 - calendar reuses `due_date`
 - calendar does not introduce a second task model
-- calendar is planned, not shipped in `1.0.0b1`
+- calendar is planned, not shipped in the current `1.1.0b1` beta line
 
 ---
 
@@ -236,7 +240,8 @@ These are ideas, not committed roadmap promises.
 | `0.2.x` | reactivity baseline |
 | `0.3.x` | CLI/config baseline |
 | `0.4.0b1` | earlier friend-beta milestone |
-| `1.0.0b1` | current integrated beta line |
+| `1.0.0b1` | integrated beta before RFC-010 interaction convergence |
+| `1.1.0b1` | current semantic-first beta line |
 | `1.0.0` | stable release target after beta hardening |
 
 ---
@@ -245,7 +250,8 @@ These are ideas, not committed roadmap promises.
 
 For the current cycle, the important source of truth is:
 
-- current beta version: **`1.0.0b1`**
+- current beta version: **`1.1.0b1`**
 - canonical task file: **`mutsumi.json`**
 - default preset: **`arrows`**
+- semantic-first interaction is shipped in the beta line
 - calendar status: **planned via RFC-009, not yet shipped**

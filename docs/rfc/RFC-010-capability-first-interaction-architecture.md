@@ -4,9 +4,10 @@
 |---|---|
 | **RFC** | 010 |
 | **Title** | Capability-First Interaction Architecture — Actions Before Inputs |
-| **Status** | Draft |
+| **Status** | Implemented in `1.1.0b1` |
 | **Author** | Wayne (ywh) |
 | **Created** | 2026-03-24 |
+| **Implementation note** | Landed in the `1.1.0b1` beta line with semantic-first bindings, onboarding contract updates, source-aware create flow, and layered confirm/back/cancel behavior. |
 
 ---
 

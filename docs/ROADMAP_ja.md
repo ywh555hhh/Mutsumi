@@ -4,22 +4,25 @@
 
 | ステータス | リビングドキュメント |
 |---|---|
-| 日付 | 2026-03-23 |
-| Current Beta | `1.0.0b1` |
+| 日付 | 2026-03-25 |
+| Current Beta | `1.1.0b1` |
 
 ---
 
 ## Product State
 
-Mutsumi は現在 **`1.0.0b1` beta** フェーズにあります。
+Mutsumi は現在 **`1.1.0b1` beta** フェーズにあります。
 
 この beta ですでに現実のものとなっている内容:
 
 - canonical task file: `mutsumi.json`
 - legacy fallback: `tasks.json`
 - default keybinding preset: `arrows`
+- semantic-first interaction layer（`confirm` / `back` / `create` / `edit`）
+- confirm/search/detail の layered close ordering
 - multi-source hub: Main + Personal + project tabs
-- first-run onboarding
+- source-aware task creation（`source/project -> scope -> task fields`）
+- first-run onboarding と、その完了時の即時 preset hot-reload
 - skills-first agent setup
 
 まだ **shipped** されていない内容:
@@ -165,6 +168,7 @@ Phase 10  Launch / GA polish
 - [x] lightweight project attach flow
 - [x] skills-first agent integration path
 - [x] 適切な場面での Mutsumi-owned files の自動作成
+- [x] onboarding 完了時に theme、i18n、keybinding preset を即時 hot-reload
 
 **Exit criteria**: 初回起動が成功し、ユーザーが先に setup graph を学ばなくてもよいこと。
 
@@ -191,7 +195,7 @@ Scope notes:
 
 - calendar は `due_date` を再利用する
 - calendar は second task model を導入しない
-- calendar は planned であり、`1.0.0b1` にはまだ shipped されていない
+- calendar は planned であり、現在の `1.1.0b1` beta line にはまだ shipped されていない
 
 ---
 
@@ -236,7 +240,8 @@ Scope notes:
 | `0.2.x` | reactivity baseline |
 | `0.3.x` | CLI/config baseline |
 | `0.4.0b1` | earlier friend-beta milestone |
-| `1.0.0b1` | current integrated beta line |
+| `1.0.0b1` | RFC-010 の interaction convergence 前の integrated beta line |
+| `1.1.0b1` | current semantic-first beta line |
 | `1.0.0` | beta hardening 後の stable release target |
 
 ---
@@ -245,7 +250,8 @@ Scope notes:
 
 現在の cycle で重要な source of truth は次の通りです。
 
-- current beta version: **`1.0.0b1`**
+- current beta version: **`1.1.0b1`**
 - canonical task file: **`mutsumi.json`**
 - default preset: **`arrows`**
+- semantic-first interaction は beta product line に入っている
 - calendar status: **RFC-009 により planned であり、まだ shipped されていない**

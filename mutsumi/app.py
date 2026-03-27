@@ -4,11 +4,12 @@ from __future__ import annotations
 
 import contextlib
 import json
+import threading
 from pathlib import Path
 from typing import TYPE_CHECKING
 
 from textual.app import App, ComposeResult
-from textual.binding import Binding
+from textual.binding import Binding, BindingsMap
 from textual.widgets import Input, Static
 
 if TYPE_CHECKING:
@@ -151,6 +152,7 @@ class MutsumiApp(App[None]):
 
         # Apply keybindings from config (with optional user overrides)
         self._bindings_list = get_keybindings(config.keybindings, config.key_overrides or None)
+        self.BINDINGS = list(self._bindings_list)
 
         # Apply theme (sets global singleton, get_css_variables reads it)
         load_theme(config.theme)
@@ -169,6 +171,7 @@ class MutsumiApp(App[None]):
         self._startup_state = startup_state
 
         super().__init__()
+        self._bindings = BindingsMap(self.BINDINGS)
 
         # Multi-source registry
         self._source_registry = SourceRegistry()
@@ -183,7 +186,8 @@ class MutsumiApp(App[None]):
             self._build_sources_from_config(config, tasks_path)
 
         self._active_source = self._source_registry.source_names[0]
-        self._self_writing = False
+        self._self_writing_sources: set[str] = set()
+        self._self_write_timers: dict[str, threading.Timer] = {}
 
         # Search state
         self._search_query = ""
@@ -390,11 +394,13 @@ class MutsumiApp(App[None]):
     def _start_watchers(self) -> None:
         """Start watching all registered sources for external changes."""
         for name in self._source_registry.source_names:
+            if name == "main":
+                continue
             self._source_registry.start_watching(name, self._on_source_changed)
 
     def _on_source_changed(self, source_name: str) -> None:
         """Called from watcher thread when a source file changes."""
-        if self._self_writing:
+        if source_name in self._self_writing_sources:
             return
         with contextlib.suppress(RuntimeError):
             self.call_from_thread(self._reload_from_disk)  # type: ignore[arg-type]
@@ -569,32 +575,91 @@ class MutsumiApp(App[None]):
             return True
         return bool(task.description and query in task.description.lower())
 
-    def _write_back(self) -> None:
-        """Atomically write the current task_file back to disk.
+    def _write_task_file_to_source(self, source_name: str, task_file: TaskFile) -> None:
+        """Write a TaskFile back to a specific source path."""
+        source = self._source_registry.get_source(source_name)
+        if source is None:
+            raise ValueError(f"Unknown source: {source_name}")
 
-        Sets _self_writing flag and keeps it True for longer than the
-        watcher's debounce window (0.1s) to prevent self-triggered reloads.
-        """
-        import threading
+        existing_timer = self._self_write_timers.pop(source_name, None)
+        if existing_timer is not None:
+            existing_timer.cancel()
 
-        if self.task_file is None:
-            return
-        self._self_writing = True
+        self._self_writing_sources.add(source_name)
         try:
-            save_task_file(self.task_file, self.tasks_path)
+            save_task_file(task_file, source.path)
+            source.task_file = task_file
         except Exception:
-            self._self_writing = False
+            self._self_writing_sources.discard(source_name)
             raise
 
-        # Keep flag True past the debounce window (0.1s) + safety margin
         def _reset_flag() -> None:
-            self._self_writing = False
+            self._self_writing_sources.discard(source_name)
+            self._self_write_timers.pop(source_name, None)
 
         timer = threading.Timer(0.3, _reset_flag)
         timer.daemon = True
+        self._self_write_timers[source_name] = timer
         timer.start()
 
-    def _log_event(self, event_type: str, **data: str | int | list[str] | None) -> None:
+    def _resolve_submission_target_source(self, event: TaskForm.TaskSubmitted) -> str:
+        """Resolve the real target source for a task form submission."""
+        if event.source_name:
+            if self._source_registry.get_source(event.source_name) is None:
+                raise ValueError(f"Unknown source: {event.source_name}")
+            return event.source_name
+        if self._active_source != "main":
+            return self._active_source
+        return self._default_submission_source()
+
+    def _task_file_for_source(self, source_name: str) -> TaskFile:
+        """Return a mutable TaskFile for the given source."""
+        source = self._source_registry.get_source(source_name)
+        if source is None:
+            raise ValueError(f"Unknown source: {source_name}")
+        if source.task_file is None:
+            self._source_registry.load_source(source_name)
+            source = self._source_registry.get_source(source_name)
+        if source is not None and source.task_file is not None:
+            return source.task_file
+
+        task_file = TaskFile(version=1, tasks=[])
+        source.task_file = task_file
+        return task_file
+
+    def _create_task_in_source(self, source_name: str, event: TaskForm.TaskSubmitted) -> str:
+        """Create a task in a specific source and return its new task id."""
+        task_file = self._task_file_for_source(source_name)
+        tag_list = [t.strip() for t in event.tags.split(",") if t.strip()] if event.tags else []
+        task = create_task_from_args(
+            title=event.title,
+            priority=event.priority,
+            scope=event.scope,
+            tags=tag_list,
+            description=event.description or None,
+        )
+        if event.parent_id:
+            if not add_child_task(task_file, event.parent_id, task):
+                raise ValueError(f"Parent task {event.parent_id} not found in source {source_name}")
+            self._log_event(
+                "child_task_added",
+                task_id=task.id,
+                parent_id=event.parent_id,
+                title=event.title,
+            )
+        else:
+            add_task(task_file, task)
+            self._log_event("task_added", task_id=task.id, title=event.title)
+        self._write_task_file_to_source(source_name, task_file)
+        return task.id
+
+    def _write_back(self) -> None:
+        """Atomically write the current task_file back to the active source."""
+        if self.task_file is None:
+            return
+        self._write_task_file_to_source(self._active_source, self.task_file)
+
+    def _log_event(self, event_type: str, **data: str) -> None:
         """Log an event if event logger is available."""
         if self._event_logger is not None:
             from mutsumi.events import EventLogger
@@ -722,6 +787,8 @@ class MutsumiApp(App[None]):
     async def on_onboarding_screen_finished(self, event: OnboardingScreen.Finished) -> None:
         """Persist first-run onboarding choices, hot-reload, and continue startup."""
         selections = event.selections
+        self._config.onboarding_completed = True
+        preferred_agent = "none"
         if not event.skipped:
             self._config.language = selections.get("language", self._config.language)
             self._config.keybindings = selections.get("keybindings", self._config.keybindings)
@@ -731,7 +798,6 @@ class MutsumiApp(App[None]):
             self._config.preferred_agent = (
                 preferred_agent if preferred_agent != "none" else None
             )
-            self._config.onboarding_completed = True
 
             workspace_mode = selections.get("workspace_mode", "personal-only")
             if workspace_mode in {"personal-only", "personal+project"}:
@@ -741,8 +807,9 @@ class MutsumiApp(App[None]):
                     self._startup_state.cwd if self._startup_state else None,
                 )
                 register_project(self._config, project_path.parent)
-            save_config(self._config)
+        save_config(self._config)
 
+        if not event.skipped:
             # Hot-reload i18n
             init_i18n(self._config.language)
 
@@ -755,11 +822,14 @@ class MutsumiApp(App[None]):
                 self._config.keybindings,
                 self._config.key_overrides or None,
             )
+            self.BINDINGS = list(self._bindings_list)
+            self._bindings = BindingsMap(self.BINDINGS)
+            self.refresh_bindings()
             self._keybinding_preset = self._config.keybindings
             self._key_manager = KeyManager(get_key_sequences(self._config.keybindings))
 
             # Install skills for selected agent
-            if preferred_agent and preferred_agent != "none":
+            if preferred_agent != "none":
                 from mutsumi.core.skill_installer import install_for_agent
 
                 with contextlib.suppress(ValueError, OSError):
@@ -831,29 +901,20 @@ class MutsumiApp(App[None]):
             update_task(self.task_file, event.editing_id, **fields)
             self._log_event("task_edited", task_id=event.editing_id, title=event.title)
             footer.show_notification(f'Updated: "{event.title}"')
-        else:
-            # Create new task
-            tag_list = [t.strip() for t in event.tags.split(",") if t.strip()] if event.tags else []
-            task = create_task_from_args(
-                title=event.title,
-                priority=event.priority,
-                scope=event.scope,
-                tags=tag_list,
-                description=event.description or None,
-            )
-            if event.parent_id:
-                add_child_task(self.task_file, event.parent_id, task)
-                self._log_event(
-                    "child_task_added",
-                    task_id=task.id, parent_id=event.parent_id, title=event.title,
-                )
-                footer.show_notification(f'Added subtask: "{event.title}"')
-            else:
-                add_task(self.task_file, task)
-                self._log_event("task_added", task_id=task.id, title=event.title)
-                footer.show_notification(f'Created: "{event.title}"')
+            self._write_back()
+            await self._load_and_render()
+            return
 
-        self._write_back()
+        try:
+            target_source = self._resolve_submission_target_source(event)
+            self._create_task_in_source(target_source, event)
+        except ValueError as exc:
+            footer.show_notification(str(exc))
+            return
+        if event.parent_id:
+            footer.show_notification(f'Added subtask: "{event.title}"')
+        else:
+            footer.show_notification(f'Created: "{event.title}"')
         await self._load_and_render()
 
     # --- ConfirmBar events ---
@@ -919,9 +980,7 @@ class MutsumiApp(App[None]):
 
     def on_detail_panel_add_child_requested(self, event: DetailPanel.AddChildRequested) -> None:
         """Handle +Subtask button click in detail panel."""
-        self.push_screen(
-            TaskForm(parent_id=event.task_id, default_scope=self._current_scope_value())
-        )
+        self.push_screen(self._new_task_form(parent_id=event.task_id))
     # --- TaskRow click-to-detail events ---
 
     def on_task_row_detail_clicked(self, event: TaskRow.DetailClicked) -> None:
@@ -1071,25 +1130,61 @@ class MutsumiApp(App[None]):
     def action_show_detail(self) -> None:
         """Show detail panel for the focused task."""
         detail = self.query_one(DetailPanel)
-        if detail.is_visible:
-            detail.hide()
-            return
         focused = self.focused
         if isinstance(focused, TaskRow):
             detail.show_task(focused.task_data)
 
-    def action_close_detail(self) -> None:
-        """Close the detail panel or search bar."""
-        # Clear KeyManager buffer on Escape
+    def _close_top_interaction_layer(self) -> bool:
+        """Close the top-most interactive layer when possible."""
         self._key_manager.clear()
+
+        confirm_bar = self.query_one(ConfirmBar)
+        if confirm_bar.display:
+            confirm_bar.hide()
+            footer = self.query_one(FooterBar)
+            footer.set_mode(BarMode.NORMAL)
+            footer.show_notification("Cancelled")
+            return True
 
         search = self.query_one(SearchBar)
         if search.is_visible:
             search.hide()
-            return
+            return True
+
         detail = self.query_one(DetailPanel)
         if detail.is_visible:
             detail.hide()
+            return True
+
+        return False
+
+    def action_confirm(self) -> None:
+        """Dispatch confirm based on the current interaction context."""
+        confirm_bar = self.query_one(ConfirmBar)
+        if confirm_bar.display:
+            return
+
+        search = self.query_one(SearchBar)
+        if search.is_visible:
+            return
+
+        detail = self.query_one(DetailPanel)
+        if detail.is_visible:
+            return
+
+        self.action_show_detail()
+
+    def action_back(self) -> None:
+        """Close the top-most interaction layer."""
+        self._close_top_interaction_layer()
+
+    def action_cancel(self) -> None:
+        """Cancel the current interaction layer."""
+        self._close_top_interaction_layer()
+
+    def action_close_detail(self) -> None:
+        """Backward-compatible alias for semantic back."""
+        self.action_back()
 
     def action_next_tab(self) -> None:
         self.query_one(HeaderBar).next_tab()
@@ -1142,11 +1237,47 @@ class MutsumiApp(App[None]):
             return scope_key if scope_key != "all" else "inbox"
         return header.active_scope.value
 
+    def _writable_source_names(self) -> list[str]:
+        """Return writable sources, excluding the virtual main source."""
+        return [
+            name for name in self._source_registry.source_names
+            if name != "main"
+        ]
+
+    def _default_submission_source(self) -> str:
+        """Return the default real source used by the task form."""
+        writable_sources = self._writable_source_names()
+        if self._active_source in writable_sources:
+            return self._active_source
+        if writable_sources:
+            return writable_sources[0]
+        return self._active_source
+
+    def _new_task_form(self, *, parent_id: str | None = None) -> TaskForm:
+        """Build a source-aware task creation form."""
+        writable_sources = self._writable_source_names()
+        source_options = [(name, name) for name in writable_sources]
+        return TaskForm(
+            parent_id=parent_id,
+            default_scope=self._current_scope_value(),
+            source_options=source_options,
+            default_source=self._default_submission_source(),
+            show_source_selector=len(writable_sources) > 1,
+        )
+
+    def action_create(self) -> None:
+        """Open the semantic create flow."""
+        self.action_new_task()
+
+    def action_edit(self) -> None:
+        """Open the semantic edit flow."""
+        self.action_edit_task()
+
     def action_new_task(self) -> None:
         """Open new task form."""
         if isinstance(self.focused, Input):
             return
-        self.push_screen(TaskForm(default_scope=self._current_scope_value()))
+        self.push_screen(self._new_task_form())
 
     def action_edit_task(self) -> None:
         """Open edit form for focused task."""
@@ -1169,13 +1300,14 @@ class MutsumiApp(App[None]):
 
     def action_search(self) -> None:
         """Open the search bar."""
-        if isinstance(self.focused, Input):
-            return
         search = self.query_one(SearchBar)
         if search.is_visible:
-            search.hide()
-        else:
-            search.show()
+            with contextlib.suppress(Exception):
+                search.query_one("#search-input", Input).focus()
+            return
+        if isinstance(self.focused, Input):
+            return
+        search.show()
 
     # --- New actions (Step 4) ---
 
@@ -1309,12 +1441,7 @@ class MutsumiApp(App[None]):
             return
         focused = self.focused
         if isinstance(focused, TaskRow):
-            self.push_screen(
-                TaskForm(
-                    parent_id=focused.task_data.id,
-                    default_scope=self._current_scope_value(),
-                )
-            )
+            self.push_screen(self._new_task_form(parent_id=focused.task_data.id))
 
     async def action_paste_task_above(self) -> None:
         """Paste task from clipboard BEFORE the focused task (P key)."""
@@ -1396,6 +1523,10 @@ class MutsumiApp(App[None]):
 
     def _stop_watchers(self) -> None:
         self._source_registry.stop_all_watchers()
+        for timer in self._self_write_timers.values():
+            timer.cancel()
+        self._self_write_timers.clear()
+        self._self_writing_sources.clear()
 
 
 def run(
